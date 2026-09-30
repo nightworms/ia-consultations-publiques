@@ -115,3 +115,69 @@ strict entre clients, aucune donnée client dans un entraînement de modèle.
 D2 et D6 invalident partiellement l'hypothèse mono-métier qui sous-tendait le travail
 de l'agent `batiment` : son livrable reste la **première** nomenclature de référence,
 pas la structure du produit.
+
+---
+
+# Décisions de phase 3
+
+*Recueillies le 30 septembre 2026, à l'issue de la phase 2.*
+
+## D7 — Option de confidentialité
+
+**Option B retenue** : chiffrement au repos, cloisonnement strict côté serveur,
+hébergement en France, **formulation publique honnête**.
+
+Conséquence assumée : le serveur peut lire les documents pendant le traitement.
+La phrase « seul le client a accès à ses données » n'est **pas** reprise dans la
+communication du produit. Elle ne serait vraie qu'en option A, qui n'est pas retenue.
+
+Une trajectoire vers l'option C est à prévoir, sans être construite maintenant
+(voir `docs/CONFIDENTIALITE-ET-HEBERGEMENT.md` § 9).
+
+## D8 — Fournisseur du modèle d'IA
+
+**Décision prise par délégation** (Anthony : « décide pour moi et avance »).
+
+**Fournisseur établi en France ou dans l'UE uniquement.** Cibles : Mistral AI,
+OVHcloud AI Endpoints, ou un modèle ouvert auto-hébergé sur le même serveur.
+
+Raison : c'est le seul moyen de rendre « hébergé en France » vrai **de bout en bout**.
+Avec un fournisseur hors UE, le document du client quitte l'Union, et la promesse
+d'hébergement français devient fausse au sens strict — exactement ce que D7 interdit.
+
+Exigence technique qui en découle : la couche d'appel au modèle doit être **abstraite**
+(un adaptateur), pour pouvoir changer de fournisseur sans réécrire le produit.
+
+## D9 — Budget mensuel cible
+
+**150 à 500 € par mois**, hébergement et consommation du modèle compris.
+
+Conséquence : le socle technique peut viser une **base de données managée en France**
+plutôt que SQLite, sans que le coût devienne un obstacle. Le budget laisse aussi de la
+marge pour la consommation du modèle, qui est la vraie dépense variable.
+
+## D10 — Matériau de test
+
+**Aucun DCE réel disponible à ce jour.** Anthony n'en a pas fourni.
+
+Conséquence : les tests d'analyse de DCE se feront sur des **documents fictifs et
+signalés comme tels**, ou sur des documents publics librement diffusés si l'occasion
+se présente. Aucun document interne de collectivité ne doit entrer dans le projet.
+
+## Conséquence sur la stack (décision d'architecture)
+
+Au vu de D7 (isolation stricte entre clients) et D9 (budget disponible), la cible
+retenue est :
+
+- **Python 3.12 + FastAPI** — confirmé par la phase 1 et la proposition de stack ;
+- **PostgreSQL managé en France** (Scaleway ou OVHcloud) plutôt que SQLite —
+  parce que l'isolation stricte par client et le chiffrement des champs sensibles
+  sont plus solides sur PostgreSQL (cloisonnement au niveau des lignes, chiffrement
+  applicatif) que sur un fichier SQLite filtré côté application ;
+- **chiffrement au repos du volume et chiffrement applicatif des champs sensibles**
+  (bilans, IBAN, CV) ;
+- **abstraction du fournisseur de modèle** (D8) ;
+- migrations SQL numérotées et réversibles, portables (D-C5 conservé).
+
+Cette décision reste **révisable** : elle est écrite ici pour être contestée, pas pour
+être subie.
