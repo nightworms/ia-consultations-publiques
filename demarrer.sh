@@ -42,6 +42,22 @@ fi
 PORT="${PORT_API:-8000}"
 HOTE="${HOTE_API:-127.0.0.1}"
 
+# --- déjà en marche ? --------------------------------------------------------
+if curl -s --max-time 3 "http://${HOTE}:${PORT}/" 2>/dev/null | grep -q "ia-consultations-publiques"; then
+  echo
+  echo "   ------------------------------------------------"
+  echo "   L'APPLICATION TOURNE DÉJÀ."
+  echo
+  echo "        http://${HOTE}:${PORT}/connexion"
+  echo
+  echo "   Rien à faire d'autre. Si tu veux la relancer, arrête d'abord"
+  echo "   l'instance en cours (Ctrl-C dans sa fenêtre Terminal)."
+  echo "   ------------------------------------------------"
+  echo
+  exit 0
+fi
+
+
 # --- 2. la base répond-elle ? ------------------------------------------------
 echo "== 1/4  base de données =="
 if command -v pg_isready >/dev/null 2>&1; then
