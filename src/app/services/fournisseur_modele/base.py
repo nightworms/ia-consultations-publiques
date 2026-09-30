@@ -50,7 +50,25 @@ class ErreurFournisseurModele(RuntimeError):
 
 
 class ReponseModeleInvalide(ErreurFournisseurModele):
-    """La réponse du fournisseur viole le contrat (source absente, catégorie inconnue)."""
+    """La réponse du fournisseur viole le contrat (source absente, catégorie inconnue).
+
+    `categorie` et `extrait` portent, quand le contrôle les connaît, l'élément
+    précisément mis en cause. Ils permettent à la couche appelante d'expliquer le
+    refus au client (« quelle catégorie, quel extrait introuvable ») sans avoir à
+    réinterpréter le message. Le refus lui-même n'est pas négociable : ces attributs
+    ne servent qu'à le rendre lisible.
+    """
+
+    def __init__(
+        self,
+        message: str,
+        *,
+        categorie: Optional[str] = None,
+        extrait: Optional[str] = None,
+    ) -> None:
+        super().__init__(message)
+        self.categorie = categorie
+        self.extrait = extrait
 
 
 @dataclass(frozen=True)
@@ -119,19 +137,25 @@ def verifier_propositions(
         if proposition.categorie not in CATEGORIES_ELEMENTS:
             raise ReponseModeleInvalide(
                 f"Catégorie hors contrat : {proposition.categorie!r}. "
-                f"Catégories admises : {', '.join(CATEGORIES_ELEMENTS)}."
+                f"Catégories admises : {', '.join(CATEGORIES_ELEMENTS)}.",
+                categorie=proposition.categorie,
             )
         if not proposition.libelle or not proposition.libelle.strip():
-            raise ReponseModeleInvalide("Proposition sans libellé : refusée.")
+            raise ReponseModeleInvalide(
+                "Proposition sans libellé : refusée.", categorie=proposition.categorie
+            )
         if not proposition.source_emplacement or not proposition.source_emplacement.strip():
             raise ReponseModeleInvalide(
-                "Proposition sans emplacement source : refusée (aucune valeur sans source)."
+                "Proposition sans emplacement source : refusée (aucune valeur sans source).",
+                categorie=proposition.categorie,
             )
         if not source_presente(proposition, pages):
             raise ReponseModeleInvalide(
                 "Proposition non adossée au document : l'extrait invoqué est introuvable "
                 f"dans le texte extrait (catégorie {proposition.categorie!r}). "
-                "Une valeur sans source n'est jamais acceptée."
+                "Une valeur sans source n'est jamais acceptée.",
+                categorie=proposition.categorie,
+                extrait=proposition.source_extrait,
             )
         retenues.append(proposition)
     return tuple(retenues)

@@ -31,7 +31,12 @@ from app.api.cloisonnement import (
     obtenir_connexion,
 )
 from app.services import analyse_dce
-from app.services.analyse_dce import ConsultationIntrouvable, ErreurAnalyseDce
+from app.services.analyse_dce import (
+    AnalyseNonValidable,
+    ConsultationIntrouvable,
+    ErreurAnalyseDce,
+)
+from app.services.fournisseur_modele import FournisseurModele, creer_fournisseur
 from app.storage.connexion import Connexion, ContexteClient
 from app.storage.fichiers import StockageFichiers
 
@@ -50,6 +55,16 @@ def obtenir_stockage(request: Request) -> StockageFichiers:
     """Stockage des pièces, hors dépôt, chiffré par client (annexe A § A6)."""
     config = obtenir_config(request)
     return StockageFichiers(config.repertoire_documents, config.cle_chiffrement_maitresse)
+
+
+def obtenir_fournisseur() -> FournisseurModele:
+    """Fournisseur de modèle de la requête (décision D8).
+
+    Dépendance explicite plutôt qu'appel direct : elle se remplace en test
+    (`app.dependency_overrides`) sans réseau, et elle rend visible dans le contrat
+    de la route que l'analyse passe bien par la couche d'abstraction.
+    """
+    return creer_fournisseur()
 
 
 def _serialiser(valeur: Any) -> Any:
@@ -119,10 +134,16 @@ async def deposer_consultation(
     contexte: ContexteClient = Depends(exiger_contexte_client),
     connexion: Connexion = Depends(obtenir_connexion),
     stockage: StockageFichiers = Depends(obtenir_stockage),
+    fournisseur: FournisseurModele = Depends(obtenir_fournisseur),
 ) -> dict[str, Any]:
     """Dépose un DCE, l'analyse et restitue les éléments **avec leur source**.
 
     Le dépôt est refusé explicitement si le format n'est pas accepté (PDF ou texte).
+
+    Une analyse **refusée** par le garde-fou anti-invention (proposition non adossée
+    au document) n'est pas une panne : le document a bien été reçu, l'analyse n'a pas
+    pu être validée. La réponse est alors un `422` explicite (catégorie et extrait mis
+    en cause), et le dépôt est annulé — jamais un `500`, jamais un succès partiel.
     """
     contenu = await fichier.read()
     if len(contenu) > TAILLE_MAX_DEPOT:
@@ -142,7 +163,13 @@ async def deposer_consultation(
             type_mime=fichier.content_type,
             reference_consultation=reference_consultation,
             maitre_ouvrage_declare=maitre_ouvrage_declare,
+            fournisseur=fournisseur,
         )
+    except AnalyseNonValidable as exc:
+        # Refus attendu du garde-fou, pas un incident : 422 explicite, dépôt annulé.
+        # (À déclarer **avant** `ErreurAnalyseDce`, dont cette erreur hérite.)
+        connexion.annuler()
+        raise _erreur(exc, status.HTTP_422_UNPROCESSABLE_CONTENT) from exc
     except ErreurAnalyseDce as exc:
         connexion.annuler()
         raise _erreur(exc, status.HTTP_400_BAD_REQUEST) from exc

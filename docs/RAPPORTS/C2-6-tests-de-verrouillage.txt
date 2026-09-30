@@ -1,0 +1,21 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/pause/Projets/ia-consultations-publiques/.venv/bin/python
+cachedir: .pytest_cache
+rootdir: /Users/pause/Projets/ia-consultations-publiques/src
+plugins: anyio-4.15.1
+collecting ... collected 12 items
+
+tests/test_isolation_fournisseur.py::test_la_suite_impose_le_fournisseur_factice PASSED [  8%]
+tests/test_isolation_fournisseur.py::test_le_verrou_arrete_la_suite_si_le_fournisseur_change PASSED [ 16%]
+tests/test_isolation_fournisseur.py::test_verifier_isolation_ne_se_plaint_pas_quand_tout_est_en_place PASSED [ 25%]
+tests/test_isolation_fournisseur.py::test_la_configuration_reelle_du_fournisseur_n_entre_pas_dans_les_tests PASSED [ 33%]
+tests/test_isolation_fournisseur.py::test_connexion_sortante_brute_refusee PASSED [ 41%]
+tests/test_isolation_fournisseur.py::test_socket_brut_sortant_refuse PASSED [ 50%]
+tests/test_isolation_fournisseur.py::test_envoi_udp_sortant_refuse PASSED [ 58%]
+tests/test_isolation_fournisseur.py::test_resolution_d_un_nom_externe_refusee PASSED [ 66%]
+tests/test_isolation_fournisseur.py::test_client_http_python_ne_peut_pas_sortir PASSED [ 75%]
+tests/test_isolation_fournisseur.py::test_un_fournisseur_ue_configure_ne_peut_atteindre_aucun_reseau PASSED [ 83%]
+tests/test_isolation_fournisseur.py::test_le_bouclage_reste_autorise PASSED [ 91%]
+tests/test_isolation_fournisseur.py::test_le_poste_parle_toujours_a_postgresql PASSED [100%]
+
+============================== 12 passed in 0.14s ==============================

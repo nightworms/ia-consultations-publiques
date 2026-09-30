@@ -27,6 +27,29 @@ if str(RACINE_SRC) not in sys.path:
 
 RACINE_PROJET = RACINE_SRC.parent
 
+RACINE_TESTS = Path(__file__).resolve().parent
+if str(RACINE_TESTS) not in sys.path:
+    sys.path.insert(0, str(RACINE_TESTS))
+
+# --- correctif C2 : la suite impose son fournisseur et interdit le réseau ---------
+# Fait **avant** tout import du produit : la valeur du `.env` local (par exemple
+# `MODELE_FOURNISSEUR=ue`) ne doit jamais atteindre le code exercé par les tests.
+# Motif complet : `src/tests/garde_isolation.py` et `docs/RAPPORTS/C2-*.md`.
+import garde_isolation  # noqa: E402  (doit suivre l'insertion de sys.path)
+
+garde_isolation.forcer_fournisseur_factice()
+garde_isolation.installer_garde_reseau()
+
+
+def pytest_sessionstart(session) -> None:  # noqa: ARG001 — signature imposée
+    """Refuse de démarrer la suite si l'isolation des tests n'est pas en place.
+
+    Voir `garde_isolation.verifier_isolation` : la propriété est verrouillée,
+    pas seulement souhaitée. Un `.env` local ne peut plus décider du verdict.
+    """
+    garde_isolation.verifier_isolation()
+
+
 # --- environnement de test (valeurs fictives, jamais de production) --------------
 UTILISATEUR_PG = getpass.getuser()
 BASE_DE_TEST = os.environ.get(

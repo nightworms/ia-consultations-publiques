@@ -1,0 +1,12 @@
+$ MODELE_FOURNISSEUR=ue MODELE_FOURNISSEUR_URL=http://127.0.0.1:8766/v1/chat/completions \
+  MODELE_FOURNISSEUR_CLE=cle-fictive-canari MODELE_FOURNISSEUR_NOM=modele-fictif \
+  ../.venv/bin/python -m pytest -q        # (depuis src/)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+185 passed, 1 warning in 11.69s
+
+--- journal du canari (/Users/pause/.hermes/profiles/dev-back/cache/scratch/canari.log) ---
+canari en ecoute sur 127.0.0.1:8766
+--- fin du journal ---
+canari en ecoute sur 127.0.0.1:8766
+canari arrete

@@ -1,0 +1,2031 @@
+....F.FF........F.FF......FF.FFFFF..FF.F................................ [ 38%]
+............................F.FFFFFF......................F............. [ 77%]
+.....................................FFF.                                [100%]
+=================================== FAILURES ===================================
+_____________________ test_invariants_i1_a_i8_par_comptage _____________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b1e22d0>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b1e02f0>
+contexte_a = ContexteClient(3d36f79f-9bb3-4c9e-a025-4ef215a8f83c)
+contexte_b = ContexteClient(4b5fdc96-4795-42b9-9760-b532f74c7f0e)
+
+    def test_invariants_i1_a_i8_par_comptage(connexion, connexion_admin, contexte_a, contexte_b):
+        # Jeu fictif : deux clients, un peuplé (A), un vide (B), pour ne pas compter du vide.
+>       _preparer_donnees_a(connexion, contexte_a)
+
+tests/integration/test_invariants.py:40: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_isolation.py:151: in _preparer_donnees_a
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10ae921b0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_77i_8eos/917839dc-9cce-4745-b054-6b... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_____________ test_acces_croise_refuse_sur_chaque_table_de_contenu _____________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b1e31d0>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b1e0170>
+contexte_a = ContexteClient(41f17bd3-efba-44dd-bc54-39040a53710c)
+contexte_b = ContexteClient(c1077ef3-f7c0-4c50-ae78-3e02357d1c97)
+
+    def test_acces_croise_refuse_sur_chaque_table_de_contenu(
+        connexion, connexion_admin, contexte_a, contexte_b
+    ):
+        """Chaque table portant `client_id` est sondée : B ne joint aucune ligne de A.
+    
+        On mesure aussi l'effet d'un `client_id` **forgé dans les paramètres** : la
+        valeur imposée par le contexte prime, le forgé n'a aucun effet.
+        """
+>       _preparer_donnees_a(connexion, contexte_a)
+
+tests/integration/test_isolation.py:234: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_isolation.py:151: in _preparer_donnees_a
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10ad08650>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_owof2x2f/63bb7673-8e0d-447b-9d43-f3... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_______________ test_api_acces_croise_refuse_et_aucune_ecriture ________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b1e2600>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b329550>
+contexte_a = ContexteClient(f564a98a-fb11-482f-9d66-2588cfbb7877)
+contexte_b = ContexteClient(76090e58-e71a-49aa-8901-67b644fcc7b1)
+api_a = <starlette.testclient.TestClient object at 0x10b41ba70>
+api_b = <starlette.testclient.TestClient object at 0x10b5471a0>
+
+    def test_api_acces_croise_refuse_et_aucune_ecriture(
+        connexion, connexion_admin, contexte_a, contexte_b, api_a, api_b
+    ):
+        """Les routes de contenu refusent B sur les objets de A, sans rien révéler."""
+>       donnees = _preparer_donnees_a(connexion, contexte_a)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/integration/test_isolation.py:338: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/integration/test_isolation.py:151: in _preparer_donnees_a
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10b2e23c0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_cz1fqcln/cf5f0c7b-0a26-4b24-a52b-91... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+______________________ test_aucune_sortie_ne_dit_conforme ______________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b4189b0>
+contexte_a = ContexteClient(044a44fc-2eb6-4e2d-82f3-2672c3cf4220)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_aucune_sortie_ne_dit_conforme(connexion, contexte_a, config):
+        """La checklist ne prononce jamais « conforme » comme un verdict.
+    
+        On exécute un parcours réel (dépôt d'un DCE fictif → validation d'un élément →
+        checklist) et on inspecte la réponse : les statuts de ligne sont bornés au
+        vocabulaire `presente` / `manquante` / `a_verifier`, et aucun champ ne porte le
+        verdict « conforme » ou « certifiée ».
+        """
+        from pathlib import Path
+    
+        from app.services import analyse_dce, checklist
+        from app.services.bibliotheque import ServiceBibliotheque
+        from app.storage.fichiers import StockageFichiers
+    
+        entreprise_id, fiche_id = _fiche_a(connexion, contexte_a)
+        pdf = Path(__file__).resolve().parents[1] / "fixtures" / "dce_fictif.pdf"
+        stockage = StockageFichiers(config.repertoire_documents, config.cle_chiffrement_maitresse)
+>       resultat = analyse_dce.deposer_et_analyser(
+            connexion,
+            contexte_a,
+            stockage,
+            entreprise_id=entreprise_id,
+            libelle=f"Consultation fictive — {MENTION}",
+            nom_fichier=pdf.name,
+            contenu=pdf.read_bytes(),
+            type_mime="application/pdf",
+        )
+
+tests/integration/test_ligne_rouge.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10b5fb620>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_shpoxfl0/56c530ee-0f1a-4cea-8466-16... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+____________________ test_parcours_complet_de_bout_en_bout _____________________
+
+api_a = <starlette.testclient.TestClient object at 0x10b5af7a0>
+
+    def test_parcours_complet_de_bout_en_bout(api_a):
+        client = api_a
+        etapes: list[str] = []
+    
+        # 1. Démarrage de zéro : une entreprise et sa première fiche.
+        entreprise_id = _creer_entreprise(client)
+        etapes.append(f"1. POST /entreprises -> 201 ({entreprise_id})")
+    
+        # 2. La bibliothèque ne renvoie plus le 404 « Provisionnez une entreprise ».
+        etat = client.get("/api/v1/bibliotheque")
+        assert etat.status_code == 200, etat.text
+        assert etat.json()["statut"] == "vierge"
+        etapes.append(f"2. GET /bibliotheque -> 200 ({etat.json()['statut']})")
+    
+        # 3. Saisie d'un élément de bibliothèque (assurances).
+        piece = client.post(
+            "/api/v1/bibliotheque/assurances",
+            json={
+                "entite": "assurance",
+                "donnees": {
+                    "type_assurance": "tous_risques",
+                    "assureur": f"Assureur fictif — {MENTION}",
+                    "date_debut": "2026-01-01",
+                    "date_echeance": "2099-01-01",
+                    "piece": None,
+                    "origine": "saisie_entreprise",
+                },
+            },
+        )
+        # `piece` est un document obligatoire : sans lui la saisie est refusée (400).
+        assert piece.status_code in (400, 422), piece.text
+        etapes.append(f"3. POST /bibliotheque/assurances sans pièce -> {piece.status_code}")
+    
+        # 4. Saisie d'une référence de chantier (pas de pièce obligatoire).
+        saisie = client.post(
+            "/api/v1/bibliotheque/references_chantiers",
+            json={
+                "entite": "reference_chantier",
+                "donnees": {
+                    "intitule_operation": f"Chantier fictif — {MENTION}",
+                    "maitre_ouvrage": f"MO fictif — {MENTION}",
+                    "origine": "saisie_entreprise",
+                },
+            },
+        )
+        assert saisie.status_code == 200, saisie.text
+        etapes.append("4. POST /bibliotheque/references_chantiers -> 200")
+    
+        # 5. Validation humaine nommée (blocage technique) — fiche complète.
+        fiche_id = etat.json()["fiche_version_id"]
+        validation = client.post(
+            "/api/v1/bibliotheque/validation",
+            json={
+                "fiche_version_id": fiche_id,
+                "relecteur_nom": f"Relecteur fictif — {MENTION}",
+                "attestation_cochee": True,
+            },
+        )
+        assert validation.status_code == 200, validation.text
+        assert validation.json()["statut"] in {"validee", "en_relecture", "en_saisie"}
+        etapes.append(f"5. POST /bibliotheque/validation -> 200 ({validation.json()['statut']})")
+    
+        # 6. Dépôt d'un DCE fictif (multipart) → consultation + document + analyse.
+>       depot = client.post(
+            "/api/v1/consultations",
+            data={
+                "libelle": f"Consultation fictive — {MENTION}",
+                "entreprise_id": entreprise_id,
+                "maitre_ouvrage_declare": f"MO déclaré fictif — {MENTION}",
+            },
+            files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+        )
+
+tests/integration/test_parcours_bout_en_bout.py:94: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/api/routes_analyse.py:155: in deposer_consultation
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10b5c4fb0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_gcc8yc1v/8367d588-ef0b-462d-af71-71... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+___________ test_bibliotheque_vide_signale_des_manques_sans_inventer ___________
+
+api_a = <starlette.testclient.TestClient object at 0x10b25deb0>
+
+    def test_bibliotheque_vide_signale_des_manques_sans_inventer(api_a):
+        """Scénario « bibliothèque vide » : beaucoup de `manquante`, rien de fabriqué."""
+        client = api_a
+        entreprise_id = _creer_entreprise(client)
+>       depot = client.post(
+            "/api/v1/consultations",
+            data={"libelle": f"Consultation fictive — {MENTION}", "entreprise_id": entreprise_id},
+            files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+        )
+
+tests/integration/test_parcours_bout_en_bout.py:160: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/api/routes_analyse.py:155: in deposer_consultation
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10b41be00>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_t62ij6qf/3f176453-194c-4fce-86bd-d5... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+________ test_depot_pdf_fictif_restitueles_trois_categories_avec_source ________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbc25d0>
+contexte_a = ContexteClient(7fba350c-193b-4b99-bdd6-4b45ec3ed308)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_depot_pdf_fictif_restitueles_trois_categories_avec_source(connexion, contexte_a, config):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:164: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cbc06e0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_oo67q1ka/49c60f46-1eee-4889-8d5c-5a... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+___________ test_tous_les_elements_stockes_portent_une_source_reelle ___________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbc2b40>
+contexte_a = ContexteClient(6851d09c-91b5-46d0-8b27-73c4cb7830c5)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_tous_les_elements_stockes_portent_une_source_reelle(connexion, contexte_a, config):
+        """Aucune ligne en base sans source, et la source existe bien dans le document."""
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:196: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cbc1790>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_9sq4r411/68a65816-4131-4d9d-83cf-07... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_______________ test_element_introuvable_est_declare_non_trouve ________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cafd3d0>
+contexte_a = ContexteClient(14c90756-f574-4ede-8eb6-64cc022d930a)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_element_introuvable_est_declare_non_trouve(connexion, contexte_a, config):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_SANS_DATE, libelle="DCE fictif incomplet")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:242: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cafcf50>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_gganhta3/5ffc1e8e-cfb6-4b4f-b21c-d5...térieurement.\nDocument fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+__________ test_seul_un_element_valide_est_utilisable_par_la_brique_c __________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbc1e50>
+contexte_a = ContexteClient(37ae18ca-3c17-41ae-82c7-b0280f4dee07)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_seul_un_element_valide_est_utilisable_par_la_brique_c(connexion, contexte_a, config):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:268: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cbc3980>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_omdu8zeo/2792d6b9-7f71-4717-be61-2e... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+________________ test_verificateur_nom_obligatoire_pour_valider ________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbc33b0>
+contexte_a = ContexteClient(3559ef6b-f895-4b8f-b748-4287b2f87e52)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_verificateur_nom_obligatoire_pour_valider(connexion, contexte_a, config):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:314: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cbc1520>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_69vgnfj2/49d3c079-5c4a-41b6-a660-73... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+______________ test_supprimer_un_element_le_retire_de_la_lecture _______________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbc0380>
+contexte_a = ContexteClient(fd6a8c31-7566-4b6d-86ed-f0f110622081)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_supprimer_un_element_le_retire_de_la_lecture(connexion, contexte_a, config):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:329: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10caffcb0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_3d83zn0s/636f6912-5426-4ebb-9060-3f... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_____________ test_deux_clients_ne_voient_pas_leurs_consultations ______________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbab920>
+contexte_a = ContexteClient(3f2a4173-e169-474d-a277-97af3aa9b8f1)
+contexte_b = ContexteClient(4f1cb022-4d72-4c1f-8a24-0989739f3782)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_deux_clients_ne_voient_pas_leurs_consultations(
+        connexion, contexte_a, contexte_b, config
+    ):
+>       resultat = _deposer(connexion, contexte_a, config, PDF_FICTIF)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:353: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cba9130>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_ay1vakn5/c3a1fb4f-5bf2-46e3-b578-42... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+___________________ test_depot_du_pdf_scanne_par_le_service ____________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cafd8e0>
+contexte_a = ContexteClient(30873636-6df1-4d11-a1d2-a133ffd26442)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+extraction_scan = ExtractionPdf(source='/Users/pause/Projets/ia-consultations-publiques/src/tests/fixtures/dce_fictif_scanne.pdf', pages...nt de la consultation. Document fictif — démonstration uniquement.\n', methode='ocr', analyseable=True, message=None)))
+
+    def test_depot_du_pdf_scanne_par_le_service(connexion, contexte_a, config, extraction_scan):
+        """Le dépôt d'un scan suit le chemin réel : OCR, puis extraction sourcée."""
+>       resultat = _deposer(connexion, contexte_a, config, PDF_SCANNE, libelle="DCE fictif scanné")
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_analyse_dce.py:422: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_analyse_dce.py:75: in _deposer
+    return analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cafed20>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_mlrjfx3h/d7cde0e1-4f51-4946-a64a-b2...nt de la consultation. Document fictif — démonstration uniquement.\n', methode='ocr', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+____________________ test_route_depot_lecture_et_validation ____________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10caffcb0>
+contexte_a = ContexteClient(af6840f3-9f14-4aec-9e6a-d5a932b3e77c)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_route_depot_lecture_et_validation(connexion, contexte_a, config):
+        _creer_utilisateur(connexion, contexte_a, "api-analyse@fictif.test", config)
+        entreprise_id = _inserer_entreprise(connexion, contexte_a, "Entreprise fictive — route")
+    
+        from app.main import app
+    
+        with TestClient(app) as client:
+            assert client.post(
+                "/api/v1/consultations",
+                data={"libelle": LIBELLE_FICTIF, "entreprise_id": entreprise_id},
+                files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+            ).status_code == 401
+    
+            connexion_ok = client.post(
+                "/api/v1/connexion",
+                json={"identifiant": "api-analyse@fictif.test", "mot_de_passe": MOT_DE_PASSE_FICTIF},
+            )
+            assert connexion_ok.status_code == 200
+            assert NOM_COOKIE_SESSION in connexion_ok.cookies
+    
+>           depot = client.post(
+                "/api/v1/consultations",
+                data={"libelle": LIBELLE_FICTIF, "entreprise_id": entreprise_id},
+                files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+            )
+
+tests/test_analyse_dce.py:472: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/api/routes_analyse.py:155: in deposer_consultation
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cba91f0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_0_emw7x2/7efe5157-4399-4901-9ee5-03... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+___________________ test_route_isolation_entre_deux_clients ____________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10cbbd220>
+contexte_a = ContexteClient(28d462c4-ab60-4fb3-90ba-1dfbfe4de966)
+contexte_b = ContexteClient(450f17de-8d98-43e6-9dcb-02d54ab084b6)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_route_isolation_entre_deux_clients(connexion, contexte_a, contexte_b, config):
+        """Le client B, authentifié, n'obtient rien de la consultation de A."""
+        _creer_utilisateur(connexion, contexte_a, "api-a@fictif.test", config)
+        _creer_utilisateur(connexion, contexte_b, "api-b@fictif.test", config)
+        entreprise_a = _inserer_entreprise(connexion, contexte_a, "Entreprise fictive A")
+    
+        from app.main import app
+    
+        with TestClient(app) as client:
+            client.post(
+                "/api/v1/connexion",
+                json={"identifiant": "api-a@fictif.test", "mot_de_passe": MOT_DE_PASSE_FICTIF},
+            )
+>           depot = client.post(
+                "/api/v1/consultations",
+                data={"libelle": LIBELLE_FICTIF, "entreprise_id": entreprise_a},
+                files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+            )
+
+tests/test_analyse_dce.py:547: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/api/routes_analyse.py:155: in deposer_consultation
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cb27920>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_uhgyyunf/0d21ff19-5e8a-4da4-a5af-58... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_________________ test_la_suite_impose_le_fournisseur_factice __________________
+
+    def test_la_suite_impose_le_fournisseur_factice():
+        """Le `.env` local ne décide pas du verdict : la suite tranche."""
+        etat = garde_isolation.etat_fournisseur()
+>       assert etat["applique"] is True, (
+            "Le forçage du fournisseur n'a pas été appliqué : src/tests/conftest.py "
+            "doit appeler garde_isolation.forcer_fournisseur_factice()."
+        )
+E       AssertionError: Le forçage du fournisseur n'a pas été appliqué : src/tests/conftest.py doit appeler garde_isolation.forcer_fournisseur_factice().
+E       assert False is True
+
+tests/test_isolation_fournisseur.py:66: AssertionError
+_______ test_verifier_isolation_ne_se_plaint_pas_quand_tout_est_en_place _______
+
+    def test_verifier_isolation_ne_se_plaint_pas_quand_tout_est_en_place():
+>       garde_isolation.verifier_isolation()  # ne doit rien lever
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_isolation_fournisseur.py:106: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def verifier_isolation() -> None:
+        """Abandonne la session de tests si l'isolation n'est pas effective.
+    
+        Lève `pytest.UsageError` — la suite ne démarre pas — dès que :
+    
+        * `MODELE_FOURNISSEUR` ne vaut pas `factice` (le `.env` local a repris la
+          main : les verdicts ne seraient plus reproductibles) ;
+        * le forçage du fournisseur n'a pas été appliqué par `conftest.py` ;
+        * la garde réseau n'est pas posée (un test pourrait joindre un vrai
+          fournisseur et envoyer un document).
+        """
+        problemes: list[str] = []
+        demande = os.environ.get(NOM_VARIABLE_FOURNISSEUR)
+        if demande != FOURNISSEUR_IMPOSE:
+            problemes.append(
+                f"  - {NOM_VARIABLE_FOURNISSEUR} vaut {demande!r} au démarrage des tests "
+                f"alors que la suite impose {FOURNISSEUR_IMPOSE!r}."
+            )
+        if not _etat["applique"]:
+            problemes.append(
+                "  - le forçage du fournisseur n'a pas été appliqué "
+                "(src/tests/conftest.py n'a pas appelé forcer_fournisseur_factice())."
+            )
+        if not garde_reseau_installee():
+            problemes.append(
+                "  - la garde réseau n'est pas posée "
+                "(src/tests/conftest.py n'a pas appelé installer_garde_reseau())."
+            )
+        if problemes:
+>           raise pytest.UsageError(
+                "ISOLATION DES TESTS NON APPLIQUÉE — la suite refuse de démarrer.\n"
+                + "\n".join(problemes)
+                + "\n\nPourquoi : un test qui dépend du fournisseur configuré dans le "
+                ".env local n'est pas reproductible — il donne un verdict différent "
+                "d'une machine à l'autre (faux négatif chez le développeur, tentation "
+                "d'affaiblir les assertions) et peut joindre un vrai fournisseur de "
+                "modèle — donc envoyer un document et consommer une clé.\n"
+                "Correctif attendu : src/tests/conftest.py doit imposer "
+                f"{NOM_VARIABLE_FOURNISSEUR}={FOURNISSEUR_IMPOSE} et poser la garde "
+                "réseau (src/tests/garde_isolation.py). Voir docs/RAPPORTS/C2-*.md."
+            )
+E           pytest.UsageError: ISOLATION DES TESTS NON APPLIQUÉE — la suite refuse de démarrer.
+E             - MODELE_FOURNISSEUR vaut 'ue' au démarrage des tests alors que la suite impose 'factice'.
+E             - le forçage du fournisseur n'a pas été appliqué (src/tests/conftest.py n'a pas appelé forcer_fournisseur_factice()).
+E             - la garde réseau n'est pas posée (src/tests/conftest.py n'a pas appelé installer_garde_reseau()).
+E           
+E           Pourquoi : un test qui dépend du fournisseur configuré dans le .env local n'est pas reproductible — il donne un verdict différent d'une machine à l'autre (faux négatif chez le développeur, tentation d'affaiblir les assertions) et peut joindre un vrai fournisseur de modèle — donc envoyer un document et consommer une clé.
+E           Correctif attendu : src/tests/conftest.py doit imposer MODELE_FOURNISSEUR=factice et poser la garde réseau (src/tests/garde_isolation.py). Voir docs/RAPPORTS/C2-*.md.
+
+tests/garde_isolation.py:241: UsageError
+____ test_la_configuration_reelle_du_fournisseur_n_entre_pas_dans_les_tests ____
+
+    def test_la_configuration_reelle_du_fournisseur_n_entre_pas_dans_les_tests():
+        """La clé (et l'URL, le nom de modèle) du `.env` local ne sont pas dans le processus.
+    
+        On ne lit ni n'affiche jamais la valeur : on vérifie seulement son **absence**.
+        Un test ne doit pas pouvoir consommer la clé d'Anthony par accident.
+        """
+        presentes = [nom for nom in garde_isolation.VARIABLES_FOURNISSEUR_REEL if nom in os.environ]
+>       assert presentes == [], (
+            f"Variables du fournisseur réel encore présentes dans le processus de test : "
+            f"{presentes}. Le `conftest.py` doit les retirer : une clé du `.env` local ne "
+            "doit jamais être chargée par la suite."
+        )
+E       AssertionError: Variables du fournisseur réel encore présentes dans le processus de test : ['MODELE_FOURNISSEUR_URL', 'MODELE_FOURNISSEUR_CLE', 'MODELE_FOURNISSEUR_NOM']. Le `conftest.py` doit les retirer : une clé du `.env` local ne doit jamais être chargée par la suite.
+E       assert ['MODELE_FOUR...RNISSEUR_NOM'] == []
+E         
+E         Left contains 3 more items, first extra item: 'MODELE_FOURNISSEUR_URL'
+E         Use -v to get more diff
+
+tests/test_isolation_fournisseur.py:116: AssertionError
+____________________ test_connexion_sortante_brute_refusee _____________________
+
+    def test_connexion_sortante_brute_refusee():
+        with pytest.raises(garde_isolation.ReseauInterdit) as exc:
+>           socket.create_connection(ADRESSE_EXTERIEURE, timeout=1)
+
+tests/test_isolation_fournisseur.py:128: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socket.py:865: in create_connection
+    raise exceptions[0]
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+address = ('192.0.2.1', 80), timeout = 1, source_address = None
+all_errors = False
+
+    def create_connection(address, timeout=_GLOBAL_DEFAULT_TIMEOUT,
+                          source_address=None, *, all_errors=False):
+        """Connect to *address* and return the socket object.
+    
+        Convenience function.  Connect to *address* (a 2-tuple ``(host,
+        port)``) and return the socket object.  Passing the optional
+        *timeout* parameter will set the timeout on the socket instance
+        before attempting to connect.  If no *timeout* is supplied, the
+        global default timeout setting returned by :func:`getdefaulttimeout`
+        is used.  If *source_address* is set it must be a tuple of (host, port)
+        for the socket to bind as a source address before making the connection.
+        A host of '' or port 0 tells the OS to use the default. When a connection
+        cannot be created, raises the last error if *all_errors* is False,
+        and an ExceptionGroup of all errors if *all_errors* is True.
+        """
+    
+        host, port = address
+        exceptions = []
+        for res in getaddrinfo(host, port, 0, SOCK_STREAM):
+            af, socktype, proto, canonname, sa = res
+            sock = None
+            try:
+                sock = socket(af, socktype, proto)
+                if timeout is not _GLOBAL_DEFAULT_TIMEOUT:
+                    sock.settimeout(timeout)
+                if source_address:
+                    sock.bind(source_address)
+>               sock.connect(sa)
+E               TimeoutError: timed out
+
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socket.py:850: TimeoutError
+_______________________ test_socket_brut_sortant_refuse ________________________
+
+    def test_socket_brut_sortant_refuse():
+        with pytest.raises(garde_isolation.ReseauInterdit):
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(1)
+>               sock.connect(ADRESSE_EXTERIEURE)
+E               TimeoutError: timed out
+
+tests/test_isolation_fournisseur.py:136: TimeoutError
+________________________ test_envoi_udp_sortant_refuse _________________________
+
+    def test_envoi_udp_sortant_refuse():
+>       with pytest.raises(garde_isolation.ReseauInterdit):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ReseauInterdit
+
+tests/test_isolation_fournisseur.py:140: Failed
+___________________ test_resolution_d_un_nom_externe_refusee ___________________
+
+    def test_resolution_d_un_nom_externe_refusee():
+        """Bloquer la résolution coupe court à tout appel HTTP par nom d'hôte."""
+        with pytest.raises(garde_isolation.ReseauInterdit) as exc:
+>           socket.getaddrinfo(HOTE_EXTERIEUR, 443)
+
+tests/test_isolation_fournisseur.py:148: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+host = 'exemple-fictif.invalid', port = 443, family = 0, type = 0, proto = 0
+flags = 0
+
+    def getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
+        """Resolve host and port into list of address info entries.
+    
+        Translate the host/port argument into a sequence of 5-tuples that contain
+        all the necessary arguments for creating a socket connected to that service.
+        host is a domain name, a string representation of an IPv4/v6 address or
+        None. port is a string service name such as 'http', a numeric port number or
+        None. By passing None as the value of host and port, you can pass NULL to
+        the underlying C API.
+    
+        The family, type and proto arguments can be optionally specified in order to
+        narrow the list of addresses returned. Passing zero as a value for each of
+        these arguments selects the full range of results.
+        """
+        # We override this function since we want to translate the numeric family
+        # and socket type values to enum constants.
+        addrlist = []
+>       for res in _socket.getaddrinfo(host, port, family, type, proto, flags):
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       socket.gaierror: [Errno 8] nodename nor servname provided, or not known
+
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/socket.py:978: gaierror
+______________ test_la_route_accepte_toujours_une_analyse_valide _______________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b21fe90>
+contexte_a = ContexteClient(c1edee0d-6c74-435e-a4d1-5ce11c3b0245)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_la_route_accepte_toujours_une_analyse_valide(connexion, contexte_a, config):
+        """Le correctif n'a pas cassé le chemin nominal : le fournisseur factice passe."""
+        from app.main import app
+    
+        _creer_utilisateur(connexion, contexte_a, "api-nominal@fictif.test", config)
+        entreprise_id = _inserer_entreprise(connexion, contexte_a, "Entreprise fictive — nominal")
+        with TestClient(app, raise_server_exceptions=False) as client:
+            client.post(
+                "/api/v1/connexion",
+                json={"identifiant": "api-nominal@fictif.test", "mot_de_passe": MOT_DE_PASSE_FICTIF},
+            )
+            depot = client.post(
+                "/api/v1/consultations",
+                data={"libelle": LIBELLE_FICTIF, "entreprise_id": entreprise_id},
+                files={"fichier": (PDF_FICTIF.name, PDF_FICTIF.read_bytes(), "application/pdf")},
+            )
+>           assert depot.status_code == 201, depot.text
+E           AssertionError: Internal Server Error
+E           assert 500 == 201
+E            +  where 500 = <Response [500 Internal Server Error]>.status_code
+
+tests/test_refus_modele.py:255: AssertionError
+__________________ test_parcours_complet_web_de_bout_en_bout ___________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b5c52e0>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b21db20>
+contexte_a = ContexteClient(878eaa75-02e0-4f1d-9cc7-8da543101325)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_parcours_complet_web_de_bout_en_bout(connexion, connexion_admin, contexte_a, config):
+        client = _client_web(connexion, contexte_a, config, "web-parcours")
+    
+        # 1. Premier écran : première utilisation, entreprise et fiche créées ici.
+        assert "Première utilisation" in client.get("/bibliotheque").text
+        client.post("/entreprises", data={"libelle_court": f"Étanchéité Fictive — {MENTION}"})
+        assert "Avancement par famille" in client.get("/bibliotheque").text
+    
+        # 2. Saisie d'un élément de bibliothèque.
+        client.post(
+            "/bibliotheque/references_chantiers",
+            data={
+                "entite": "reference_chantier",
+                "origine": "saisie_entreprise",
+                "confiance": "declare_non_verifie",
+                "champ_intitule_operation": f"Toiture bâtiment communal fictif — {MENTION}",
+                "champ_maitre_ouvrage": "Commune fictive de Démonstration",
+                "champ_nature_travaux_code": "etancheite-toiture",
+                "champ_date_debut": "2023-05-01",
+                "champ_date_fin": "2023-09-30",
+            },
+        )
+        assert "Toiture bâtiment communal fictif" in client.get(
+            "/bibliotheque/references_chantiers"
+        ).text
+    
+        # 3. Validation humaine nommée et horodatée.
+        fiche = str(
+            connexion_admin.lire(
+                "SELECT id FROM fiche_version WHERE client_id = %s;", (contexte_a.client_id,)
+            )[0][0]
+        )
+        client.post(
+            "/bibliotheque/validation",
+            data={
+                "fiche_version_id": fiche,
+                "relecteur_nom": f"Anthony Fictif — {MENTION}",
+                "attestation_cochee": "1",
+            },
+        )
+        assert "Relue et validée" in client.get("/bibliotheque").text
+    
+        # 4. Fourniture d'un DCE fictif (document de démonstration du dépôt).
+        reponse = client.get("/consultations")
+        assert reponse.status_code == 200
+        assert "dce_fictif.pdf" in reponse.text  # fixture de démonstration indiquée à l'écran
+        entreprise_id = str(
+            connexion_admin.lire(
+                "SELECT id FROM entreprise WHERE client_id = %s;", (contexte_a.client_id,)
+            )[0][0]
+        )
+        with (FIXTURES / "dce_fictif.pdf").open("rb") as fichier:
+>           reponse = client.post(
+                "/consultations",
+                data={
+                    "libelle": f"DCE fictif — {MENTION}",
+                    "entreprise_id": entreprise_id,
+                    "reference_consultation": "FICTIF-2026-001",
+                    "maitre_ouvrage_declare": "Commune fictive de Démonstration",
+                },
+                files={"fichier": ("dce_fictif.pdf", fichier, "application/pdf")},
+                **SANS_REDIRECTION,
+            )
+
+tests/test_web.py:492: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/web/routes_web.py:759: in fournir_document
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10b2e2c00>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_fqe3_vll/def1ced2-17a9-4ea2-bdd9-6e... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+_________ test_un_client_ne_peut_pas_atteindre_les_donnees_d_un_autre __________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b21fe00>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b25ff50>
+contexte_a = ContexteClient(ebb78768-d782-47a7-b423-0cdc176760a8)
+contexte_b = ContexteClient(1408caa5-410f-4f49-a770-e7f5462d5509)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_un_client_ne_peut_pas_atteindre_les_donnees_d_un_autre(
+        connexion, connexion_admin, contexte_a, contexte_b, config
+    ):
+        client_a = _client_web(connexion, contexte_a, config, "iso-a")
+        client_b = _client_web(connexion, contexte_b, config, "iso-b")
+    
+        client_a.post("/entreprises", data={"libelle_court": f"Iso A fictive — {MENTION}"})
+        client_a.post(
+            "/bibliotheque/references_chantiers",
+            data={
+                "entite": "reference_chantier",
+                "origine": "saisie_entreprise",
+                "champ_intitule_operation": f"Chantier secret de A — {MENTION}",
+                "champ_maitre_ouvrage": "Commune fictive A",
+            },
+        )
+        entreprise_a = str(
+            connexion_admin.lire(
+                "SELECT id FROM entreprise WHERE client_id = %s;", (contexte_a.client_id,)
+            )[0][0]
+        )
+        with (FIXTURES / "dce_fictif.pdf").open("rb") as fichier:
+>           reponse = client_a.post(
+                "/consultations",
+                data={"libelle": f"DCE de A — {MENTION}", "entreprise_id": entreprise_a},
+                files={"fichier": ("dce_fictif.pdf", fichier, "application/pdf")},
+                **SANS_REDIRECTION,
+            )
+
+tests/test_web.py:602: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/web/routes_web.py:759: in fournir_document
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10cbc21b0>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_ju0b5j2i/9b44425b-7884-4e2a-b65e-eb... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+______________ test_aucun_bouton_de_depot_d_envoi_ou_de_signature ______________
+
+connexion = <app.storage.connexion.Connexion object at 0x10b666c90>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10b665f10>
+contexte_a = ContexteClient(b503f359-48ce-49a0-a560-d2f6c58eb037)
+config = Config(database_url='postgresql://pause@127.0.0.1:5432/ia_consultations_test', cle_chiffrement_maitresse=b'0123456789a...i=8000, repertoire_documents='/Users/pause/Projets/ia-consultations-publiques/data/tests', duree_session_secondes=3600)
+
+    def test_aucun_bouton_de_depot_d_envoi_ou_de_signature(connexion, connexion_admin, contexte_a, config):
+        client = _client_web(connexion, contexte_a, config, "web-boutons")
+        client.post("/entreprises", data={"libelle_court": f"Fictive boutons — {MENTION}"})
+        entreprise_id = str(
+            connexion_admin.lire(
+                "SELECT id FROM entreprise WHERE client_id = %s;", (contexte_a.client_id,)
+            )[0][0]
+        )
+        with (FIXTURES / "dce_fictif.pdf").open("rb") as fichier:
+>           reponse = client.post(
+                "/consultations",
+                data={"libelle": f"DCE boutons — {MENTION}", "entreprise_id": entreprise_id},
+                files={"fichier": ("dce_fictif.pdf", fichier, "application/pdf")},
+                **SANS_REDIRECTION,
+            )
+
+tests/test_web.py:662: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1144: in post
+    return self.request(
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:463: in request
+    return super().request(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:825: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:914: in send
+    response = self._send_handling_auth(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+../.venv/lib/python3.12/site-packages/httpx/_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/httpx/_client.py:1014: in _send_single_request
+    response = transport.handle_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:360: in handle_request
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/testclient.py:357: in handle_request
+    portal.call(self.app, scope, receive, send)
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:340: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:456: in result
+    return self.__get_result()
+           ^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.12/3.12.14/Frameworks/Python.framework/Versions/3.12/lib/python3.12/concurrent/futures/_base.py:401: in __get_result
+    raise self._exception
+../.venv/lib/python3.12/site-packages/anyio/from_thread.py:265: in _call_func
+    retval = await retval_or_awaitable
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/applications.py:1215: in __call__
+    await super().__call__(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/applications.py:96: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:186: in __call__
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/middleware/errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+../.venv/lib/python3.12/site-packages/fastapi/telemetry/_asgi.py:151: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/middleware/exceptions.py:63: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/middleware/asyncexitstack.py:18: in __call__
+    await self.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/routing.py:676: in __call__
+    await self.middleware_stack(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2786: in app
+    await route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1817: in handle
+    await self.original_router.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:2869: in handle
+    await included_router._handle_selected(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1843: in _handle_selected
+    await original_route.handle(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:1308: in handle
+    await effective_context.app(scope, receive, send)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:165: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:53: in wrapped_app
+    raise exc
+../.venv/lib/python3.12/site-packages/starlette/_exception_handler.py:42: in wrapped_app
+    await app(scope, receive, sender)
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:151: in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:727: in app
+    raw_response = await run_endpoint_function(
+../.venv/lib/python3.12/site-packages/fastapi/routing.py:360: in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+app/web/routes_web.py:759: in fournir_document
+    resultat = analyse_dce.deposer_et_analyser(
+app/services/analyse_dce.py:630: in deposer_et_analyser
+    resultat = analyser_consultation(
+app/services/analyse_dce.py:412: in analyser_consultation
+    fournisseur_effectif.analyser(extraction).propositions, extraction.pages
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = <app.services.fournisseur_modele.fournisseur_ue.FournisseurUe object at 0x10c5ea660>
+extraction = ExtractionPdf(source='/var/folders/39/_vznpp5n0klbzswlzbyyt2rr0000gn/T/analyse_dce_z6ho8e8l/6917c682-389e-4364-9962-bc... consultation. Document fictif — démonstration uniquement.\n\n\x0c', methode='texte', analyseable=True, message=None)))
+
+    def analyser(self, extraction: ExtractionPdf) -> ResultatAnalyse:
+        """Appelle le fournisseur. Ne journalise jamais la clé."""
+        entetes = {
+            "Authorization": f"Bearer {self._cle}",
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        charge = self.construire_charge_utile(extraction)
+        client = self._client_http or httpx.Client(timeout=self.delai)
+        proprietaire = self._client_http is None
+        try:
+            reponse = client.post(self.url, headers=entetes, json=charge)
+        except httpx.HTTPError as exc:
+            raise ErreurFournisseurModele(
+                f"Appel au fournisseur {self.organisme} impossible : {type(exc).__name__}."
+            ) from exc
+        finally:
+            if proprietaire:
+                client.close()
+    
+        if reponse.status_code >= 400:
+>           raise ErreurFournisseurModele(
+                f"Fournisseur {self.organisme} en échec (HTTP {reponse.status_code}). "
+                "La clé et l'adresse ne sont jamais recopiées ici."
+            )
+E           app.services.fournisseur_modele.base.ErreurFournisseurModele: Fournisseur France/UE (non précisé) en échec (HTTP 401). La clé et l'adresse ne sont jamais recopiées ici.
+
+app/services/fournisseur_modele/fournisseur_ue.py:227: ErreurFournisseurModele
+=============================== warnings summary ===============================
+../.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/pause/Projets/ia-consultations-publiques/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_invariants.py::test_invariants_i1_a_i8_par_comptage
+FAILED tests/integration/test_isolation.py::test_acces_croise_refuse_sur_chaque_table_de_contenu
+FAILED tests/integration/test_isolation.py::test_api_acces_croise_refuse_et_aucune_ecriture
+FAILED tests/integration/test_ligne_rouge.py::test_aucune_sortie_ne_dit_conforme
+FAILED tests/integration/test_parcours_bout_en_bout.py::test_parcours_complet_de_bout_en_bout
+FAILED tests/integration/test_parcours_bout_en_bout.py::test_bibliotheque_vide_signale_des_manques_sans_inventer
+FAILED tests/test_analyse_dce.py::test_depot_pdf_fictif_restitueles_trois_categories_avec_source
+FAILED tests/test_analyse_dce.py::test_tous_les_elements_stockes_portent_une_source_reelle
+FAILED tests/test_analyse_dce.py::test_element_introuvable_est_declare_non_trouve
+FAILED tests/test_analyse_dce.py::test_seul_un_element_valide_est_utilisable_par_la_brique_c
+FAILED tests/test_analyse_dce.py::test_verificateur_nom_obligatoire_pour_valider
+FAILED tests/test_analyse_dce.py::test_supprimer_un_element_le_retire_de_la_lecture
+FAILED tests/test_analyse_dce.py::test_deux_clients_ne_voient_pas_leurs_consultations
+FAILED tests/test_analyse_dce.py::test_depot_du_pdf_scanne_par_le_service - a...
+FAILED tests/test_analyse_dce.py::test_route_depot_lecture_et_validation - ap...
+FAILED tests/test_analyse_dce.py::test_route_isolation_entre_deux_clients - a...
+FAILED tests/test_isolation_fournisseur.py::test_la_suite_impose_le_fournisseur_factice
+FAILED tests/test_isolation_fournisseur.py::test_verifier_isolation_ne_se_plaint_pas_quand_tout_est_en_place
+FAILED tests/test_isolation_fournisseur.py::test_la_configuration_reelle_du_fournisseur_n_entre_pas_dans_les_tests
+FAILED tests/test_isolation_fournisseur.py::test_connexion_sortante_brute_refusee
+FAILED tests/test_isolation_fournisseur.py::test_socket_brut_sortant_refuse
+FAILED tests/test_isolation_fournisseur.py::test_envoi_udp_sortant_refuse - F...
+FAILED tests/test_isolation_fournisseur.py::test_resolution_d_un_nom_externe_refusee
+FAILED tests/test_refus_modele.py::test_la_route_accepte_toujours_une_analyse_valide
+FAILED tests/test_web.py::test_parcours_complet_web_de_bout_en_bout - app.ser...
+FAILED tests/test_web.py::test_un_client_ne_peut_pas_atteindre_les_donnees_d_un_autre
+FAILED tests/test_web.py::test_aucun_bouton_de_depot_d_envoi_ou_de_signature
+27 failed, 158 passed, 1 warning in 19.15s
