@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block titre %}Première utilisation{% endblock %}
+{% block contenu %}
+<h2>Première utilisation — aucune bibliothèque n'existe encore</h2>
+
+<div class="message">
+  <p>
+    Ce client n'a pas encore d'<strong>entreprise</strong> ni de
+    <strong>version de fiche</strong>. C'est la situation qui répondait
+    auparavant « Provisionnez une entreprise et une version de fiche » — elle
+    n'est plus un cul-de-sac : créez l'entreprise ci-dessous.
+  </p>
+  <p>
+    Rien ne se remplit tout seul : le libellé court est saisi par l'humain
+    (annexe C § C2).
+  </p>
+</div>
+
+{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
+
+<div class="carte">
+  <form method="post" action="/entreprises">
+    <div class="champ">
+      <label for="libelle_court">Libellé court de l'entreprise</label>
+      <p class="aide" id="aide-libelle">
+        Nom d'usage de l'entreprise, tel que saisi par l'humain. Aucune donnée
+        externe n'est consultée. Les jeux de démonstration sont fictifs.
+      </p>
+      <input type="text" id="libelle_court" name="libelle_court" maxlength="255"
+             aria-describedby="aide-libelle" required>
+    </div>
+    <div class="actions">
+      <button type="submit">Créer l'entreprise et sa première version de fiche</button>
+    </div>
+  </form>
+</div>
+
+{% if entreprises %}
+<h3>Entreprises déjà déclarées pour ce client</h3>
+<table>
+  <caption>Entreprises du client de la session</caption>
+  <thead>
+    <tr><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Dernière version de fiche</th></tr>
+  </thead>
+  <tbody>
+    {% for e in entreprises %}
+    <tr>
+      <td>{{ e.libelle_court }}</td>
+      <td>{{ e.statut }}</td>
+      <td>
+        {% if e.derniere_fiche %}
+          n°{{ e.derniere_fiche.numero_version }} — {{ e.derniere_fiche.statut }}
+          <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches" style="display:inline">
+            <button type="submit" class="secondaire">Ouvrir une nouvelle version de fiche</button>
+          </form>
+        {% else %}
+          aucune version de fiche
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

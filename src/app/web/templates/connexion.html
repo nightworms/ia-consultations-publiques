@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titre %}Connexion{% endblock %}
+{% block contenu %}
+<h2>Connexion</h2>
+
+{% if erreur %}
+<div class="message message-erreur" role="alert">{{ erreur }}</div>
+{% endif %}
+
+<div class="carte">
+  <form method="post" action="/connexion">
+    <div class="champ">
+      <label for="identifiant">Identifiant</label>
+      <input type="text" id="identifiant" name="identifiant" autocomplete="username" required>
+    </div>
+    <div class="champ">
+      <label for="mot_de_passe">Mot de passe</label>
+      <input type="password" id="mot_de_passe" name="mot_de_passe" autocomplete="current-password" required>
+    </div>
+    <div class="actions">
+      <button type="submit">Ouvrir la session</button>
+    </div>
+  </form>
+</div>
+
+<p class="aide">
+  Le compte est créé par l'exploitant
+  (<code>scripts/provisionnement.py</code>), jamais depuis cette interface :
+  aucune inscription spontanée, aucune réinitialisation de mot de passe
+  (annexe C § C2, hors périmètre de la phase 3).
+</p>
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block titre %}Bibliothèque d'entreprise{% endblock %}
+{% block contenu %}
+<h2>Bibliothèque d'entreprise — état d'avancement</h2>
+
+{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
+{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
+
+{% if etat %}
+<div class="carte">
+  <h3>État de la fiche courante</h3>
+  <dl class="source">
+    <dt>Version de fiche :</dt><dd>{{ fiche.numero_version if fiche else '?' }}</dd>
+    <dt>État :</dt><dd>{{ etat.statut_libelle }} ({{ etat.statut }})</dd>
+    <dt>Identifiant :</dt><dd><code>{{ etat.fiche_version_id }}</code></dd>
+  </dl>
+  <p class="aide">
+    L'état « Relue et validée » ne peut être posé que par une action humaine
+    nommée et horodatée, depuis le formulaire de validation en bas de page.
+    Aucun chemin automatique n'y mène.
+  </p>
+</div>
+
+<h3>Avancement par famille</h3>
+<table>
+  <caption>Une ligne par famille : nombre d'éléments saisis, état d'avancement, complétude structurelle</caption>
+  <thead>
+    <tr>
+      <th scope="col">Famille</th>
+      <th scope="col">Éléments</th>
+      <th scope="col">État d'avancement</th>
+      <th scope="col">Complétude</th>
+      <th scope="col">Saisir</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for f in etat.familles %}
+    <tr>
+      <td>{{ f.libelle }}</td>
+      <td>{{ f.nb_elements }}</td>
+      <td>{{ f.statut }}</td>
+      <td>
+        {% if f.completude_famille == 'complete' %}au moins un élément{% else %}aucun élément{% endif %}
+      </td>
+      <td><a href="/bibliotheque/{{ f.famille }}">Ouvrir {{ f.libelle }}</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p class="aide">
+  Complétude <strong>structurelle</strong> seulement : l'outil n'affirme pas
+  qu'une famille est complète au sens réglementaire, il constate qu'elle contient
+  au moins un élément.
+</p>
+
+{% if etat.anomalies_empreinte %}
+<div class="message message-erreur">
+  <p>Anomalie d'empreinte détectée (invariant I6) — à relire :</p>
+  <ul>
+    {% for a in etat.anomalies_empreinte %}
+    <li>{{ a.famille_code or a.cible_type }} : {{ a.motif or 'empreinte recalculée différente' }}</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<h3>Validations de relecture enregistrées</h3>
+{% if etat.validations %}
+<table>
+  <caption>Validations de relecture de cette version de fiche</caption>
+  <thead>
+    <tr><th scope="col">Cible</th><th scope="col">Famille</th><th scope="col">Relecteur</th><th scope="col">Statut</th></tr>
+  </thead>
+  <tbody>
+    {% for v in etat.validations %}
+    <tr>
+      <td>{{ v.cible_type }}</td>
+      <td>{{ v.famille_code or '—' }}</td>
+      <td>{{ v.relecteur_nom }}</td>
+      <td>{{ v.statut }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Aucune validation de relecture enregistrée pour cette version.</p>
+{% endif %}
+
+<div class="carte">
+  <h3>Relecture humaine bloquante</h3>
+  <p>
+    Deux verrous distincts : la <strong>validation de la bibliothèque</strong>
+    (ce formulaire) et la <strong>validation des éléments extraits d'un DCE</strong>
+    (écran d'analyse). Aucun des deux ne se court-circuite.
+  </p>
+  {% if erreur_validation %}
+  <div class="message message-erreur" role="alert">{{ erreur_validation }}</div>
+  {% endif %}
+  <form method="post" action="/bibliotheque/validation">
+    <input type="hidden" name="fiche_version_id" value="{{ etat.fiche_version_id }}">
+    <div class="champ">
+      <label for="relecteur_nom">Nom du relecteur (obligatoire)</label>
+      <input type="text" id="relecteur_nom" name="relecteur_nom" required
+             autocomplete="name" aria-describedby="aide-relecteur">
+      <p class="aide" id="aide-relecteur">
+        Le nom de l'humain qui a relu. Une validation sans nom est refusée.
+      </p>
+    </div>
+    <div class="champ">
+      <label for="cible_type">Périmètre de la validation</label>
+      <select id="cible_type" name="cible_type">
+        <option value="fiche">La fiche entière</option>
+        <option value="famille">Une seule famille</option>
+      </select>
+    </div>
+    <div class="champ">
+      <label for="famille_code">Famille (si validation d'une famille)</label>
+      <select id="famille_code" name="famille_code">
+        <option value="">—</option>
+        {% for f in etat.familles %}
+        <option value="{{ f.famille }}">{{ f.libelle }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="champ">
+      <label for="attestation_cochee">
+        <input type="checkbox" id="attestation_cochee" name="attestation_cochee" value="1">
+        J'ai relu et corrigé les informations ci-dessus (attestation obligatoire)
+      </label>
+    </div>
+    <div class="champ">
+      <label for="commentaire">Commentaire (facultatif)</label>
+      <textarea id="commentaire" name="commentaire"></textarea>
+    </div>
+    <div class="actions">
+      <button type="submit">Enregistrer la relecture humaine</button>
+    </div>
+  </form>
+</div>
+
+<h3>Entreprises et versions de fiche</h3>
+<table>
+  <caption>Entreprises du client de la session</caption>
+  <thead>
+    <tr><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Dernière version</th><th scope="col">Action</th></tr>
+  </thead>
+  <tbody>
+    {% for e in entreprises %}
+    <tr>
+      <td>{{ e.libelle_court }}</td>
+      <td>{{ e.statut }}</td>
+      <td>
+        {% if e.derniere_fiche %}n°{{ e.derniere_fiche.numero_version }} — {{ e.derniere_fiche.statut }}{% else %}—{% endif %}
+      </td>
+      <td>
+        <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches">
+          <button type="submit" class="secondaire">Ouvrir une nouvelle version</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% else %}
+<div class="message">
+  <p>
+    Aucune fiche de bibliothèque pour ce client :
+    <a href="/entreprises/nouvelle">créer une entreprise et sa première version de fiche</a>.
+  </p>
+</div>
+{% endif %}
+
+<p><a href="/consultations">Consultations et analyse de DCE</a></p>
+{% endblock %}

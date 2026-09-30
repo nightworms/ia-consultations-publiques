@@ -1,0 +1,71 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.14, pytest-9.1.1, pluggy-1.6.0 -- /Users/pause/Projets/ia-consultations-publiques/.venv/bin/python
+rootdir: /Users/pause/Projets/ia-consultations-publiques/src
+plugins: anyio-4.15.1
+collecting ... collected 23 items
+
+tests/integration/test_fuite_et_perimetre.py::test_controle_de_fuite_dans_le_depot 
+[fuite] fichiers textuels examinés : 119
+[fuite] occurrences du mot de passe de test (fictif) : 7
+[fuite] motifs non expliqués : 0
+PASSED
+tests/integration/test_fuite_et_perimetre.py::test_aucun_secret_ni_fichier_sensible_versionne PASSED
+tests/integration/test_fuite_et_perimetre.py::test_aucune_fonctionnalite_hors_perimetre_dans_le_code 
+[périmètre] occurrences hors-périmètre non justifiées : 0
+PASSED
+tests/integration/test_fuite_et_perimetre.py::test_script_provisionnement_ne_fuit_aucun_secret 
+[provisionnement] script : refus d'un mot de passe en argument (code 2), aucune fuite
+PASSED
+tests/integration/test_invariants.py::test_invariants_i1_a_i8_par_comptage 
+[invariants] volume contrôlé : {'entreprise': 2, 'fiche_version': 2, 'assurance': 1, 'document': 2, 'consultation': 1, 'extraction_element': 10, 'checklist_ligne': 1, 'validation_relecture': 1}
+[invariants] tables portant client_id : 34
+[invariants] écarts par invariant : {'I1': 0, 'I2': 0, 'I3': 0, 'I4': 0, 'I5': 0, 'I6': 0, 'I7': 0, 'I8': 0}
+PASSED
+tests/integration/test_invariants.py::test_i6_detecte_reellement_une_validation_devenue_fausse PASSED
+tests/integration/test_isolation.py::test_acces_croise_refuse_sur_chaque_table_de_contenu 
+[isolation] tables couvertes avec données A : 28
+[isolation] tables couvertes (vides chez A) : 6
+[isolation] tables sans données chez A : ['abonnement', 'chapitre_memoire_reference', 'dossier', 'evenement_facturation', 'evenement_facturation_dossier', 'tracabilite_valeur']
+PASSED
+tests/integration/test_isolation.py::test_api_acces_croise_refuse_et_aucune_ecriture PASSED
+tests/integration/test_isolation.py::test_client_id_du_corps_ignore_a_l_ecriture PASSED
+tests/integration/test_ligne_rouge.py::test_schema_sans_champ_de_prix_ni_de_marge 
+[ligne rouge] colonnes examinées : 516
+[ligne rouge] colonnes de prix/marge trouvées : []
+PASSED
+tests/integration/test_ligne_rouge.py::test_api_refuse_une_valeur_sans_origine PASSED
+tests/integration/test_ligne_rouge.py::test_base_refuse_une_valeur_sans_origine PASSED
+tests/integration/test_ligne_rouge.py::test_api_refuse_origine_generee_par_ia PASSED
+tests/integration/test_ligne_rouge.py::test_base_refuse_origine_generee_par_ia PASSED
+tests/integration/test_ligne_rouge.py::test_api_refuse_confiance_verifie_sans_source PASSED
+tests/integration/test_ligne_rouge.py::test_confiance_sans_source_reste_a_verifier PASSED
+tests/integration/test_ligne_rouge.py::test_aucune_sortie_ne_dit_conforme PASSED
+tests/integration/test_migrations.py::test_up_puis_down_de_chaque_migration 
+[migrations] tables après up complet : 38
+[migrations] séquence up/down rejouée : 0001, 0002, 0003, 0004
+PASSED
+tests/integration/test_parcours_bout_en_bout.py::test_parcours_complet_de_bout_en_bout 
+[parcours] étapes franchies :
+  - 1. POST /entreprises -> 201 (7a4e35f1-119e-429b-ad62-73b4af6fe513)
+  - 2. GET /bibliotheque -> 200 (vierge)
+  - 3. POST /bibliotheque/assurances sans pièce -> 400
+  - 4. POST /bibliotheque/references_chantiers -> 200
+  - 5. POST /bibliotheque/validation -> 200 (validee)
+  - 6. POST /consultations -> 201 (10 éléments)
+  - 7. GET /consultations/{id} -> 200 (sources présentes)
+  - 8. POST .../elements/{id} valider -> 200 (valide)
+  - 9. POST .../checklist -> 200 (1 exigences)
+  - 10. GET .../checklist -> 200 (présentes=0, manquantes=1)
+PASSED
+tests/integration/test_parcours_bout_en_bout.py::test_bibliotheque_vide_signale_des_manques_sans_inventer PASSED
+tests/integration/test_parcours_bout_en_bout.py::test_contrat_gele_non_renomme PASSED
+tests/integration/test_parcours_bout_en_bout.py::test_routes_de_contenu_refusent_sans_session PASSED
+tests/integration/test_provisionnement_parcours.py::test_demarrage_de_zero_par_le_script_puis_l_api PASSED
+
+=============================== warnings summary ===============================
+../.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/pause/Projets/ia-consultations-publiques/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+======================== 23 passed, 1 warning in 2.24s =========================

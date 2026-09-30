@@ -1,0 +1,23 @@
+# Dépendances du socle — L1 (annexe A § A10). Épinglées.
+# Python 3.12 requis (installé via Homebrew : python@3.12).
+#
+# Installation :  .venv/bin/python -m pip install -r src/requirements.txt
+
+# --- Application HTTP ---------------------------------------------------------
+fastapi==0.142.1            # framework API (contrat /api/v1)
+uvicorn[standard]==0.54.0   # serveur ASGI local
+pydantic==2.13.5            # validation des entrées aux frontières
+python-multipart==0.0.32    # dépôt de fichiers multipart (routes ultérieures)
+jinja2==3.1.6               # écrans HTML rendus côté serveur (A8)
+
+# --- Base de données ----------------------------------------------------------
+psycopg[binary]==3.3.6      # pilote PostgreSQL ; SQL paramétré, sans ORM
+
+# --- Sécurité -----------------------------------------------------------------
+cryptography==50.0.1        # AES-256-GCM + HKDF (chiffrement par client)
+argon2-cffi==25.1.0         # hachage des mots de passe (Argon2id)
+itsdangerous==2.2.0         # signature du cookie de session
+
+# --- Tests --------------------------------------------------------------------
+pytest==9.1.1               # exécuteur de tests
+httpx==0.28.1               # client HTTP pour TestClient (tests d'API)

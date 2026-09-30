@@ -1,0 +1,191 @@
+/* ==========================================================================
+   ia-consultations-publiques — CSS des écrans HTML (annexe A § A8).
+   Aucun framework, aucun build : une seule feuille, servie telle quelle.
+
+   Contraintes tenues ici (docs/UI-SAISIE.md § 11) :
+   - HTML sémantique : ce fichier ne fait que mettre en forme, il ne porte
+     aucun statut par lui seul ;
+   - aucun statut porté par la couleur seule : chaque état a son libellé
+     textuel dans les gabarits ;
+   - contrastes visés : WCAG AA / RGAA ;
+   - responsive par défaut, mobile d'abord ; aucun palier ne casse.
+   ========================================================================== */
+
+:root {
+  --encre: #16202b;
+  --encre-douce: #43506180;
+  --texte-doux: #3d4a5a;
+  --fond: #f4f6f8;
+  --carte: #ffffff;
+  --bord: #b9c2cd;
+  --accent: #14456e;
+  --accent-fonce: #0d2f4d;
+  --alerte-texte: #7a2405;
+  --alerte-fond: #fdeee6;
+  --ok-texte: #175c33;
+  --ok-fond: #e7f4ec;
+  --brouillon-texte: #5c4300;
+  --brouillon-fond: #fff6d8;
+  --info-fond: #eaf1f8;
+  --rayon: 6px;
+}
+
+* { box-sizing: border-box; }
+
+html { font-size: 100%; }
+
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* --- Accessibilité : lien d'évitement et focus visible ------------------- */
+.lien-evitement {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--accent-fonce);
+  color: #fff;
+  padding: .6rem 1rem;
+  z-index: 10;
+}
+.lien-evitement:focus { left: 0; }
+
+a { color: var(--accent); }
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--accent-fonce);
+  outline-offset: 2px;
+}
+
+/* --- Ossature ------------------------------------------------------------ */
+.entete {
+  background: var(--accent-fonce);
+  color: #fff;
+  padding: .9rem 1rem;
+}
+.entete a { color: #fff; }
+.entete h1 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.entete nav { margin-top: .5rem; display: flex; flex-wrap: wrap; gap: .75rem; font-size: .95rem; }
+.entete nav a { text-decoration: underline; }
+
+.conteneur {
+  max-width: 62rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+main h2 { margin-top: 1.6rem; font-size: 1.2rem; }
+main h3 { margin-top: 1.2rem; font-size: 1.05rem; }
+
+.carte {
+  background: var(--carte);
+  border: 1px solid var(--bord);
+  border-radius: var(--rayon);
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+/* --- Messages ------------------------------------------------------------ */
+.message {
+  border-left: 5px solid var(--bord);
+  background: var(--info-fond);
+  padding: .7rem .9rem;
+  margin: 1rem 0;
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+}
+.message-erreur { border-left-color: var(--alerte-texte); background: var(--alerte-fond); color: var(--alerte-texte); }
+.message-ok { border-left-color: var(--ok-texte); background: var(--ok-fond); color: var(--ok-texte); }
+.message-brouillon {
+  border-left-color: var(--brouillon-texte);
+  background: var(--brouillon-fond);
+  color: var(--brouillon-texte);
+  font-weight: 600;
+}
+
+/* --- Marqueurs textuels de statut (jamais la couleur seule) -------------- */
+.etiquette {
+  display: inline-block;
+  border: 1px solid var(--bord);
+  border-radius: 999px;
+  padding: .05rem .55rem;
+  font-size: .85rem;
+  background: var(--carte);
+  white-space: nowrap;
+}
+.etiquette-presente { border-color: var(--ok-texte); color: var(--ok-texte); background: var(--ok-fond); }
+.etiquette-manquante { border-color: var(--alerte-texte); color: var(--alerte-texte); background: var(--alerte-fond); }
+.etiquette-a_verifier { border-color: var(--brouillon-texte); color: var(--brouillon-texte); background: var(--brouillon-fond); }
+
+/* --- Tableaux ------------------------------------------------------------ */
+table { border-collapse: collapse; width: 100%; margin: .6rem 0; }
+caption { text-align: left; padding: .3rem 0; color: var(--texte-doux); }
+th, td { border: 1px solid var(--bord); padding: .45rem .55rem; text-align: left; vertical-align: top; }
+thead th { background: var(--info-fond); }
+
+/* --- Formulaires --------------------------------------------------------- */
+.champ { margin: .7rem 0; }
+.champ label { display: block; font-weight: 600; margin-bottom: .15rem; }
+.champ .aide { color: var(--texte-doux); font-size: .88rem; margin: .1rem 0 .3rem; }
+input[type="text"], input[type="password"], input[type="date"], input[type="file"],
+input[type="number"], select, textarea {
+  width: 100%;
+  max-width: 100%;
+  padding: .45rem .5rem;
+  border: 1px solid var(--bord);
+  border-radius: 4px;
+  font: inherit;
+  background: #fff;
+  color: var(--encre);
+}
+textarea { min-height: 5.5rem; }
+.grille { display: grid; gap: .2rem 1rem; grid-template-columns: 1fr; }
+fieldset { border: 1px solid var(--bord); border-radius: var(--rayon); padding: .6rem .9rem 1rem; margin: 1rem 0; }
+legend { font-weight: 700; padding: 0 .4rem; }
+
+.actions { margin-top: 1rem; display: flex; flex-wrap: wrap; gap: .6rem; }
+button, .bouton {
+  font: inherit;
+  padding: .5rem .9rem;
+  border-radius: 4px;
+  border: 1px solid var(--accent-fonce);
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+button.secondaire, .bouton.secondaire { background: #fff; color: var(--accent-fonce); }
+button.danger { background: #fff; color: var(--alerte-texte); border-color: var(--alerte-texte); }
+
+/* --- Listes de valeurs / sources ---------------------------------------- */
+dl.source { margin: .35rem 0 0; font-size: .9rem; color: var(--texte-doux); }
+dl.source dt { font-weight: 600; display: inline; }
+dl.source dd { display: inline; margin: 0 .8rem 0 .25rem; }
+
+ul.elements { list-style: none; padding: 0; margin: 0; }
+ul.elements > li { border: 1px solid var(--bord); border-radius: var(--rayon); padding: .7rem .8rem; margin-bottom: .7rem; background: var(--carte); }
+ul.elements h4 { margin: 0 0 .3rem; font-size: 1rem; }
+.fiche-valeur { font-weight: 600; }
+
+/* --- Pied de page -------------------------------------------------------- */
+.pied {
+  border-top: 1px solid var(--bord);
+  margin-top: 2rem;
+  padding: 1rem;
+  color: var(--texte-doux);
+  font-size: .88rem;
+}
+
+/* --- Palier large : deux colonnes --------------------------------------- */
+@media (min-width: 44rem) {
+  .grille { grid-template-columns: 1fr 1fr; }
+  .grille .pleine-largeur { grid-column: 1 / -1; }
+  .conteneur { padding: 1.5rem; }
+}

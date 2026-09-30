@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titre %}Erreur {{ code }}{% endblock %}
+{% block contenu %}
+<h2>Erreur {{ code }}</h2>
+<div class="message message-erreur" role="alert">
+  <p>{{ message }}</p>
+</div>
+<p><a href="/bibliotheque">Retour à la bibliothèque</a> — <a href="/consultations">Consultations</a></p>
+{% endblock %}

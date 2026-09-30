@@ -1,7 +1,10 @@
 # Ignorer les données locales et les secrets
 data/
+data-restaure/
 .env
 .env.*
+# Exception : le modèle d'exemple est versionné (aucune valeur secrète dedans).
+!.env.example
 *.secret
 *.key
 *.pem

@@ -1,0 +1,50 @@
+{# Gabarit de base — HTML rendu côté serveur (annexe A § A8).
+   Aucun JavaScript, aucun build. Hiérarchie de titres continue :
+   h1 = écran, h2 = section, h3 = sous-section. #}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titre %}Bibliothèque d'entreprise{% endblock %} — ia-consultations-publiques</title>
+  <link rel="stylesheet" href="{{ url_for('statique', path='style.css') }}">
+</head>
+<body>
+  <a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+  <header class="entete">
+    <div class="conteneur">
+      <h1>ia-consultations-publiques — brouillon de travail</h1>
+      {% if identite %}
+      <nav aria-label="Navigation principale">
+        <span>Connecté&nbsp;: {{ identite.nom_affichage }} (client {{ identite.client_id[:8] }}…)</span>
+        <a href="/bibliotheque">Bibliothèque</a>
+        <a href="/consultations">Consultations</a>
+        <form method="post" action="/deconnexion" style="display:inline">
+          <button type="submit" class="secondaire">Fermer la session</button>
+        </form>
+      </nav>
+      {% else %}
+      <nav aria-label="Navigation principale">
+        <a href="/connexion">Connexion</a>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main id="contenu" class="conteneur">
+    {% block contenu %}{% endblock %}
+  </main>
+
+  <footer class="pied">
+    <div class="conteneur">
+      <p>
+        Outil d'aide à la relecture. L'outil ne signe rien, n'invente aucune
+        référence ni aucun chiffre, ne fixe aucun prix et ne garantit aucune
+        conformité. Toute sortie de nature à engager l'entreprise reste un
+        <strong>brouillon — à relire et à signer</strong> par un humain.
+      </p>
+      <p>Aucune donnée réelle : les jeux de démonstration sont fictifs et signalés.</p>
+    </div>
+  </footer>
+</body>
+</html>

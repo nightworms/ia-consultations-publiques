@@ -1,34 +1,40 @@
-"""Famille 9 — Mémoire technique type. Voir ``docs/DATA-MODEL.md`` § 14.
+"""Famille 9 — Mémoire technique type : `chapitre_memoire`.
 
-Ce module stocke un mémoire type réutilisable ; il ne rédige rien automatiquement
-(hors périmètre phase 1) et n'automatise aucune signature.
+Voir `docs/DATA-MODEL-V2.md` § 10 F9. **Périmètre strict** : ce module **stocke** un
+mémoire technique type réutilisable. Il ne décrit et ne réalise **aucune rédaction
+automatique** (hors périmètre de la phase 3), et **la signature n'est jamais
+automatisée** : un chapitre réutilisé dans un dossier exige la relecture humaine
+(§ 6.4).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import date
-from enum import Enum
 from typing import Optional
 
-
-class StatutChapitre(str, Enum):
-    BROUILLON = "brouillon"
-    ACCEPTE = "accepte"
-    ARCHIVE = "archive"
+from .commun import Sensibilite
 
 
 @dataclass
 class ChapitreMemoire:
     """Un chapitre réutilisable du mémoire technique type."""
 
-    id: str
-    entreprise_id: str
     titre: str
     ordre: int
-    contenu_texte: str
-    statut: StatutChapitre = StatutChapitre.BROUILLON
+    id: Optional[str] = None
+    contenu_texte: Optional[str] = None
+    statut: str = "brouillon"  # code_reference memoire.statut_chapitre
     date_redaction: Optional[date] = None
-    references_liees_ids: list[str] = field(default_factory=list)
-    documents_associes_ids: list[str] = field(default_factory=list)
-    source_document_id: Optional[str] = None
+    references_liees: list[str] = field(default_factory=list)
+    documents_associes: list[str] = field(default_factory=list)
+    sensibilite: Sensibilite = Sensibilite.INTERNE
+
+    def vers_colonnes(self) -> dict[str, object]:
+        return {
+            "titre": self.titre,
+            "ordre": self.ordre,
+            "contenu_texte": self.contenu_texte,
+            "statut": self.statut,
+            "date_redaction": self.date_redaction,
+        }

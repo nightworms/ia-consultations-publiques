@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block titre %}Consultations{% endblock %}
+{% block contenu %}
+<h2>Consultations — analyse d'un DCE</h2>
+
+{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
+{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
+
+<div class="message message-brouillon">
+  brouillon — à relire et à signer
+</div>
+
+<div class="message">
+  <p>
+    Vous fournissez vous-même le document : l'outil ne va rien chercher, ne
+    consulte aucune plateforme d'achat et ne dépose aucun pli à votre place.
+    Il lit le document et propose des éléments <strong>avec leur source</strong> ;
+    seul un élément validé par un humain alimente ensuite la checklist.
+  </p>
+  <p>
+    Générateur d'analyse : <code>{{ fournisseur }}</code>
+    {% if fournisseur == 'factice' %}
+    — fournisseur <strong>factice</strong> (règles de lecture déterministes,
+    aucun modèle de langage, aucun appel réseau). Le chemin réel France/UE est
+    codé mais non testé faute de clé d'API.
+    {% endif %}
+  </p>
+  <p>Formats acceptés : PDF (y compris scanné, via OCR) et texte brut. Les formats bureautiques sont refusés explicitement.</p>
+</div>
+
+<div class="carte">
+  <h3>Fournir un document de consultation</h3>
+  <form method="post" action="/consultations" enctype="multipart/form-data">
+    <div class="grille">
+      <div class="champ">
+        <label for="libelle">Libellé de la consultation</label>
+        <input type="text" id="libelle" name="libelle" maxlength="255" required>
+      </div>
+      <div class="champ">
+        <label for="entreprise_id">Entreprise concernée</label>
+        <select id="entreprise_id" name="entreprise_id" required>
+          {% for e in entreprises %}
+          <option value="{{ e.entreprise_id }}">{{ e.libelle_court }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="champ">
+        <label for="reference_consultation">Référence de la consultation (saisie par l'humain)</label>
+        <input type="text" id="reference_consultation" name="reference_consultation">
+      </div>
+      <div class="champ">
+        <label for="maitre_ouvrage_declare">Maître d'ouvrage déclaré (saisi par l'humain, jamais déduit)</label>
+        <input type="text" id="maitre_ouvrage_declare" name="maitre_ouvrage_declare">
+      </div>
+      <div class="champ pleine-largeur">
+        <label for="fichier">Document (PDF ou .txt)</label>
+        <input type="file" id="fichier" name="fichier" accept=".pdf,.txt,application/pdf,text/plain" required>
+        <p class="aide">
+          Jeu de démonstration fictif disponible dans le dépôt :
+          <code>src/tests/fixtures/dce_fictif.pdf</code> (document signalé
+          « DOCUMENT FICTIF — DÉMONSTRATION »).
+        </p>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit">Analyser ce document</button>
+    </div>
+  </form>
+</div>
+
+<h3>Consultations déjà enregistrées pour ce client</h3>
+{% if consultations %}
+<table>
+  <caption>Consultations du client de la session</caption>
+  <thead>
+    <tr>
+      <th scope="col">Libellé</th>
+      <th scope="col">Statut</th>
+      <th scope="col">Créée le</th>
+      <th scope="col">Analyse</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in consultations %}
+    <tr>
+      <td>{{ c.libelle }}</td>
+      <td>{{ c.statut }}</td>
+      <td>{{ c.date_creation }}</td>
+      <td><a href="/consultations/{{ c.id }}">Ouvrir l'analyse</a></td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>Aucune consultation enregistrée pour ce client.</p>
+{% endif %}
+{% endblock %}

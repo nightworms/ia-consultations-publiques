@@ -58,6 +58,7 @@ déclarée et, si elle est extraite, un document source (§ 7).
 14. Portabilité du modèle (décision D-C5)
 15. Points ouverts
 16. Rappels de sécurité et de dépôt
+17. **Extension v2 — briques B et C** (analyse d'un DCE, checklist de conformité) *— ajoutée par le lot L3*
 
 ---
 
@@ -1322,8 +1323,191 @@ Colonne « qui tranche » : aucune de ces lignes n'est de mon ressort.
 
 ---
 
-*Fin du modèle v2. Lot L3 — `dev-back`. Conception sur le papier : aucun schéma
-appliqué, aucune migration écrite, aucun code produit. Toute évolution ultérieure de
-structure passe par une migration versionnée et réversible, jamais par une
-modification en place d'un schéma appliqué — et toute évolution de contenu de
-référence se fait par ajout de lignes, sans migration destructive (§ 8.5).*
+## 17. Extension v2 — briques B et C (analyse d'un DCE, checklist de conformité)
+
+*Section ajoutée par le lot **L3** (implémentation de l'analyse de DCE). Le contenu de
+structure est celui de l'**annexe B du plan de phase 3** (`docs/PLAN-PHASE-3.md`),
+décision **gelée** prise à la racine de la phase : elle répond au constat **S2**
+(`docs/REVUE-SECURITE.md`), selon lequel les briques B et C n'avaient **aucune**
+représentation dans les sections 0 à 16 de ce document. Aucune section antérieure n'est
+modifiée ; les jeux de référence, conventions et invariants des § 3 et § 8 s'appliquent
+tels quels.*
+
+### 17.1 Pourquoi cette extension — et ce qu'elle ne fait pas
+
+Les sections 0 à 16 décrivent la bibliothèque d'entreprise (brique A) et la
+facturation. Rien n'y représente **un DCE déposé par l'utilisateur** ni **un élément
+extrait d'un document**, alors que la brique B (analyse) et la brique C (checklist) en
+ont besoin. Deux conséquences pratiques :
+
+- un DCE n'est **pas** une pièce de la bibliothèque : il appartient à l'acheteur ; il ne
+  peut donc pas exister sans fausser la bibliothèque, ce que le modèle d'origine lui
+  interdisait structurellement ;
+- un élément extrait par la machine doit porter **sa source** et rester **non vérifié**
+  jusqu'à ce qu'un humain nommé le valide : c'est la traduction technique de la ligne
+  rouge (§ 2 de ce document, et § 2 de `docs/SPEC-MVP-V2.md`).
+
+Cette extension **n'ajoute aucun prix, aucun seuil, aucune durée légale, aucune
+garantie de conformité**. Aucun de ces champs ne peut être alimenté par une valeur
+inventée.
+
+### 17.2 `document` — extension (migration `0003`)
+
+Le tableau § 9.1 reste valable, avec trois changements :
+
+| Champ | Type | Oblig. | Rôle |
+|---|---|---|---|
+| `nature` | `code_reference` `document.nature` | oui | **nouveau** — `piece_bibliotheque` (défaut) \| `dce` |
+| `entreprise_id` | `reference` `entreprise.id` | oui si `piece_bibliotheque` | devient **NULL-able** dans le schéma |
+| `fiche_version_id` | `reference` `fiche_version.id` | oui si `piece_bibliotheque` | devient **NULL-able** dans le schéma |
+| `consultation_id` | `reference` `consultation.id` | oui si `dce` | **nouveau** — rattachement au DCE déposé |
+
+**Invariant I7.**
+
+| # | Invariant | Contrôle attendu |
+|---|---|---|
+| I7 | `nature = piece_bibliotheque` ⇒ `entreprise_id` et `fiche_version_id` non nuls ; `nature = dce` ⇒ `consultation_id` non nul | compter les lignes de `document` qui ne respectent ni l'une ni l'autre branche — doit être 0 |
+
+Nuance assumée : un document de nature `dce` peut porter `entreprise_id` (l'espace de
+travail qui l'a déposé) mais **jamais** `fiche_version_id` — un DCE n'entre pas dans la
+version de fiche de l'entreprise. C'est ce que la contrainte de schéma impose.
+
+### 17.3 `consultation` — le DCE déposé et analysé
+
+| Champ | Type | Oblig. | Rôle |
+|---|---|---|---|
+| `id` | `identifiant` | oui | — |
+| `client_id` | `reference` `client.id` | oui | cloisonnement (§ 4) |
+| `entreprise_id` | `reference` `entreprise.id` | oui | l'entreprise qui répond |
+| `dossier_id` | `reference` `dossier.id` | non | rattachement à la facturation (D3, § 11.2) |
+| `libelle` | `texte_court` | oui | nom donné par l'entreprise |
+| `reference_consultation` | `texte_court` | non | **saisie par l'humain** ; l'outil ne va rien chercher |
+| `maitre_ouvrage_declare` | `texte_court` | non | **saisi par l'humain**, jamais déduit du document |
+| `statut` | `code_reference` `consultation.statut` | oui | `deposee` \| `analysee` \| `verifiee` \| `abandonnee` (défaut `deposee`) |
+| `date_creation`, `date_modification` | `horodatage` | oui | — |
+| `sensibilite` | `code_reference` `securite.sensibilite` | oui | défaut `interne` |
+| `statut_enregistrement` | `code_reference` `commun.statut_enregistrement` | oui | `actif` \| `archive` |
+
+`maitre_ouvrage_declare` est volontairement **déclaré** et non « lu » : la maîtrise
+d'ouvrage est une donnée d'engagement, elle n'est jamais présentée comme extraite.
+
+### 17.4 `extraction_element` — un élément proposé, puis vérifié par un humain
+
+| Champ | Type | Oblig. | Rôle |
+|---|---|---|---|
+| `id` | `identifiant` | oui | — |
+| `client_id` | `reference` `client.id` | oui | cloisonnement (§ 4) |
+| `consultation_id` | `reference` `consultation.id` | oui | — |
+| `categorie` | `code_reference` `consultation.categorie_element` | oui | `piece_exigee` \| `critere` \| `date_limite` |
+| `libelle` | `texte_long` | oui | l'élément **tel qu'extrait** |
+| `valeur` | `texte_long` | non | pondération, date ISO 8601, précision — **telle qu'écrite** au document |
+| `source_document_id` | `reference` `document.id` | **oui** | document de nature `dce` — **aucune valeur sans source** |
+| `source_emplacement` | `texte_court` | **oui** | page ou section (non vide : contrainte de schéma) |
+| `source_extrait` | `texte_long` | non | extrait **littéral** du document |
+| `confiance` | `code_reference` `tracabilite.confiance` | oui | valeur initiale `a_verifier` |
+| `statut_verification` | `code_reference` `consultation.statut_verification` | oui | `propose` \| `valide` \| `corrige` \| `supprime` |
+| `verificateur_nom` | `texte_court` | oui si `statut_verification` ∈ {`valide`, `corrige`} | saisi par l'humain (contrainte de schéma) |
+| `date_verification` | `horodatage` | non | posée automatiquement par l'action humaine |
+| `date_extraction` | `horodatage` | oui | — |
+| `moteur_fournisseur` | `texte_court` | non | ex. `factice`, `mistral`, `ovh` |
+| `moteur_modele` | `texte_court` | non | nom du modèle employé |
+| `date_creation`, `date_modification` | `horodatage` | oui | — |
+| `sensibilite`, `statut_enregistrement` | `code_reference` | oui | conformes à § 3.2 |
+
+**Verrou n° 2 (opposable).** Seul un élément dont `statut_verification = valide`
+alimente la checklist de la brique C. Un élément `propose` ne l'alimente **pas** ; un
+élément `corrige` non plus tant qu'il n'a pas été validé en l'état. Ce verrou est
+implémenté et testé par L3 (`analyse_dce.elements_valides`), puis consommé par L4.
+
+**Élément introuvable.** Une catégorie attendue dont le document ne dit rien est
+restituée avec la mention explicite « non trouvé dans le document », **sans ligne en
+base** : un « non trouvé » n'a pas de source, donc pas de source à valider. Il ne peut
+donc pas figurer dans `extraction_element`, dont les deux colonnes de source sont non
+nulles. Le vide n'est jamais comblé.
+
+**Ce que le schéma rend impossible.** Une valeur sans `source_document_id` ou sans
+`source_emplacement` ; une validation `valide`/`corrige` sans `verificateur_nom` ; un
+DCE sans `consultation_id`.
+
+### 17.5 `checklist_execution` — une exécution de la checklist (brique C)
+
+*Décrite ici pour que la structure soit connue de tous les lots ; elle est implémentée
+par la migration `0004` et le lot **L4**, qui sont seuls propriétaires de ces tables.*
+
+| Champ | Type | Oblig. | Rôle |
+|---|---|---|---|
+| `id` | `identifiant` | oui | — |
+| `client_id` | `reference` `client.id` | oui | cloisonnement |
+| `consultation_id` | `reference` `consultation.id` | oui | — |
+| `fiche_version_id` | `reference` `fiche_version.id` | oui | **quelle version de fiche a servi** |
+| `date_execution` | `horodatage` | oui | — |
+| `execute_par` | `texte_court` | oui | nom saisi par l'humain |
+| `nb_exigences` | `entier` | oui | — |
+| `nb_presentes` | `entier` | oui | — |
+| `nb_manquantes` | `entier` | oui | — |
+| `nb_a_verifier` | `entier` | oui | — |
+| `extraction_partielle` | `booleen` | oui | vrai si des éléments lus sont restés non validés |
+| `sensibilite`, `statut_enregistrement` | `code_reference` | oui | conformes à § 3.2 |
+
+`fiche_version_id` est obligatoire : une checklist n'a de sens que rapportée à **une**
+version de fiche, sinon le résultat n'est pas reproductible.
+
+### 17.6 `checklist_ligne` — une ligne de résultat (brique C)
+
+| Champ | Type | Oblig. | Rôle |
+|---|---|---|---|
+| `id` | `identifiant` | oui | — |
+| `client_id` | `reference` `client.id` | oui | cloisonnement |
+| `checklist_execution_id` | `reference` `checklist_execution.id` | oui | — |
+| `extraction_element_id` | `reference` `extraction_element.id` | oui | l'exigence comparée (donc **validée**) |
+| `libelle_piece` | `texte_court` | oui | l'exigence, telle que validée par l'humain |
+| `statut` | `code_reference` `checklist.statut_ligne` | oui | `presente` \| `manquante` \| `a_verifier` |
+| `justification` | `texte_long` | oui | la pièce de la bibliothèque qui satisfait l'exigence, ou la raison du manque |
+| `document_id` | `reference` `document.id` | non | renseigné **si et seulement si** `statut = presente` |
+| `date_creation`, `date_modification` | `horodatage` | oui | — |
+| `sensibilite`, `statut_enregistrement` | `code_reference` | oui | conformes à § 3.2 |
+
+**Invariant I8.**
+
+| # | Invariant | Contrôle attendu |
+|---|---|---|
+| I8 | une ligne `presente` référence **obligatoirement** un `document_id` du même `client_id` ; une ligne `manquante` ne référence **aucun** document | compter les lignes `presente` sans `document_id` (0) et les lignes `manquante` avec `document_id` (0) |
+
+Une correspondance incertaine est `a_verifier`, **jamais** `presente` : le produit ne
+garantit aucune conformité, il signale ce qu'il constate.
+
+### 17.7 Jeux de référence ajoutés
+
+| Namespace | Valeurs | Créé par |
+|---|---|---|
+| `document.nature` | `piece_bibliotheque`, `dce` | migration `0003` (L3) |
+| `consultation.statut` | `deposee`, `analysee`, `verifiee`, `abandonnee` | migration `0003` (L3) |
+| `consultation.categorie_element` | `piece_exigee`, `critere`, `date_limite` | migration `0003` (L3) |
+| `consultation.statut_verification` | `propose`, `valide`, `corrige`, `supprime` | migration `0003` (L3) |
+| `checklist.statut_ligne` | `presente`, `manquante`, `a_verifier` | attendu de la migration `0004` (L4) |
+
+`document.type_document` reste à alimenter : les valeurs seront ajoutées **par ajout de
+lignes**, sans migration destructive (§ 8.5), et toute valeur non adossée à une source
+documentaire porte `statut = a_verifier`.
+
+### 17.8 Récapitulatif des invariants de cette extension
+
+| # | Invariant | Vérifié par |
+|---|---|---|
+| I7 | cohérence `nature` ⇔ rattachements de `document` | contrainte de schéma (migration `0003`) |
+| I8 | cohérence `statut` ⇔ `document_id` des lignes de checklist | règle applicative + contrainte de schéma (migration `0004`) |
+| Verrou n° 2 | seul `statut_verification = valide` alimente la checklist | contrainte applicative, testée par L3 et L4 |
+
+Les invariants I1 à I6 (§ 3.4) restent valables et s'appliquent aux tables ci-dessus :
+`client_id` est non nul partout, et toute entité de contenu d'un client référence une
+racine du **même** client.
+
+---
+
+*Fin du modèle v2. Lot L3 — `dev-back`. Les sections 0 à 16 sont une conception sur le
+papier : aucun schéma appliqué, aucune migration écrite, aucun code produit par ce lot
+là. La section 17, ajoutée par le lot L3 de la phase 3, est la seule dont la structure
+est **implémentée** (migration `0003_analyse_dce.sql`, testée par le même lot). Toute
+évolution ultérieure de structure passe par une migration versionnée et réversible,
+jamais par une modification en place d'un schéma appliqué — et toute évolution de
+contenu de référence se fait par ajout de lignes, sans migration destructive (§ 8.5).*
