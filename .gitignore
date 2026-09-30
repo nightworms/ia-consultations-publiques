@@ -1,0 +1,27 @@
+# Ignorer les données locales et les secrets
+data/
+.env
+.env.*
+*.secret
+*.key
+*.pem
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+build/
+
+# OS
+.DS_Store
+
+# Divers
+*.log
+tmp/
+.cache/
