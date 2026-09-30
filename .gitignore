@@ -28,3 +28,9 @@ build/
 *.log
 tmp/
 .cache/
+
+# Documents de consultation recus (jamais versionnes : ce sont des pieces d'acheteurs,
+# pas des ressources du projet). Regle posee apres l'ajout accidentel d'un DCE reel
+# dans docs/ (decision D10).
+docs/Model de dossier de consultation/
+docs/*dossier*consultation*/

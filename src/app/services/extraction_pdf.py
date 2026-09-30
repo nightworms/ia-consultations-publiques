@@ -171,14 +171,30 @@ def nombre_de_pages(chemin: str | os.PathLike[str]) -> int:
 
 
 def _texte_page(chemin: Path, numero: int) -> str:
-    """Texte d'une seule page, via `pdftotext` (aucune concaténation de commande)."""
+    """Texte d'une seule page, via `pdftotext` (aucune concaténation de commande).
+
+    **`-layout` volontairement retiré** (correctif du 30/09/2026). Sur un vrai DCE de
+    la Commune de Saint-Denis (RC « régénération des pelouses des stades », 10 pages),
+    `-layout` recollait les colonnes d'un tableau sur une même ligne et **injectait
+    le libellé de la colonne voisine au milieu d'une phrase** :
+
+        source lue avec -layout : « …l'importance du **effectifs moyens et importance**
+                                     personnel d'encadrement… »
+
+    Le modèle citait la phrase correcte ; la vérification de source la rejetait, et
+    l'analyse entière échouait sur un document pourtant lisible. `pdftotext` sans
+    `-layout` restitue l'ordre de lecture et donne le texte attendu.
+
+    Conséquence à surveiller : sur une page réellement tabulaire, l'ordre de lecture
+    sans `-layout` peut mélanger les colonnes autrement. Le choix mérite d'être
+    réévalué par un agent sur plusieurs DCE réels, et non figé ici sur un seul cas.
+    """
     pdftotext = _exiger_outil("pdftotext")
     resultat = _executer(
         [
             pdftotext,
             "-f", str(numero),
             "-l", str(numero),
-            "-layout",
             "-enc", "UTF-8",
             str(chemin),
             "-",
