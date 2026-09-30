@@ -1,0 +1,18 @@
+DOCUMENT FICTIF — DÉMONSTRATION — PIÈCE DE BIBLIOTHÈQUE
+Aucun assureur réel. Pièce déjà présente dans la bibliothèque du jeu de
+démonstration (lot L7).
+================================================================================
+
+ATTESTATION D'ASSURANCE — FICTIF
+
+Assureur FICTIF : ASSURANCES-FICTIVES OCÉANE (compagnie entièrement inventée)
+Assuré : OCÉAN ÉTANCHÉITÉ (FICTIF)
+Type d'assurance : responsabilité civile professionnelle
+Numéro de contrat : FICTIF-RCP-2026-1188
+Date d'effet : 2026-01-01
+Date d'échéance : 2027-01-31
+Activités couvertes : travaux d'étanchéité et activités connexes.
+Montant de garantie : 800 000 EUR (FICTIF)
+
+================================================================================
+FIN DU DOCUMENT FICTIF.

@@ -1,0 +1,59 @@
+DOCUMENT FICTIF — DÉMONSTRATION
+Aucune donnée réelle d'entreprise. Document écrit pour le jeu de démonstration du
+projet ia-consultations-publiques (lot L7) ; il sert à montrer l'import guidé.
+================================================================================
+
+PLAQUETTE DE PRÉSENTATION — FICTIF
+
+Raison sociale : OCÉAN ÉTANCHÉITÉ (FICTIF)
+Forme juridique : SAS (société par actions simplifiée) — FICTIF
+Siège social : 14 rue des Alizés, ZA Fictive, 97000 Ville-Inventée (FICTIF)
+Téléphone : 0262 00 00 00 (numéro fictif de démonstration)
+Courriel : contact@ocean-etancheite.exemple.invalid
+Site : non renseigné
+Code APE/NAF : 4391B — Travaux d'étanchéification (FICTIF)
+Effectif : 24 personnes
+Date de création : 2011-04-18 (FICTIF)
+Capital social : 90 000 EUR (FICTIF)
+SIREN : 000 000 000 (FICTIF)
+SIRET du siège : 000 000 000 00000 (FICTIF)
+
+ACTIVITÉS
+
+Étanchéité de toitures-terrasses, relevés d'étanchéité et points singuliers ;
+étanchéité de toitures en pente ; travaux d'étanchéité en site occupé ; pose de
+membranes bitumineuses et de membranes synthétiques ; reprise de joints de
+dilatation ; protection gravillonnée et autoprotection.
+
+QUALIFICATIONS ET CERTIFICATIONS
+
+Qualification « étanchéité de toitures-terrasses » — organisme certificateur
+FICTIF O.C.F.E. (organisme fictif), numéro CERT-FICTIF-2021-0457, obtenue le 2021-09-01.
+
+ASSURANCES
+
+Assurance responsabilité civile décennale, assureur FICTIF ASSURANCES-FICTIVES OCÉANE, police
+FICTIF-RCD-2026-1187.
+Assurance responsabilité civile professionnelle, assureur FICTIF ASSURANCES-FICTIVES OCÉANE,
+police FICTIF-RCP-2026-1188.
+
+MOYENS HUMAINS
+
+Quatre équipes d'étanchéité de deux compagnons, encadrées par deux chefs
+d'équipe ; un conducteur de travaux ; un responsable qualité-sécurité.
+
+MOYENS MATÉRIELS
+
+Une camionnette atelier, un camion-benne, deux nacelles élévatrices, un groupe
+d'étanchéité à air chaud, un monte-charge de chantier, un groupe électrogène.
+
+RÉFÉRENCES (résumé — voir la bibliothèque pour le détail)
+
+Réfection de l'étanchéité des toitures-terrasses du groupe scolaire FICTIF « Les
+Filaos », 2024, montant 412 000 EUR.
+Étanchéité de toiture-terrasse du collège FICTIF « Les Alizés », 2022, montant
+268 000 EUR.
+Étanchéité de bâtiments administratifs FICTIFS en site occupé, 2023, 195 000 EUR.
+
+================================================================================
+FIN DU DOCUMENT FICTIF — plaquette de présentation (démonstration L7).

@@ -1,0 +1,31 @@
+DOCUMENT FICTIF — DÉMONSTRATION
+Aucune donnée réelle d'entreprise, aucun assureur réel. Document écrit pour le jeu
+de démonstration du projet ia-consultations-publiques (lot L7) ; il sert à montrer
+l'import guidé d'une attestation.
+================================================================================
+
+ATTESTATION D'ASSURANCE — FICTIF
+
+Assureur FICTIF : ASSURANCES-FICTIVES OCÉANE (compagnie entièrement inventée)
+Assuré : OCÉAN ÉTANCHÉITÉ (FICTIF)
+Numéro de contrat : FICTIF-RCD-2026-1187
+
+Le présent document atteste que l'assuré nommé ci-dessus est couvert par un
+contrat d'assurance responsabilité civile décennale.
+
+Type d'assurance : responsabilité civile décennale
+Assureur : ASSURANCES-FICTIVES OCÉANE (FICTIF)
+Numéro de contrat : FICTIF-RCD-2026-1187
+Date d'effet : 2026-01-01
+Date d'échéance : 2026-10-15
+Activités couvertes : étanchéité de toitures-terrasses, relevés et points
+singuliers, travaux d'étanchéité en site occupé.
+Montant de garantie : 1 500 000 EUR (FICTIF)
+
+AVERTISSEMENT
+
+Cette attestation est fictive. Elle ne peut être produite devant aucun maître
+d'ouvrage. Le numéro de contrat, l'assureur et les montants sont inventés.
+
+================================================================================
+FIN DU DOCUMENT FICTIF — attestation d'assurance (démonstration L7).

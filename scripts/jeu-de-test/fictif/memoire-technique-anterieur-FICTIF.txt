@@ -1,0 +1,46 @@
+DOCUMENT FICTIF — DÉMONSTRATION
+Aucune donnée réelle d'entreprise. Document écrit pour le jeu de démonstration du
+projet ia-consultations-publiques (lot L7) ; il sert à montrer l'import guidé d'un
+ancien mémoire technique.
+================================================================================
+
+MÉMOIRE TECHNIQUE ANTÉRIEUR — EXTRAIT FICTIF
+Entreprise : OCÉAN ÉTANCHÉITÉ (FICTIF)
+Objet du chantier d'origine (FICTIF) : réfection de l'étanchéité des
+toitures-terrasses du groupe scolaire FICTIF « Les Filaos ».
+
+1. COMPRÉHENSION DE L'OPÉRATION
+
+L'opération porte sur la réfection complète de l'étanchéité de toitures-terrasses
+de bâtiments scolaires en service. Les travaux sont réalisés en site occupé, par
+phases, pendant les périodes de vacances scolaires afin de ne pas interrompre
+l'accueil des élèves.
+
+2. MÉTHODE D'EXÉCUTION
+
+Décapage de l'ancienne étanchéité et de la protection gravillonnée, évacuation
+des gravats, contrôle du support, réparation des supports dégradés, pose d'un
+complexe d'étanchéité bitumineux, reprise des relevés d'étanchéité et traitement
+des points singuliers : émergences, pénétrations, descentes d'eaux pluviales,
+joints de dilatation.
+
+3. MOYENS AFFECTÉS
+
+Trois équipes d'étanchéité, un chef d'équipe par équipe, un conducteur de
+travaux à temps partiel, une nacelle élévatrice, un groupe d'étanchéité à air
+chaud, un camion-benne.
+
+4. PLANNING
+
+Travaux réalisés en trois phases de quatre semaines, calées sur les vacances
+scolaires, pour une durée totale de quatorze semaines, site restant occupé entre
+les phases.
+
+5. SÉCURITÉ ET ENVIRONNEMENT
+
+Plan particulier de sécurité et de protection de la santé adapté à un site
+scolaire occupé, balisage des zones, protection des accès, gestion des déchets
+de chantier par filière agréée.
+
+================================================================================
+FIN DU DOCUMENT FICTIF — mémoire technique antérieur (démonstration L7).
