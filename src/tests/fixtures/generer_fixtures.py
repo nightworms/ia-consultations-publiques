@@ -6,7 +6,12 @@ les tests de la brique B :
 * `dce_fictif.pdf` — le DCE fictif, texte sélectionnable, une page par article ;
 * `dce_fictif_sans_date.pdf` — variante sans date limite ni critère ;
 * `dce_fictif_scanne.pdf` — la **variante « scannée »** : chaque page est une
-  **image** (aucune couche texte), pour exercer réellement le chemin OCR.
+  **image** (aucune couche texte), pour exercer réellement le chemin OCR ;
+* `dce_fictif_deux_colonnes.pdf` — une page à **colonne latérale** : les libellés
+  posés à droite sont sur la même ligne de base que le corps de texte. Cette
+  disposition est celle qui a fait échouer `pdftotext -layout` en production (voir
+  `src/tests/test_extraction_pdf_non_regression.py`) ; la fixture est définie ici,
+  en code, parce qu'un simple fichier `.txt` ne sait pas exprimer une mise en page.
 
 Le texte PDF est écrit par un petit générateur PDF de la bibliothèque standard
 (Helvetica, encodage WinAnsi) ; la variante scannée est obtenue en rasterisant ce
@@ -246,8 +251,82 @@ def ecrire_pdf_scanne(pdf_source: Path, chemin: Path) -> None:
         chemin.write_bytes(pdf.rendre(racine))
 
 
+# --------------------------------------------------------------------------- #
+# Fixture « deux colonnes » : le cas qui a motivé le retrait de `-layout`
+# --------------------------------------------------------------------------- #
+MENTION_FICTIF = "DOCUMENT FICTIF — DEMONSTRATION — AUCUNE DONNEE REELLE"
+
+#: Corps de texte, posé en colonne de gauche. La phrase qui suit est celle du cas réel.
+CORPS_DEUX_COLONNES = (
+    "Le candidat doit justifier de l'importance du",
+    "personnel d'encadrement affecte au chantier,",
+    "notamment pour la maitrise des delais.",
+)
+
+#: Colonne latérale : (indice d'une ligne du corps, libellé) posé **à droite, sur la
+#: même ligne de base**. C'est ce voisinage que `pdftotext -layout` recolle au milieu
+#: de la phrase du corps.
+COLONNE_DROITE_DEUX_COLONNES = (
+    (0, "Effectifs moyens et importance"),
+    (1, "Personnel d'encadrement"),
+)
+
+#: Abscisse de la colonne latérale (points).
+COLONNE_X = 360
+
+
+def ecrire_pdf_deux_colonnes(chemin: Path) -> None:
+    """Écrit une page A4 à deux colonnes, avec la bibliothèque standard seule.
+
+    Corps en colonne de gauche, libellés de tableau en colonne de droite sur les
+    mêmes lignes de base. **Cette fixture est une mise en page, pas un texte** : elle
+    est décrite en code plutôt que dans un `.txt` (voir `ecrire_pdf_texte`).
+    """
+    pdf = _Pdf()
+    police = pdf.ajouter(
+        b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"
+    )
+    pdf.ajouter(b"")  # objet 2 réservé : /Pages (doit exister avant les pages)
+
+    blocs: list[tuple[int, int, str]] = [(MARGE_GAUCHE, MARGE_HAUTE, MENTION_FICTIF)]
+    y_corps = MARGE_HAUTE - 2 * INTERLIGNE
+    for indice, ligne in enumerate(CORPS_DEUX_COLONNES):
+        blocs.append((MARGE_GAUCHE, y_corps - indice * INTERLIGNE, ligne))
+    for indice, libelle in COLONNE_DROITE_DEUX_COLONNES:
+        blocs.append((COLONNE_X, y_corps - indice * INTERLIGNE, libelle))
+
+    flux = bytearray()
+    for x, y, texte in blocs:
+        # Un bloc de texte par ligne : la recomposition est laissée à `pdftotext`,
+        # qui se comporte différemment selon qu'il reçoit `-layout` ou non.
+        flux += (
+            b"BT\n"
+            + f"/F1 {CORPS} Tf 1 0 0 1 {x} {y} Tm ".encode("ascii")
+            + b"("
+            + _echapper(texte)
+            + b") Tj\nET\n"
+        )
+
+    contenu = pdf.ajouter(
+        f"<< /Length {len(flux)} >>\nstream\n".encode("ascii")
+        + bytes(flux)
+        + b"endstream"
+    )
+    numero_page = pdf.ajouter(
+        (
+            f"<< /Type /Page /Parent 2 0 R "
+            f"/MediaBox [0 0 {LARGEUR_PAGE} {HAUTEUR_PAGE}] "
+            f"/Resources << /Font << /F1 {police} 0 R >> >> "
+            f"/Contents {contenu} 0 R >>"
+        ).encode("ascii")
+    )
+    pdf.remplacer(2, f"<< /Type /Pages /Kids [{numero_page} 0 R] /Count 1 >>".encode("ascii"))
+    racine = pdf.ajouter(b"<< /Type /Catalog /Pages 2 0 R >>")
+    chemin.write_bytes(pdf.rendre(racine))
+
+
 def generer_tout() -> list[Path]:
-    """Régénère les trois PDF fictifs. Renvoie les chemins écrits."""
+    """Régénère les quatre PDF fictifs. Renvoie les chemins écrits."""
     produits: list[Path] = []
     for nom_texte, nom_pdf in (
         ("dce_fictif.txt", "dce_fictif.pdf"),
@@ -262,6 +341,10 @@ def generer_tout() -> list[Path]:
     scanne = ICI / "dce_fictif_scanne.pdf"
     ecrire_pdf_scanne(ICI / "dce_fictif.pdf", scanne)
     produits.append(scanne)
+
+    deux_colonnes = ICI / "dce_fictif_deux_colonnes.pdf"
+    ecrire_pdf_deux_colonnes(deux_colonnes)
+    produits.append(deux_colonnes)
     return produits
 
 
