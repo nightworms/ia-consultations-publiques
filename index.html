@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IA Consultations Publiques — aide à la réponse aux appels d'offres</title>
+<meta name="description" content="Renseignez votre entreprise une fois. L'outil lit le dossier de consultation et produit un mémoire technique pré-rempli, en signalant ce qui vous manque.">
+<style>
+:root{
+  --encre:#16202b; --encre-2:#4a5768; --fond:#f2f4f7; --carte:#ffffff;
+  --bord:#c9d2dc; --bandeau:#0d3554; --accent:#14507a;
+  --ok-f:#125c37; --ok-bg:#e6f4ec;
+  --att-f:#7a4f00; --att-bg:#fdf3e0;
+  --non-f:#9b2c12; --non-bg:#fdeee9;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--fond); color:var(--encre);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.65;
+}
+.enveloppe{max-width:780px; margin:0 auto; padding:0 22px}
+header{background:var(--bandeau); color:#fff; padding:46px 0 40px}
+header h1{margin:0 0 12px; font-size:1.85rem; line-height:1.25; letter-spacing:-.01em}
+header p{margin:0; color:#dbe6f1; font-size:1.06rem; max-width:60ch}
+main{padding:44px 0 20px}
+section{margin:0 0 34px}
+h2{font-size:1.16rem; margin:0 0 12px; letter-spacing:-.005em}
+p{margin:0 0 14px}
+a{color:var(--accent)}
+a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+.carte{background:var(--carte); border:1px solid var(--bord); border-radius:10px; padding:20px 22px}
+.carte + .carte{margin-top:14px}
+.briques{margin:0; padding:0; list-style:none}
+.briques li{border-left:3px solid var(--bord); padding:2px 0 2px 16px; margin:0 0 16px}
+.briques li:last-child{margin-bottom:0}
+.briques strong{display:block; margin-bottom:2px}
+.briques span{color:var(--encre-2)}
+.etat{display:inline-block; font-size:.82rem; font-weight:600; padding:3px 9px;
+      border-radius:999px; border:1px solid transparent; white-space:nowrap}
+.etat-ok{color:var(--ok-f); background:var(--ok-bg); border-color:var(--ok-f)}
+.etat-att{color:var(--att-f); background:var(--att-bg); border-color:var(--att-f)}
+.etat-non{color:var(--non-f); background:var(--non-bg); border-color:var(--non-f)}
+table{border-collapse:collapse; width:100%; font-size:.96rem}
+th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--bord); vertical-align:top}
+th{font-size:.84rem; text-transform:uppercase; letter-spacing:.04em; color:var(--encre-2)}
+td:last-child{text-align:right}
+.cle{margin-top:6px; padding:14px 18px; background:var(--carte);
+     border:1px solid var(--bord); border-left:4px solid var(--accent); border-radius:8px}
+.cle p{margin:0}
+footer{color:var(--encre-2); font-size:.9rem; padding:26px 0 46px; border-top:1px solid var(--bord); margin-top:14px}
+footer p{margin:0 0 6px}
+@media (max-width:520px){
+  header h1{font-size:1.5rem}
+  td:last-child{text-align:left}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="enveloppe">
+    <h1>IA Consultations Publiques</h1>
+    <p>Renseignez votre entreprise une fois. L'outil lit le dossier de consultation
+       et produit un mémoire technique pré-rempli — en signalant ce qui vous manque.</p>
+  </div>
+</header>
+
+<main class="enveloppe">
+
+  <section>
+    <h2>Le problème</h2>
+    <p>Répondre à une consultation publique coûte un temps considérable à une entreprise,
+       pour un taux de réussite faible. Chaque dossier demande de lire un DCE de plusieurs
+       dizaines de pages, de comprendre les critères d'attribution, de réunir les pièces
+       administratives, de rédiger un mémoire technique réécrit à chaque fois, et de
+       vérifier la conformité avant remise.</p>
+  </section>
+
+  <section>
+    <h2>Ce que fait l'outil</h2>
+    <ul class="briques">
+      <li>
+        <strong>1. Bibliothèque d'entreprise</strong>
+        <span>Vos références, moyens humains, certifications et attestations, saisies une
+              fois et structurées. Elles resservent à chaque réponse.</span>
+      </li>
+      <li>
+        <strong>2. Lecture du dossier de consultation</strong>
+        <span>Pièces exigées, critères pondérés, date limite — chaque élément extrait
+              porte l'extrait du document qui le justifie.</span>
+      </li>
+      <li>
+        <strong>3. Mémoire technique argumenté</strong>
+        <span>Une section par critère, chaque affirmation rattachée à un élément de votre
+              bibliothèque. Relu, corrigé et signé par vous.</span>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Ce qui distingue l'outil</h2>
+    <div class="cle">
+      <p>Un mémoire qui se contente de valoriser ce que vous avez ne fait pas gagner un marché.
+         L'outil dit aussi <strong>ce qui manque</strong> : pour chaque critère non couvert par
+         votre bibliothèque, il indique la pièce ou l'information à fournir pour y répondre.</p>
+    </div>
+    <p style="margin-top:14px">Aucun contenu n'est inventé. Le modèle propose, vous validez :
+       chaque élément extrait est présenté comme une proposition à vérifier, et une citation
+       introuvable dans le document source est refusée par l'outil plutôt qu'acceptée.</p>
+  </section>
+
+  <section>
+    <h2>État du projet</h2>
+    <div class="carte">
+      <table>
+        <caption class="etat etat-att" style="caption-side:top; margin-bottom:14px">
+          Projet en développement — pas encore ouvert
+        </caption>
+        <thead>
+          <tr><th scope="col">Fonction</th><th scope="col">État</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Bibliothèque d'entreprise</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
+          <tr><td>Lecture du dossier de consultation</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
+          <tr><td>Mémoire technique</td><td><span class="etat etat-att">en correction</span></td></tr>
+          <tr><td>Import guidé des documents</td><td><span class="etat etat-att">en correction</span></td></tr>
+          <tr><td>Lisibilité des écrans</td><td><span class="etat etat-att">en correction</span></td></tr>
+        </tbody>
+      </table>
+      <p style="margin:16px 0 0; color:var(--encre-2); font-size:.94rem">
+        Le socle fonctionne de bout en bout sur un dossier de consultation réel. Les trois
+        points marqués « en correction » ont été recalés par une vérification indépendante et
+        sont en cours de reprise — ils ne sont pas annoncés comme tenus avant d'être re-testés.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Périmètre</h2>
+    <p>L'outil s'adresse aux <strong>entreprises</strong> qui répondent à des marchés publics,
+       tous corps de métier. L'acheteur public est hors périmètre. Les données de l'entreprise
+       et les dossiers déposés lui appartiennent ; l'hébergement visé est en France.</p>
+  </section>
+
+  <section>
+    <h2>Aller plus loin</h2>
+    <p>Le cadrage, les décisions de conception et les documents techniques sont publics :
+       <a href="https://github.com/nightworms/ia-consultations-publiques">dépôt GitHub du projet</a>.</p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="enveloppe">
+    <p>IA Consultations Publiques — projet en développement.</p>
+    <p>Page sans script, sans police distante et sans ressource externe.</p>
+  </div>
+</footer>
+
+</body>
+</html>
