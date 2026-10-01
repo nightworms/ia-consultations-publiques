@@ -1,32 +1,47 @@
 {% extends "base.html" %}
 {% block titre %}Connexion{% endblock %}
 {% block contenu %}
-<h2>Connexion</h2>
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Connectez-vous à votre espace</h1>
+    <p class="sous-titre">Votre bibliothèque d'entreprise et vos dossiers de
+       consultation, au même endroit.</p>
+  </div>
+</div>
 
 {% if erreur %}
-<div class="message message-erreur" role="alert">{{ erreur }}</div>
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">Connexion refusée</p>
+  <p>{{ erreur }}</p>
+  <p>Vérifiez l'identifiant et le mot de passe, puis réessayez.</p>
+</div>
 {% endif %}
 
-<div class="carte">
+<div class="carte" style="max-width:32rem">
   <form method="post" action="/connexion">
     <div class="champ">
       <label for="identifiant">Identifiant</label>
-      <input type="text" id="identifiant" name="identifiant" autocomplete="username" required>
+      <input type="text" id="identifiant" name="identifiant"
+             autocomplete="username" required>
     </div>
     <div class="champ">
       <label for="mot_de_passe">Mot de passe</label>
-      <input type="password" id="mot_de_passe" name="mot_de_passe" autocomplete="current-password" required>
+      <input type="password" id="mot_de_passe" name="mot_de_passe"
+             autocomplete="current-password" required>
     </div>
     <div class="actions">
-      <button type="submit">Ouvrir la session</button>
+      <button type="submit" class="btn btn--principal btn--action">Se connecter</button>
     </div>
   </form>
+  <details class="pourquoi">
+    <summary>Pourquoi je ne peux pas créer mon compte ici&nbsp;?</summary>
+    <div class="reponse">
+      <p>Le compte est ouvert par la personne qui installe le service pour
+         vous. Cette page ne crée aucun compte et ne réinitialise aucun mot de
+         passe.</p>
+      <p>Vous avez perdu votre mot de passe&nbsp;? Demandez à votre contact de
+         vous en ouvrir un nouveau.</p>
+    </div>
+  </details>
 </div>
-
-<p class="aide">
-  Le compte est créé par l'exploitant
-  (<code>scripts/provisionnement.py</code>), jamais depuis cette interface :
-  aucune inscription spontanée, aucune réinitialisation de mot de passe
-  (annexe C § C2, hors périmètre de la phase 3).
-</p>
 {% endblock %}

@@ -1,0 +1,30 @@
+POST /connexion -> 303 Location=/accueil
+cookie de session posé : oui (valeur non affichée)
+== 1. export AVANT toute validation nommee ==
+   format=md -> HTTP 409 | 522 octets | entete empreinte=None
+   corps : Le mémoire doit d'abord être validé / =================================== /  / Le mémoire doit d'abord être relu et validé par une personne nommée. Rien ne sort sans relecture humaine : 
+   format=docx -> HTTP 409 | 522 octets | entete empreinte=None
+   corps : Le mémoire doit d'abord être validé / =================================== /  / Le mémoire doit d'abord être relu et validé par une personne nommée. Rien ne sort sans relecture humaine : 
+
+== 2. validation d'une seule section (statut_section_memoire) ==
+   POST relire section 1 -> 303 /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire?ok=section_relue
+   statuts sections : [(0, 'relue'), (1, 'brouillon'), (2, 'brouillon'), (3, 'brouillon'), (4, 'brouillon'), (5, 'brouillon')]
+
+== 3. validation du memoire alors que 5 sections restent en brouillon ==
+   POST validation -> 303 | /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire?erreur=5%20section%28s%29%20encore%20en%20brouillon%20%3A%20relisez%20chaque%20section%20avant%20de%20valider%20le%20m%C3%A9moire%20%28brouillon%20%E2%86%92%20relue%20%E2%86%92%20validee%29.
+   statut du dossier : ('en_relecture',)
+   lignes memoire_validation : 0
+
+== 4. toutes les sections relues, puis validation nommee ==
+   POST validation -> 303 | /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire?ok=memoire_valide
+   statut du dossier : ('valide',)
+   validation enregistree : ('QA L8 — vérification indépendante', 'Verification independante', datetime.datetime(2026, 9, 30, 19, 49, 8, 98913, tzinfo=zoneinfo.ZoneInfo(key='Indian/Reunion')), 'c89db700346d294c', None, None)
+
+== 5. export apres validation ==
+   format=md -> HTTP 200 | 29610 octets | attachment; filename="memoire-technique-fictif-refection-etancheite-toitures-terra.md"; filename*=UTF-8''memoire-technique-fictif-refection-etancheite-toitures-terra.md | empreinte=c89db700346d294cae373fa9b7d995f63f2b9c8a427884263ddfc8956b4094ce
+   fichier ecrit : /Users/pause/.hermes/profiles/qa/cache/scratch/export-qa-l8.md
+   format=docx -> HTTP 200 | 40068 octets | attachment; filename="memoire-technique-fictif-refection-etancheite-toitures-terra.docx"; filename*=UTF-8''memoire-technique-fictif-refection-etancheite-toitures-terra.docx | empreinte=c89db700346d294cae373fa9b7d995f63f2b9c8a427884263ddfc8956b4094ce
+   fichier ecrit : /Users/pause/.hermes/profiles/qa/cache/scratch/export-qa-l8.docx
+
+== 6. format inconnu ==
+   format=pdf -> 400 | Format d'export inconnu / ======================= /  / Format d'export inconnu : 'pdf'. Formats admis : md, docx (Markdown = format canonique). /  / Revenir à la liste de

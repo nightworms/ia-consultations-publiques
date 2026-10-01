@@ -1,0 +1,60 @@
+== Contrôle B2 — mémoire technique, jeu L7 (fictif), base ia_consultations_b2demo ==
+Consultation : df1d658a-5f6a-407c-9545-69997826f609
+
+--- 1. Sections et manques écrits en base ---
+SELECT titre, critere_libelle, critere_poids, length(contenu), (sources) FROM memoire_section ORDER BY ordre;
+ ordre |                            titre                             |                       critere_libelle                        | critere_poids | longueur_contenu | sources 
+-------+--------------------------------------------------------------+--------------------------------------------------------------+---------------+------------------+---------
+     0 | Étanchéité de toitures-terrasses sur bâtiments scolaires     | Étanchéité de toitures-terrasses sur bâtiments scolaires     |         40.00 |             5317 |      19
+     1 | Traitement des relevés d'étanchéité et des points singuliers | Traitement des relevés d'étanchéité et des points singuliers |         20.00 |             3901 |      19
+     2 | Exécution en site occupé et planning par phases              | Exécution en site occupé et planning par phases              |         15.00 |             2566 |      10
+     3 | Moyens humains et matériels affectés au marché               | Moyens humains et matériels affectés au marché               |         10.00 |             1570 |      11
+     5 | Délai d'exécution et engagement de planning                  | Délai d'exécution et engagement de planning                  |          5.00 |             1829 |      10
+(5 rows)
+
+SELECT count(*) FROM memoire_manque;  -- attendu : 1 (avant correction : 0)
+ nb_manques 
+------------
+          1
+(1 row)
+
+
+--- 2. Le manque du critère à 10 % : constat et action à mener ---
+                critere_libelle                | critere_poids |                                                                                                  constat                                                                                                   |                                                       action_attendue                                                       
+-----------------------------------------------+---------------+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------
+ Expérience en toitures-terrasses végétalisées |         10.00 | Aucun élément de votre bibliothèque ne porte « végétalisées » : le sujet du critère n'est pas couvert. Le mémoire ne peut pas présenter une expérience ou un moyen que votre bibliothèque ne démontre pas. | Ajouter un chantier comparable (nature de travaux, maître d'ouvrage, montant € HT, année de réception, difficulté traitée).
+(1 row)
+
+
+--- 3. Contre-épreuve : aucune référence ne porte « végétalisé » ---
+SELECT count(*) FROM reference_chantier WHERE (intitule_operation || ' ' || coalesce(description,'') || ' ' || coalesce(competences_appliquees,'')) ILIKE '%végétalis%';
+ references_vegetalisees 
+-------------------------
+                       0
+(1 row)
+
+La référence du critère lourd (40 %) porte bien le vocabulaire de SON critère :
+                  id                  |                                     intitule_operation                                     |      nature_travaux_libelle      
+--------------------------------------+--------------------------------------------------------------------------------------------+----------------------------------
+ d0000000-0000-4000-8000-000000000901 | FICTIF — Réfection de l'étanchéité des toitures-terrasses — groupe scolaire « Les Filaos » | Étanchéité de toitures-terrasses
+ d0000000-0000-4000-8000-000000000904 | FICTIF — Réfection d'étanchéité — école « Roche-Plate »                                    | Étanchéité de toitures-terrasses
+(2 rows)
+
+
+--- 4. Chaque section est sourcée (aucune section sans memoire_section_source) ---
+ sections_sans_source 
+----------------------
+                    0
+(1 row)
+
+
+--- 5. La trace de correspondance est écrite dans le contenu des sections ---
+ ordre |                       critere_libelle                        | trace_presente 
+-------+--------------------------------------------------------------+----------------
+     0 | Étanchéité de toitures-terrasses sur bâtiments scolaires     | t
+     1 | Traitement des relevés d'étanchéité et des points singuliers | t
+     2 | Exécution en site occupé et planning par phases              | t
+     3 | Moyens humains et matériels affectés au marché               | t
+     5 | Délai d'exécution et engagement de planning                  | t
+(5 rows)
+

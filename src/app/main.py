@@ -17,13 +17,7 @@ from typing import AsyncIterator, Dict
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
-from app.api import (
-    routes_analyse,
-    routes_authentification,
-    routes_bibliotheque,
-    routes_checklist,
-    routes_provisionnement,
-)
+from app.api import routes
 from app.config import charger_config
 from app.web import routes_web
 
@@ -48,11 +42,10 @@ app = FastAPI(
     lifespan=cycle_de_vie,
 )
 
-app.include_router(routes_authentification.router)
-app.include_router(routes_analyse.router)
-app.include_router(routes_bibliotheque.router)
-app.include_router(routes_provisionnement.router)
-app.include_router(routes_checklist.router)
+# Routeurs JSON de l'API `/api/v1` — agrégés par `app.api.routes` (un seul écrivain
+# par fichier : un lot ajoute sa ligne dans `routes.ROUTEURS_API`, pas ici).
+for _routeur in routes.ROUTEURS_API:
+    app.include_router(_routeur)
 
 # Écrans HTML rendus côté serveur (annexe A § A8) et leur feuille de style.
 # Aucune route `/api/v1` n'est créée ni modifiée ici : les écrans appellent les
@@ -63,6 +56,13 @@ app.mount(
     StaticFiles(directory=str(routes_web.REPERTOIRE_STATIQUE)),
     name="statique",
 )
+
+# Adresse inconnue : la page d'erreur du produit plutôt que le `{"detail":"Not Found"}`
+# par défaut de FastAPI (critère 6 du plan de phase 4, point 4 de la carte t_ebbaac86).
+# Un gestionnaire d'exception s'enregistre sur l'application, pas sur un routeur : c'est
+# la seule ligne que l'écran ne peut pas poser lui-même. Le préfixe d'API et les fichiers
+# statiques gardent leur réponse JSON d'origine (le gestionnaire les laisse passer).
+app.add_exception_handler(404, routes_web.gestionnaire_404)
 
 
 @app.get("/")

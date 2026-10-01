@@ -1,9 +1,38 @@
 {% extends "base.html" %}
-{% block titre %}Erreur {{ code }}{% endblock %}
+{% block titre %}{{ titre_erreur }}{% endblock %}
 {% block contenu %}
-<h2>Erreur {{ code }}</h2>
-<div class="message message-erreur" role="alert">
-  <p>{{ message }}</p>
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>{{ titre_erreur }}</h1>
+    <p class="sous-titre">{{ sous_titre_erreur }}</p>
+  </div>
+  <div class="entete-ecran__action">
+    {% if identite %}
+    <a class="btn btn--principal btn--action" href="/accueil">Revenir à l'accueil</a>
+    {% else %}
+    <a class="btn btn--principal btn--action" href="/connexion">Aller à la connexion</a>
+    {% endif %}
+  </div>
 </div>
-<p><a href="/bibliotheque">Retour à la bibliothèque</a> — <a href="/consultations">Consultations</a></p>
+
+<div class="carte">
+  <h2 class="carte__titre">Ce qui s'est passé</h2>
+  <p>{{ message }}</p>
+  <h3>Ce que vous pouvez faire</h3>
+  <ul>
+    <li>reprendre depuis l'accueil et recommencer ce que vous faisiez&nbsp;;</li>
+    <li>ouvrir votre bibliothèque ou vos dossiers par la barre du haut&nbsp;;</li>
+    <li>si vous êtes arrivé ici depuis un lien de l'outil, signalez-le&nbsp;: c'est un défaut à corriger.</li>
+  </ul>
+</div>
+
+{% if message_technique %}
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Code de réponse&nbsp;: <code>{{ code }}</code></p>
+    <p>Détail&nbsp;: <code>{{ message_technique }}</code></p>
+  </div>
+</details>
+{% endif %}
 {% endblock %}

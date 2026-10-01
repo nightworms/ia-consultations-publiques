@@ -28,7 +28,7 @@ from __future__ import annotations
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Mapping, Optional, Sequence
 
 from app.services.extraction_pdf import ExtractionPdf, PageExtraite
 
@@ -161,6 +161,93 @@ def verifier_propositions(
     return tuple(retenues)
 
 
+# --------------------------------------------------------------------------- #
+# Import guidé — même mécanique de source, cible différente
+# --------------------------------------------------------------------------- #
+
+MENU_ENTITES_VIDE = "Aucune entité cible connue pour cet import."
+
+
+@dataclass(frozen=True)
+class PropositionImport:
+    """Un élément de bibliothèque proposé à partir d'un document déjà détenu.
+
+    Même contrat que `PropositionElement` — **source obligatoire**, `source_extrait`
+    retrouvé littéralement dans le texte extrait — mais la cible n'est pas une
+    catégorie de DCE : c'est une **entité de la bibliothèque** (`app.domain.familles`),
+    décrite par les champs proposés. Le fournisseur ne voit que le texte extrait,
+    jamais le fichier (même règle que l'analyse de DCE).
+    """
+
+    entite_cible: str
+    champs_proposes: Mapping[str, str]
+    source_emplacement: str
+    source_extrait: str
+    libelle: Optional[str] = None
+
+
+def verifier_propositions_import(
+    propositions: Sequence[PropositionImport],
+    pages: Sequence[PageExtraite],
+    *,
+    entites_admises: Sequence[str],
+) -> tuple[PropositionImport, ...]:
+    """Applique aux propositions d'import les **mêmes règles opposables** qu'à un DCE.
+
+    Réutilise `source_presente` tel quel (l'extrait doit se retrouver littéralement
+    dans le texte extrait). Seule la liste des cibles change : ici ce sont des entités
+    de bibliothèque, non les trois catégories de DCE — d'où cette variante plutôt que
+    `verifier_propositions`, dont le garde-fou de catégorie est propre au DCE. Les
+    trois contrôles sont identiques : cible connue, champs non vides, source
+    vérifiable. Aucune proposition n'est « réparée » ni complétée.
+    """
+    admises = tuple(entites_admises)
+    retenues: list[PropositionImport] = []
+    for proposition in propositions:
+        if not proposition.entite_cible or proposition.entite_cible not in admises:
+            raise ReponseModeleInvalide(
+                f"Entité cible hors périmètre : {proposition.entite_cible!r}. "
+                f"Entités admises : {', '.join(admises) or MENU_ENTITES_VIDE}.",
+                categorie=proposition.entite_cible,
+            )
+        champs = proposition.champs_proposes
+        if not isinstance(champs, Mapping) or not champs:
+            raise ReponseModeleInvalide(
+                "Proposition sans champ : refusée (rien à enregistrer).",
+                categorie=proposition.entite_cible,
+            )
+        for champ, valeur in champs.items():
+            if not str(champ).strip() or valeur is None or not str(valeur).strip():
+                raise ReponseModeleInvalide(
+                    f"Champ vide ou sans valeur ({champ!r}) : refusé — aucune valeur "
+                    "sans source n'est acceptée.",
+                    categorie=proposition.entite_cible,
+                )
+        if not proposition.source_emplacement or not proposition.source_emplacement.strip():
+            raise ReponseModeleInvalide(
+                "Proposition sans emplacement source : refusée (aucune valeur sans source).",
+                categorie=proposition.entite_cible,
+            )
+        if not source_presente(  # `source_presente` réutilisé tel quel
+            PropositionElement(
+                categorie=proposition.entite_cible,
+                libelle=proposition.libelle or proposition.entite_cible,
+                source_emplacement=proposition.source_emplacement,
+                source_extrait=proposition.source_extrait,
+            ),
+            pages,
+        ):
+            raise ReponseModeleInvalide(
+                "Proposition non adossée au document : l'extrait invoqué est introuvable "
+                f"dans le texte extrait (entité {proposition.entite_cible!r}). "
+                "Une valeur sans source n'est jamais acceptée.",
+                categorie=proposition.entite_cible,
+                extrait=proposition.source_extrait,
+            )
+        retenues.append(proposition)
+    return tuple(retenues)
+
+
 class FournisseurModele(ABC):
     """Contrat d'un fournisseur de modèle (D8).
 
@@ -183,6 +270,22 @@ class FournisseurModele(ABC):
         signalée plus haut par `MENTION_NON_TROUVE`.
         """
         raise NotImplementedError
+
+    def proposer_elements(
+        self, extraction: ExtractionPdf, *, famille_cible: str
+    ) -> tuple[PropositionImport, ...]:
+        """Propose des éléments de bibliothèque lus dans un document existant (import guidé).
+
+        Capacité **optionnelle** du contrat : elle n'est exercée que par l'import guidé.
+        Un fournisseur qui ne sait pas la rendre le dit explicitement (erreur), plutôt
+        que de renvoyer une liste vide qu'on prendrait pour « rien à proposer ».
+        `famille_cible` oriente le fournisseur ; le factice ne lit que le texte et
+        n'en dépend pas. Le fournisseur ne voit jamais le fichier, seulement l'extraction.
+        """
+        raise ErreurFournisseurModele(
+            f"Le fournisseur {self.nom!r} ne sait pas proposer d'éléments de bibliothèque "
+            "(import guidé) : capacité `proposer_elements` non implémentée."
+        )
 
     # -- confort ---------------------------------------------------------------
     @property

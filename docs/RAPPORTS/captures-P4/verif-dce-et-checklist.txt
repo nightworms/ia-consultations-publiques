@@ -1,0 +1,44 @@
+elements du DCE : 15
+  piece_exigee   8
+  critere        6
+  date_limite    1
+
+-- exemple avec sa source --
+  Étanchéité de toitures-terrasses sur bâtiments scolaires | valeur=40 % | source=page 1 — section « ARTICLE 5 — CRITÈRES D'ATTRIBUTION » | extrait='- Étanchéité de toitures-terrasses sur bâtiments scolaires : 40 %'
+POST /connexion -> 303 Location=/accueil
+cookie de session posé : oui (valeur non affichée)
+
+apres validation : [('critere', 'valide', 6), ('date_limite', 'valide', 1), ('piece_exigee', 'valide', 8)]
+POST checklist -> 303 /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist?ok=checklist_executee
+GET checklist -> 200
+   CHECKLIST | Vérifier le dossier — Consultations publiques
+   CHECKLIST | Vérifier le dossier
+   CHECKLIST | manquante
+   CHECKLIST | . L'outil n'en fabrique aucune : c'est vous
+   CHECKLIST | À vérifier
+   CHECKLIST | À vérifier
+   CHECKLIST | Correspondance incertaine avec Certificat de qualification professionnelle de l'entreprise — domaine étanchéité [certificat_qualification] : à vérifie
+   CHECKLIST | À vérifier
+   CHECKLIST | Pièce présente (Certificat de qualification professionnelle de l'entreprise — domaine étanchéité [certificat_qualification]) mais échéance dépassée le
+   CHECKLIST | Pièce retenue :
+   CHECKLIST | Manquante
+   CHECKLIST | Aucune pièce correspondante dans la bibliothèque de la fiche utilisée : le système ne fabrique pas la pièce manquante.
+   CHECKLIST | Présente
+   CHECKLIST | Pièce de la bibliothèque retenue : Attestation de bonne exécution d'un chantier comparable, délivrée par son maître d'ouvrage [attestation_bonne_execu
+   CHECKLIST | Pièce retenue :
+   CHECKLIST | Présente
+   CHECKLIST | Pièce de la bibliothèque retenue : Attestation d'assurance responsabilité civile professionnelle [attestation_assurance_professionnelle].
+   CHECKLIST | Pièce retenue :
+   CHECKLIST | Présente
+   CHECKLIST | Pièce de la bibliothèque retenue : Attestation d'assurance responsabilité civile décennale [attestation_assurance_decennale].
+   CHECKLIST | Pièce retenue :
+   CHECKLIST | Présente
+   CHECKLIST | Pièce de la bibliothèque retenue : Fiche technique du procédé d'étanchéité proposé — référence fournisseur exacte [fiche_technique_produit].
+   CHECKLIST | Pièce retenue :
+   CHECKLIST |        contient. C'est une aide à la relecture, pas un certificat : aucune
+   CHECKLIST | Checklist — outil d'aide à la relecture, pas un certificat de conformité. Aucune conformité n'est garantie.
+   CHECKLIST | 1 pièce(s) exigée(s) sans correspondance dans la bibliothèque : le système ne fabrique aucune pièce.
+   CHECKLIST | Exigences comparées : 8 — présentes :
+   CHECKLIST |        4 — manquantes : 1 —
+   CHECKLIST |        à vérifier : 3 — pièces de la bibliothèque
+   CHECKLIST | Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un

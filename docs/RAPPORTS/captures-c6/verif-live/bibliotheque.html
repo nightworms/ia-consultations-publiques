@@ -1,0 +1,316 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bibliothèque d'entreprise — Consultations publiques</title>
+  <link rel="stylesheet" href="http://127.0.0.1:8098/static/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="/accueil">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      
+      <a href="/accueil">Accueil</a>
+      <a href="/bibliotheque" aria-current="page">Bibliothèque</a>
+      <a href="/consultations">Consultations</a>
+      <span class="bandeau__qui">Compte de démonstration (FICTIF)</span>
+      <form method="post" action="/deconnexion">
+        <button type="submit">Se déconnecter</button>
+      </form>
+      
+    </nav>
+  </div>
+</header>
+
+<main id="contenu" class="page">
+  
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Votre bibliothèque d'entreprise</h1>
+    <p class="sous-titre">Tout ce qui sert à écrire vos mémoires&nbsp;: chantiers,
+       certifications, moyens, assurances, produits.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="/bibliotheque/import">Importer vos documents existants</a>
+  </div>
+</div>
+
+
+
+
+
+<div class="encart encart--attention">
+  <p class="encart__titre">Relecture de votre bibliothèque&nbsp;: Socle complet (non relue)</p>
+  <p>La relecture porte toujours le nom de la personne qui l'a faite et la date.
+     Toute information ajoutée ensuite fait repasser la bibliothèque en relecture.</p>
+</div>
+
+
+<div class="carte">
+  <h2 class="carte__titre">Ce qui vous manque pour être prêt à concourir</h2>
+  
+  <p><strong>Chaque famille contient au moins une information.</strong></p>
+  <p>Cela ne veut pas dire qu'elles sont complètes au sens réglementaire&nbsp;:
+     l'outil constate ce qui est renseigné, il ne certifie rien.</p>
+  
+</div>
+
+<h2>Avancement par famille</h2>
+<div class="carte">
+  <div class="jauge" role="img"
+       aria-label="9 familles renseignées sur 9">
+    <div class="jauge__part" style="width:100.0%"></div>
+  </div>
+  <p class="jauge-legende">9 familles
+     renseignées sur 9.
+     Aucune ne reste à compléter.
+     </p>
+  <ul class="liste">
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Identité</span>
+        <span class="liste__complement">
+          2 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/identite">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Capacités financières</span>
+        <span class="liste__complement">
+          4 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/capacites_financieres">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Assurances</span>
+        <span class="liste__complement">
+          2 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/assurances">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Certifications et qualifications</span>
+        <span class="liste__complement">
+          2 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/certifications">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Références de chantiers</span>
+        <span class="liste__complement">
+          4 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/references_chantiers">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Moyens humains</span>
+        <span class="liste__complement">
+          5 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/moyens_humains">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Moyens matériels</span>
+        <span class="liste__complement">
+          4 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/moyens_materiels">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Fiches techniques produits</span>
+        <span class="liste__complement">
+          2 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/fiches_produits">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Mémoire technique type</span>
+        <span class="liste__complement">
+          2 informations
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">En cours</span>
+        <a href="/bibliotheque/memoire_technique">Ouvrir</a>
+      </div>
+    </li>
+    
+  </ul>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Ce que « renseigné » veut dire ici</summary>
+    <div class="reponse">
+      <p>L'outil constate qu'une famille contient au moins une information. Il
+         n'affirme pas qu'elle est complète au sens réglementaire&nbsp;: c'est
+         votre relecture, et elle seule, qui engage.</p>
+    </div>
+  </details>
+</div>
+
+
+
+<h2>Relectures enregistrées</h2>
+
+<p>Aucune relecture enregistrée pour cette version.</p>
+
+
+<div class="carte">
+  <h2 class="carte__titre">Valider votre bibliothèque</h2>
+  <p>Relire et valider vos informations, c'est ce qui autorise le mémoire à
+     s'appuyer dessus. La relecture porte toujours le nom de la personne qui l'a
+     faite et la date.</p>
+  
+  <form method="post" action="/bibliotheque/validation">
+    <input type="hidden" name="fiche_version_id" value="d0000000-0000-4000-8000-000000000004">
+    <div class="grille">
+      <div class="champ">
+        <label for="relecteur_nom">Votre nom</label>
+        <p class="aide" id="aide-relecteur">La personne qui a relu. Une
+           validation sans nom n'est pas enregistrée.</p>
+        <input type="text" id="relecteur_nom" name="relecteur_nom" required
+               autocomplete="name" aria-describedby="aide-relecteur">
+      </div>
+      <div class="champ">
+        <label for="cible_type">Ce que vous validez</label>
+        <select id="cible_type" name="cible_type">
+          <option value="fiche">Toute la bibliothèque</option>
+          <option value="famille">Une seule famille</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="famille_code">Famille concernée (si vous validez une seule famille)</label>
+        <select id="famille_code" name="famille_code">
+          <option value="">—</option>
+          
+          <option value="identite">Identité</option>
+          
+          <option value="capacites_financieres">Capacités financières</option>
+          
+          <option value="assurances">Assurances</option>
+          
+          <option value="certifications">Certifications et qualifications</option>
+          
+          <option value="references_chantiers">Références de chantiers</option>
+          
+          <option value="moyens_humains">Moyens humains</option>
+          
+          <option value="moyens_materiels">Moyens matériels</option>
+          
+          <option value="fiches_produits">Fiches techniques produits</option>
+          
+          <option value="memoire_technique">Mémoire technique type</option>
+          
+        </select>
+      </div>
+      <div class="champ">
+        <label for="commentaire">Commentaire <span class="liste__complement">facultatif</span></label>
+        <textarea id="commentaire" name="commentaire"></textarea>
+      </div>
+    </div>
+    <div class="case">
+      <input type="checkbox" id="attestation_cochee" name="attestation_cochee" value="1">
+      <label for="attestation_cochee">J'ai relu et corrigé ces informations.</label>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--secondaire">Enregistrer la relecture</button>
+    </div>
+  </form>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Deux relectures distinctes</summary>
+    <div class="reponse">
+      <p>La validation de votre bibliothèque (ce formulaire) et la validation
+         des éléments extraits d'un dossier de consultation (écran d'analyse)
+         sont deux relectures différentes. Aucune des deux ne se
+         court-circuite.</p>
+    </div>
+  </details>
+</div>
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Fiche de bibliothèque n° 1 —
+       identifiant <code>d0000000-0000-4000-8000-000000000004</code>.</p>
+    <p>Cette zone sert au support technique. Vous n'avez pas besoin de la lire.</p>
+    
+    <form method="post" action="/entreprises/d0000000-0000-4000-8000-000000000003/fiches">
+      <button type="submit" class="btn btn--secondaire">Ouvrir une nouvelle fiche — FICTIF — Océan Étanchéité</button>
+    </form>
+    
+  </div>
+</details>
+
+
+</main>
+
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un <strong>brouillon — à relire et à signer</strong>.</p>
+  </div>
+</footer>
+</body>
+</html>

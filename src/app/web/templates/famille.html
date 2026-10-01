@@ -1,79 +1,96 @@
 {% extends "base.html" %}
 {% block titre %}{{ libelle }}{% endblock %}
 {% block contenu %}
-<h2>Famille — {{ libelle }}</h2>
-<p><a href="/bibliotheque">Retour à l'état d'avancement de la bibliothèque</a></p>
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>{{ libelle }}</h1>
+    <p class="sous-titre">Ce que vous enregistrez ici sert de source au mémoire
+       technique. Une information sans source est signalée comme non vérifiée.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="#ajouter">Ajouter un élément</a>
+  </div>
+</div>
 
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
-{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'enregistrement n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
 
 <div class="carte">
-  <h3>Contenu enregistré</h3>
-  <dl class="source">
-    <dt>Version de fiche :</dt><dd><code>{{ fiche_version_id }}</code></dd>
-    <dt>État de la fiche :</dt><dd>{{ statut_fiche }}</dd>
-  </dl>
-
+  <h2 class="carte__titre">Ce qui est enregistré</h2>
   {% for bloc in definitions %}
-  <h4>{{ bloc.libelle }} <span class="etiquette">{{ bloc.entite }}</span></h4>
   {% set lignes = contenu.elements.get(bloc.entite) or [] %}
+  <h3>{{ bloc.libelle }}</h3>
   {% if lignes %}
-  <ul class="elements">
-    {% for ligne in lignes %}
-    <li>
-      <h5 style="margin:0 0 .3rem">
-        {% set titre = ligne.get('raison_sociale') or ligne.get('intitule_operation') or ligne.get('intitule') or ligne.get('description') or ligne.get('designation') or ligne.get('type_assurance') or ligne.get('nom') or ('élément ' ~ ligne.id[:8]) %}
-        {{ titre }}
-      </h5>
-      <dl class="source">
-        {% for champ in bloc.champs %}
-          {% if ligne.get(champ) not in (None, '') %}
-          <dt>{{ bloc.libelles.get(champ, champ) }} :</dt><dd class="fiche-valeur">{{ ligne.get(champ) }}</dd>
-          {% endif %}
-        {% endfor %}
-        <dt>Origine :</dt><dd>{{ ligne.get('origine') or 'non renseignée' }}</dd>
-        <dt>Confiance :</dt>
-        <dd>
-          {% if ligne.get('confiance') == 'verifie' %}vérifié
-          {% elif ligne.get('confiance') == 'declare_non_verifie' %}déclaré, non vérifié
-          {% else %}{{ ligne.get('confiance') or 'à vérifier' }}{% endif %}
-        </dd>
-        <dt>Source :</dt>
-        <dd>
-          {% if ligne.get('source_document_id') %}
-            document <code>{{ ligne.get('source_document_id') }}</code>
-          {% else %}
-            aucune source — valeur <strong>non vérifiée</strong>
-          {% endif %}
-        </dd>
-        {% if ligne.get('statut_validite') %}
-        <dt>Validité :</dt><dd>{{ ligne.get('statut_validite') }}</dd>
+  {% for ligne in lignes %}
+  <div class="fiche-ligne">
+    <div class="fiche-ligne__tete">
+      <span class="fiche-ligne__titre">{{ ligne.titre_affiche }}</span>
+      <span class="etat etat--{% if ligne.get('confiance') == 'verifie' %}ok{% elif ligne.get('source_document_id') or ligne.get('confiance') == 'declare_non_verifie' %}attente{% else %}attente{% endif %}">
+        {% if ligne.get('confiance') == 'verifie' %}Vérifié
+        {% elif ligne.get('confiance') == 'declare_non_verifie' %}Déclaré, non vérifié
+        {% else %}À vérifier{% endif %}
+      </span>
+    </div>
+    <ul class="sources">
+      {% for c in ligne.champs_affiches %}
+      <li><span class="source-etiquette">{{ c.libelle }} :</span> {{ c.valeur }}</li>
+      {% endfor %}
+      <li><span class="source-etiquette">Origine :</span>
+        {% if ligne.get('origine') == 'saisie_entreprise' %}saisie par vous
+        {% elif ligne.get('origine') == 'document_extrait' %}extraite d'un document que vous avez fourni
+        {% else %}non renseignée{% endif %}
+      </li>
+      <li><span class="source-etiquette">Source :</span>
+        {% if ligne.get('source_document_id') %}
+          {{ documents.get(ligne.get('source_document_id')) or 'document que vous avez fourni' }}
+        {% else %}
+          aucune source — valeur <strong>non vérifiée</strong>
         {% endif %}
-        <dt>Modifié le :</dt><dd>{{ ligne.get('date_modification') or ligne.get('date_creation') or '—' }}</dd>
-      </dl>
-    </li>
-    {% endfor %}
-  </ul>
+      </li>
+      {% if ligne.get('statut_validite') %}
+      <li><span class="source-etiquette">Validité :</span> {{ ligne.get('statut_validite') }}</li>
+      {% endif %}
+      <li><span class="source-etiquette">Mis à jour le :</span> {{ ligne.date_affichee }}</li>
+    </ul>
+    {% if bloc.liaisons %}
+    <details class="references">
+      <summary>Références techniques</summary>
+      <div class="reponse">
+        <p>Pièces rattachées :
+          {% for champ in bloc.liaisons %}
+            {% if ligne.get(champ) %}{{ bloc.libelles.get(champ, champ) }} = <code>{{ ligne.get(champ) }}</code>{% endif %}
+          {% endfor %}
+        </p>
+        <p>Identifiant de l'élément : <code>{{ ligne.get('id') }}</code></p>
+      </div>
+    </details>
+    {% endif %}
+  </div>
+  {% endfor %}
   {% else %}
-  <p>Aucun élément enregistré dans « {{ bloc.libelle }} » pour cette version.</p>
+  <p>Aucun élément enregistré dans « {{ bloc.libelle }} » pour l'instant.</p>
   {% endif %}
   {% endfor %}
 </div>
 
-<h3>Ajouter un élément</h3>
-<p class="aide">
-  Une valeur sans source s'affiche comme <strong>non vérifiée</strong> : l'outil
-  ne présente jamais une valeur non sourcée comme un fait. Toute écriture
-  <strong>révoque</strong> la validation de relecture qui couvrait la famille
-  écrite (retour en relecture obligatoire).
-</p>
+<h2 id="ajouter">Ajouter un élément</h2>
+<p>Une valeur sans source s'affiche comme <strong>non vérifiée</strong>&nbsp;:
+   l'outil ne présente jamais une valeur non sourcée comme un fait. Toute
+   écriture fait repasser la famille concernée en relecture.</p>
 
 {% for bloc in definitions %}
 <fieldset>
   <legend>Nouvel élément — {{ bloc.libelle }}</legend>
   {% if bloc.champs_obligatoires %}
   <p class="aide">
-    Champs obligatoires :
+    Champs obligatoires&nbsp;:
     {% for c in bloc.champs_obligatoires %}{{ bloc.libelles.get(c, c) }}{% if not loop.last %}, {% endif %}{% endfor %}.
   </p>
   {% endif %}
@@ -82,6 +99,7 @@
     <input type="hidden" name="fiche_version_id" value="{{ fiche_version_id }}">
     <div class="grille">
       {% for champ in bloc.champs %}
+      {% if champ not in bloc.liaisons %}
       {% set ref = bloc.references.get(champ) %}
       <div class="champ">
         <label for="{{ bloc.entite }}-{{ champ }}">{{ bloc.libelles.get(champ, champ) }}</label>
@@ -90,25 +108,24 @@
           <select id="{{ bloc.entite }}-{{ champ }}" name="champ_{{ champ }}">
             <option value="">—</option>
             {% for v in ref.valeurs %}
-            <option value="{{ v.code }}">{{ v.libelle }} ({{ v.code }})</option>
+            <option value="{{ v.code }}">{{ v.libelle }}</option>
             {% endfor %}
           </select>
           {% else %}
           <input type="text" id="{{ bloc.entite }}-{{ champ }}" name="champ_{{ champ }}">
           {% endif %}
+          {% if ref.charge %}
           <p class="aide" id="aide-{{ bloc.entite }}-{{ champ }}">
-            Nomenclature <code>{{ ref.namespace }}</code> —
-            {% if ref.charge %}
-            jeu <strong>chargé</strong> dans cette base : seules les valeurs
-            ci-dessus sont acceptées ; une valeur absente est refusée avec son motif.
-            {% else %}
-            jeu <strong>non chargé</strong> (nomenclature ouverte) : si votre
-            valeur n'apparaît pas, créez-la ci-dessous <em>sans quitter le
-            formulaire</em>. Elle est enregistrée sur l'élément, marquée à
-            vérifier — aucune valeur n'est inventée et rien n'est écrit dans une
-            nomenclature commune.
-            {% endif %}
+            Cette valeur vient d'une liste de référence — jeu <strong>chargé</strong>&nbsp;:
+            seules les valeurs proposées ci-dessus sont acceptées.
           </p>
+          {% else %}
+          <p class="aide" id="aide-{{ bloc.entite }}-{{ champ }}">
+            Cette valeur vient d'une liste de référence — jeu <strong>non chargé</strong>&nbsp;:
+            si votre valeur n'apparaît pas, créez-la ci-dessous sans quitter ce
+            formulaire. Elle est enregistrée sur cet élément, marquée à vérifier.
+          </p>
+          {% endif %}
           <label for="{{ bloc.entite }}-{{ champ }}-nouvelle">
             Valeur absente de la liste (créer pour cet élément)
           </label>
@@ -118,47 +135,66 @@
           {% else %}
           <input type="{% if bloc.types.get(champ) == 'date' %}date{% elif bloc.types.get(champ) in ('entier','decimal') %}number{% else %}text{% endif %}"
                  id="{{ bloc.entite }}-{{ champ }}" name="champ_{{ champ }}"
-                 {% if bloc.types.get(champ) == 'decimal' %}step="any"{% endif %}>
+                 {% if bloc.types.get(champ) == 'decimal' %}step="any"{% endif %}
+                 {% if champ == 'montant_montant' %}aria-describedby="aide-{{ bloc.entite }}-{{ champ }}"{% endif %}>
+          {% if champ == 'montant_montant' %}
+          <p class="aide" id="aide-{{ bloc.entite }}-{{ champ }}">Le montant de vos
+             travaux réalisés. Aucun prix de vente n'est demandé ici.</p>
           {% endif %}
-        </div>
+          {% endif %}
+      </div>
+      {% endif %}
       {% endfor %}
       <div class="champ">
-        <label for="{{ bloc.entite }}-origine">Origine de la donnée (obligatoire)</label>
-        <select id="{{ bloc.entite }}-origine" name="origine">
-          <option value="saisie_entreprise">Saisie par l'entreprise</option>
-          <option value="document_extrait">Extraite d'un document</option>
+        <label for="{{ bloc.entite }}-origine">D'où vient cette information</label>
+        <select id="{{ bloc.entite }}-origine" name="origine" required>
+          <option value="">Choisissez…</option>
+          <option value="saisie_entreprise">Je la saisis moi-même</option>
+          <option value="document_extrait">Elle vient d'un document que je fournis</option>
         </select>
       </div>
       <div class="champ">
-        <label for="{{ bloc.entite }}-confiance">Confiance déclarée</label>
+        <label for="{{ bloc.entite }}-confiance">Niveau de confiance</label>
         <select id="{{ bloc.entite }}-confiance" name="confiance">
-          <option value="">À vérifier (défaut)</option>
+          <option value="">À vérifier (par défaut)</option>
           <option value="declare_non_verifie">Déclaré, non vérifié</option>
           <option value="verifie">Vérifié (exige une source et un contrôle humain nommé)</option>
         </select>
       </div>
       <div class="champ">
-        <label for="{{ bloc.entite }}-source">Identifiant du document source (si origine « document extrait »)</label>
-        <input type="text" id="{{ bloc.entite }}-source" name="source_document_id">
-      </div>
-      <div class="champ">
-        <label for="{{ bloc.entite }}-controle">Contrôle humain par (si confiance « vérifié »)</label>
+        <label for="{{ bloc.entite }}-controle">Contrôle humain par (si « vérifié »)</label>
         <input type="text" id="{{ bloc.entite }}-controle" name="controle_humain_par">
       </div>
       <div class="champ">
-        <label for="{{ bloc.entite }}-sensibilite">Sensibilité</label>
+        <label for="{{ bloc.entite }}-sensibilite">Sensibilité de l'information</label>
         <select id="{{ bloc.entite }}-sensibilite" name="sensibilite">
-          <option value="">Défaut de l'entité</option>
+          <option value="">Valeur par défaut</option>
           <option value="publique">Publique</option>
           <option value="interne">Interne</option>
           <option value="confidentiel">Confidentiel</option>
         </select>
       </div>
+      <div class="champ">
+        <label for="{{ bloc.entite }}-source">Document source (si l'information vient d'un document)</label>
+        <input type="text" id="{{ bloc.entite }}-source" name="source_document_id"
+               aria-describedby="aide-{{ bloc.entite }}-source">
+        <p class="aide" id="aide-{{ bloc.entite }}-source">
+          Renseigné automatiquement par l'import. Laisser vide si vous ne savez
+          pas&nbsp;: la valeur sera marquée non vérifiée.</p>
+      </div>
     </div>
     <div class="actions">
-      <button type="submit">Enregistrer cet élément</button>
+      <button type="submit" class="btn btn--secondaire">Enregistrer cet élément</button>
     </div>
   </form>
 </fieldset>
 {% endfor %}
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Famille <code>{{ famille }}</code> — fiche
+       <code>{{ fiche_version_id }}</code> — état « {{ statut_fiche }} ».</p>
+  </div>
+</details>
 {% endblock %}

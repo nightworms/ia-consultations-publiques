@@ -1,68 +1,107 @@
 {% extends "base.html" %}
-{% block titre %}Checklist de conformité{% endblock %}
+{% block titre %}Vérifier le dossier{% endblock %}
 {% block contenu %}
-<h2>Checklist de conformité — {{ consultation.libelle }}</h2>
-<p><a href="/consultations/{{ consultation.id }}">Retour à l'analyse de la consultation</a></p>
-
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
-{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
-
-<div class="message message-brouillon">
-  brouillon — à relire et à signer
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Vérifier le dossier</h1>
+    <p class="sous-titre">{{ consultation.libelle }} — vos pièces exigées,
+       confrontées à votre bibliothèque d'entreprise.</p>
+  </div>
 </div>
 
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'action n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+
 {% if pas_de_checklist %}
-<div class="message">
-  <p>Aucune checklist n'a encore été exécutée pour cette consultation.</p>
+<div class="encart">
+  <p>Aucune vérification n'a encore été lancée pour ce dossier. Elle croise les
+     pièces exigées que vous avez acceptées avec votre bibliothèque.</p>
 </div>
 <form method="post" action="/consultations/{{ consultation.id }}/checklist">
   <div class="champ">
-    <label for="execute_par">Nom de l'humain qui lance la vérification (obligatoire)</label>
-    <input type="text" id="execute_par" name="execute_par" required>
+    <label for="execute_par">Votre nom</label>
+    <p class="aide" id="aide-exec">La personne qui lance la vérification.</p>
+    <input type="text" id="execute_par" name="execute_par" required aria-describedby="aide-exec">
   </div>
   <div class="actions">
-    <button type="submit">Vérifier le dossier</button>
+    <button type="submit" class="btn btn--principal btn--action">Vérifier le dossier</button>
   </div>
 </form>
 {% else %}
 
-<div class="message">
-  <p>{{ mention }}</p>
-</div>
-
-<div class="carte">
-  <h3>Résumé</h3>
-  <dl class="source">
-    <dt>Exécution :</dt><dd>{{ execution.date_execution }} par {{ execution.execute_par }}</dd>
-    <dt>Version de fiche croisée :</dt><dd><code>{{ execution.fiche_version_id }}</code></dd>
-    <dt>Exigences comparées :</dt><dd>{{ resume.nb_exigences }}</dd>
-    <dt>Présentes :</dt><dd>{{ resume.nb_presentes }}</dd>
-    <dt>Manquantes :</dt><dd>{{ resume.nb_manquantes }}</dd>
-    <dt>À vérifier :</dt><dd>{{ resume.nb_a_verifier }}</dd>
-    <dt>Pièces de la bibliothèque examinées :</dt><dd>{{ resume.nb_pieces_bibliotheque }}</dd>
-  </dl>
-</div>
-
-<h3>Résumé des manques</h3>
+<h2 id="manques">Résumé des manques</h2>
 {% if resume.manques %}
-<div class="message message-erreur">
-  <p><strong>{{ resume.manques|length }} pièce(s) exigée(s) sans correspondance dans la bibliothèque :</strong></p>
-  <ul>
-    {% for m in resume.manques %}<li>{{ m }}</li>{% endfor %}
+<div class="encart encart--attention">
+  <p class="encart__titre">{{ resume.manques|length }} pièce(s) exigée(s) sans
+     correspondance dans votre bibliothèque</p>
+  <p>Une pièce exigée qui n'a pas de correspondance est affichée
+     <strong>manquante</strong>. L'outil n'en fabrique aucune&nbsp;: c'est vous
+     qui décidez comment la fournir.</p>
+  <ul class="liste">
+    {% for m in resume.manques %}
+    <li>
+      <div class="liste__principal"><span class="liste__libelle">{{ m }}</span></div>
+      <div class="liste__fin"><a href="/bibliotheque">Ajouter la pièce dans ma bibliothèque</a></div>
+    </li>
+    {% endfor %}
   </ul>
-  <p>Le système ne fabrique aucune pièce manquante.</p>
 </div>
 {% else %}
-<p>Aucune pièce exigée sans correspondance dans la bibliothèque.</p>
+<div class="encart encart--ok">
+  <p>Aucune pièce exigée sans correspondance dans la bibliothèque.</p>
+</div>
 {% endif %}
 
 {% if resume.a_verifier %}
-<div class="message">
-  <p><strong>À vérifier par un humain ({{ resume.a_verifier|length }}) :</strong></p>
+<h2>À relire avant de compter</h2>
+<div class="encart">
+  <p>{{ resume.a_verifier|length }} ligne(s) lue(s) dans le dossier mais jamais
+     relue(s) par vous&nbsp;: elles ne comptent pas encore.</p>
   <ul>
     {% for m in resume.a_verifier %}<li>{{ m }}</li>{% endfor %}
   </ul>
+  <p><a href="/consultations/{{ consultation.id }}">Les relire dans l'analyse du dossier</a></p>
 </div>
+{% endif %}
+
+<h2>Pièce par pièce</h2>
+{% if lignes %}
+{% for l in lignes %}
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">{{ l.libelle_piece }}</span>
+    <span class="etat etat--{% if l.statut == 'presente' %}ok{% elif l.statut == 'manquante' %}erreur{% else %}attente{% endif %}">
+      {% if l.statut == 'presente' %}Présente
+      {% elif l.statut == 'manquante' %}Manquante
+      {% else %}À vérifier{% endif %}
+    </span>
+  </div>
+  <p>{{ l.justification }}</p>
+  <ul class="sources">
+    {% if l.piece_libelle %}
+    <li><span class="source-etiquette">Pièce retenue :</span> {{ l.piece_libelle }}</li>
+    {% endif %}
+    <li><span class="source-etiquette">Exigence lue :</span>
+      {% if l.source_document_id %}
+        {{ consultation.libelle }}{% if l.source_emplacement %}, {{ l.source_emplacement }}{% endif %}
+      {% else %}
+        aucune source — non vérifiée
+      {% endif %}
+    </li>
+  </ul>
+</div>
+{% endfor %}
+{% else %}
+<p>Aucune pièce exigée n'a encore été acceptée&nbsp;: la vérification n'a rien
+   à croiser. Les lignes proposées dans l'analyse du dossier doivent d'abord
+   être acceptées par vous.</p>
 {% endif %}
 
 {% if resume.categories_sans_element %}
@@ -72,18 +111,34 @@
 </p>
 {% endif %}
 
+<details class="pourquoi">
+  <summary>Pourquoi&nbsp;? Ce que cette vérification ne dit pas</summary>
+  <div class="reponse">
+    <p>Elle compare ce que le dossier exige avec ce que votre bibliothèque
+       contient. C'est une aide à la relecture, pas un certificat : aucune
+       conformité n'est garantie par cette vérification&nbsp;: la responsabilité
+       du contenu que vous remettez reste la vôtre.</p>
+    {% if execution %}
+    <p>Dernière vérification le {{ execution.date_execution }}, par
+       {{ execution.execute_par }}.</p>
+    {% endif %}
+  </div>
+</details>
+
 {% if avertissements %}
-<div class="carte">
-  <h3>Avertissements</h3>
-  <ul>
-    {% for a in avertissements %}<li>{{ a }}</li>{% endfor %}
-  </ul>
-</div>
+<h2>Avertissements</h2>
+<ul class="liste">
+  {% for a in avertissements %}
+  <li><div class="liste__principal"><span class="liste__libelle">{{ a }}</span></div></li>
+  {% endfor %}
+</ul>
 {% endif %}
 
 {% if contradictions %}
-<div class="carte">
-  <h3>Valeurs contradictoires — le système ne choisit pas</h3>
+<h2>Valeurs contradictoires</h2>
+<div class="encart encart--attention">
+  <p>Deux valeurs différentes disent la même chose. L'outil ne choisit pas à
+     votre place&nbsp;: à vous d'arbitrer.</p>
   <ul>
     {% for c in contradictions %}
     <li>
@@ -95,58 +150,37 @@
 </div>
 {% endif %}
 
-<h3>Lignes de la checklist</h3>
-{% if lignes %}
-<table>
-  <caption>Une ligne par pièce exigée validée, avec sa source et le résultat du croisement</caption>
-  <thead>
-    <tr>
-      <th scope="col">Pièce exigée</th>
-      <th scope="col">Statut</th>
-      <th scope="col">Justification</th>
-      <th scope="col">Source de l'exigence</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for l in lignes %}
-    <tr>
-      <td>{{ l.libelle_piece }}</td>
-      <td>
-        <span class="etiquette etiquette-{{ l.statut }}">
-          {% if l.statut == 'presente' %}présente
-          {% elif l.statut == 'manquante' %}manquante
-          {% else %}à vérifier{% endif %}
-        </span>
-        <br><small>{{ l.statut }}</small>
-      </td>
-      <td>
-        {{ l.justification }}
-        {% if l.piece_libelle %}<br><small>Pièce retenue : {{ l.piece_libelle }} [{{ l.piece_type_document }}]</small>{% endif %}
-      </td>
-      <td>
-        {% if l.source_document_id %}
-          document <code>{{ l.source_document_id }}</code>, emplacement : {{ l.source_emplacement }}
-        {% else %}
-          aucune source — non vérifiée
-        {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>Aucune pièce exigée validée : la checklist n'a rien à croiser. Les éléments
-proposés doivent d'abord être validés par un humain.</p>
-{% endif %}
+<h2>Relancer la vérification</h2>
+<div class="carte">
+  <form method="post" action="/consultations/{{ consultation.id }}/checklist">
+    <div class="champ">
+      <label for="execute_par">Votre nom</label>
+      <p class="aide" id="aide-exec">La personne qui lance la vérification.</p>
+      <input type="text" id="execute_par" name="execute_par" required aria-describedby="aide-exec">
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--secondaire">Relancer la vérification</button>
+    </div>
+  </form>
+</div>
 
-<form method="post" action="/consultations/{{ consultation.id }}/checklist">
-  <div class="champ">
-    <label for="execute_par">Relancer la vérification — nom de l'humain (obligatoire)</label>
-    <input type="text" id="execute_par" name="execute_par" required>
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Exigences comparées&nbsp;: {{ resume.nb_exigences }} — présentes&nbsp;:
+       {{ resume.nb_presentes }} — manquantes&nbsp;: {{ resume.nb_manquantes }} —
+       à vérifier&nbsp;: {{ resume.nb_a_verifier }} — pièces de la bibliothèque
+       examinées&nbsp;: {{ resume.nb_pieces_bibliotheque }}.</p>
+    {% if codes_retenus %}
+    <p>Références de type des pièces examinées&nbsp;:
+       {% for code in codes_retenus %}<code>{{ code }}</code>{% if not loop.last %}, {% endif %}{% endfor %}.
+       Le corps de l'écran ne les affiche pas&nbsp;: le libellé métier suffit.</p>
+    {% endif %}
+    {% if execution %}
+    <p>Vérification <code>{{ execution.fiche_version_id }}</code> —
+       {{ execution.date_execution }}.</p>
+    {% endif %}
   </div>
-  <div class="actions">
-    <button type="submit">Relancer la vérification</button>
-  </div>
-</form>
+</details>
 {% endif %}
 {% endblock %}

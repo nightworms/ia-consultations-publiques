@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block titre %}Accueil{% endblock %}
+{% block contenu %}
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Répondez à une consultation publique sans repartir de zéro</h1>
+    <p class="sous-titre">Déposez le dossier de consultation&nbsp;: nous en
+       sortons les pièces exigées, les critères notés et la date limite. Votre
+       mémoire technique se monte ensuite avec vos propres références.</p>
+  </div>
+  <div class="entete-ecran__action">
+    {% if entreprises %}
+    <a class="btn btn--principal btn--action" href="/consultations">Déposer un dossier de consultation</a>
+    {% else %}
+    <a class="btn btn--principal btn--action" href="/entreprises/nouvelle">Créer mon entreprise</a>
+    {% endif %}
+  </div>
+</div>
+
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+
+<div class="carte">
+  <h2 class="carte__titre">Où vous en êtes</h2>
+  <ol class="progression">
+    <li class="{% if entreprises %}fait{% else %}encours{% endif %}">
+      <span class="puce" aria-hidden="true">1</span>
+      <div>
+        <p class="titre">Votre entreprise est déclarée
+          {% if entreprises %}
+          <span class="etat etat--ok">Terminé</span>
+          {% else %}
+          <span class="etat etat--attente">À faire</span>
+          {% endif %}
+        </p>
+        <p class="detail">
+          {% if entreprises %}
+            {{ entreprises[0].libelle_court }} — fiche n° {{ entreprises[0].derniere_fiche.numero_version if entreprises[0].derniere_fiche else '—' }}, {{ entreprises[0].derniere_fiche.statut_libelle if entreprises[0].derniere_fiche else 'aucune fiche' }}.
+          {% else %}
+            Vous n'avez pas encore d'entreprise&nbsp;: commencez par là, c'est
+            ce qui ouvre la bibliothèque.
+          {% endif %}
+        </p>
+      </div>
+    </li>
+    <li class="{% if not entreprises %}none{% elif resume.nb_familles_renseignees == resume.nb_familles %}fait{% else %}encours{% endif %}">
+      <span class="puce" aria-hidden="true">2</span>
+      <div>
+        <p class="titre">Votre bibliothèque se remplit
+          {% if not entreprises %}
+          <span class="etat etat--info">Après l'étape 1</span>
+          {% elif resume.nb_familles_renseignees == resume.nb_familles %}
+          <span class="etat etat--ok">Renseignée</span>
+          {% else %}
+          <span class="etat etat--attente">{{ resume.nb_familles_vides }} à compléter</span>
+          {% endif %}
+        </p>
+        <p class="detail">
+          {% if entreprises %}
+            {{ resume.nb_familles_renseignees }} familles sur {{ resume.nb_familles }}
+            contiennent au moins une information.
+            {% if resume.familles_vides_libelles %}
+            Restent vides&nbsp;: {{ resume.familles_vides_libelles | join(', ') }}.
+            {% endif %}
+          {% else %}
+            Chantiers, certifications, moyens, assurances, produits&nbsp;: tout
+            ce qui sert à écrire un mémoire se range là.
+          {% endif %}
+        </p>
+      </div>
+    </li>
+    <li class="{% if resume.nb_consultations %}fait{% else %}none{% endif %}">
+      <span class="puce" aria-hidden="true">3</span>
+      <div>
+        <p class="titre">Votre mémoire technique
+          {% if resume.nb_consultations %}
+          <span class="etat etat--ok">{{ resume.nb_consultations }} dossier{% if resume.nb_consultations > 1 %}s{% endif %} déposé{% if resume.nb_consultations > 1 %}s{% endif %}</span>
+          {% else %}
+          <span class="etat etat--info">À démarrer</span>
+          {% endif %}
+        </p>
+        <p class="detail">
+          {% if resume.nb_consultations %}
+            Un dossier de consultation est analysé&nbsp;: le mémoire se monte à
+            partir des critères de ce dossier.
+          {% else %}
+            Il se monte dès qu'un dossier de consultation est analysé. Aucun
+            dossier en cours pour l'instant.
+          {% endif %}
+        </p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<h2>Ce que la plateforme fait pour vous</h2>
+<div style="display:grid;gap:1rem">
+  <div class="carte carte--plate">
+    <h3>Elle lit le dossier à votre place</h3>
+    <p>Pièces exigées, critères d'attribution et date limite de remise, chacun
+       avec l'endroit exact du document où il a été lu.</p>
+  </div>
+  <div class="carte carte--plate">
+    <h3>Elle écrit votre mémoire avec vos références</h3>
+    <p>Chaque argument renvoie à un chantier, une certification ou un moyen
+       réellement enregistré dans votre bibliothèque.</p>
+  </div>
+  <div class="carte carte--plate">
+    <h3>Elle dit ce qui manque, et quoi faire</h3>
+    <p>« Aucune référence comparable pour ce montant — ajoutez une référence de
+       chantier du bon ordre de grandeur. » Un manque est une information, pas
+       un échec.</p>
+  </div>
+</div>
+
+<details class="pourquoi">
+  <summary>Pourquoi&nbsp;? Ce que l'outil ne fait pas</summary>
+  <div class="reponse">
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit
+       aucune conformité. Ce que vous produisez reste un brouillon à relire et à
+       signer.</p>
+    <p>Il n'écrit que ce qu'il peut rattacher à un élément de votre
+       bibliothèque. Tout le reste est signalé comme manquant, jamais
+       inventé.</p>
+  </div>
+</details>
+{% endblock %}

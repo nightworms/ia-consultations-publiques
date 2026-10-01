@@ -43,13 +43,16 @@ Décisions de structure tenues ici
 
 from __future__ import annotations
 
-import os
+import re
+from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping, Optional, Sequence
 from urllib.parse import quote
 
-from fastapi import APIRouter, Depends, File, Form, Request, Response, UploadFile
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.api.cloisonnement import (
@@ -57,6 +60,7 @@ from app.api.cloisonnement import (
     obtenir_config,
     obtenir_connexion,
 )
+from app.domain.fiche_version import LIBELLES_STATUT_VERSION, StatutFamille
 from app.domain.familles import (
     FAMILLE_VERS_ENTITES,
     LIBELLES_FAMILLES,
@@ -65,8 +69,16 @@ from app.domain.familles import (
     reference_attendue,
     type_champ,
 )
-from app.services import analyse_dce, checklist
+from app.domain.memoire_technique_genere import familles_pour_critere
+from app.services import analyse_dce, checklist, import_guide, memoire_technique
 from app.services.analyse_dce import ConsultationIntrouvable, ErreurAnalyseDce
+from app.services.import_guide import (
+    ErreurImportGuide,
+    ImportIntrouvable,
+    ImportNonValidable,
+)
+from app.services.fournisseur_modele import ErreurFournisseurModele
+from app.services.memoire_technique import ErreurMemoire, MemoireIntrouvable
 from app.services.authentification import (
     ErreurAuthentification,
     ServiceAuthentification,
@@ -77,7 +89,7 @@ from app.services.versionnement import ErreurVersionnement
 from app.storage.connexion import Connexion, ContexteClient
 from app.storage.depot_consultations import DepotConsultation
 from app.storage.fichiers import StockageFichiers
-from app.storage.repositories import ErreurDepot
+from app.storage.repositories import DepotDocument, ErreurDepot
 
 # --------------------------------------------------------------------------- #
 # Constantes d'écran
@@ -104,7 +116,7 @@ LIBELLES_CHAMPS: dict[str, str] = {
     "raison_sociale": "Raison sociale",
     "siren": "SIREN",
     "siret_siege": "SIRET du siège",
-    "forme_juridique_code": "Forme juridique (code)",
+    "forme_juridique_code": "Forme juridique (référence)",
     "capital_social_montant": "Capital social (montant)",
     "capital_social_devise": "Capital social (devise ISO)",
     "date_creation_entreprise": "Date de création de l'entreprise",
@@ -162,13 +174,13 @@ LIBELLES_CHAMPS: dict[str, str] = {
     "activites_couvertes": "Activités couvertes",
     "intitule": "Intitulé",
     "organisme": "Organisme",
-    "domaine_code": "Domaine (code)",
+    "domaine_code": "Domaine (référence)",
     "numero_certificat": "Numéro de certificat",
     "date_obtention": "Date d'obtention",
     "intitule_operation": "Intitulé de l'opération",
     "maitre_ouvrage": "Maître d'ouvrage",
-    "nature_travaux_code": "Nature des travaux (code)",
-    "nature_travaux_libelle": "Nature des travaux (libellé)",
+    "nature_travaux_code": "Nature des travaux (référence)",
+    "nature_travaux_libelle": "Nature des travaux",
     "lieu_commune": "Commune",
     "lieu_departement": "Département",
     "date_fin": "Date de fin",
@@ -180,15 +192,15 @@ LIBELLES_CHAMPS: dict[str, str] = {
     "competences_appliquees": "Compétences appliquées",
     "attestation_bonne_execution": "Attestation de bonne exécution",
     "contact_reference": "Contact de référence",
-    "photos": "Photos (identifiants de documents)",
-    "metier_code": "Métier (code)",
-    "metier_libelle": "Métier (libellé)",
+    "photos": "Photos",
+    "metier_code": "Métier (référence)",
+    "metier_libelle": "Métier",
     "nombre": "Nombre",
     "date_maj": "Date de mise à jour",
     "diplomes": "Diplômes",
     "annees_experience": "Années d'expérience",
     "cv_piece": "Pièce CV",
-    "categorie_code": "Catégorie (code)",
+    "categorie_code": "Catégorie (référence)",
     "designation": "Désignation",
     "quantite": "Quantité",
     "marque_modele": "Marque et modèle",
@@ -198,18 +210,18 @@ LIBELLES_CHAMPS: dict[str, str] = {
     "justificatif": "Justificatif",
     "fournisseur": "Fournisseur",
     "reference_produit": "Référence produit",
-    "famille_code": "Famille de produit (code)",
+    "famille_code": "Famille de produit (référence)",
     "domaine_application": "Domaine d'application",
     "fiche_technique": "Fiche technique",
     "avis_technique": "Avis technique",
     "date_validite_document": "Date de validité du document",
-    "certificats": "Certificats (identifiants de documents)",
+    "certificats": "Certificats",
     "titre": "Titre",
     "ordre": "Ordre",
     "contenu_texte": "Contenu",
     "date_redaction": "Date de rédaction",
-    "references_liees": "Références liées (identifiants)",
-    "documents_associes": "Documents associés (identifiants)",
+    "references_liees": "Références liées",
+    "documents_associes": "Documents associés",
 }
 
 #: Messages affichés après une action réussie (paramètre `ok` de l'URL).
@@ -220,7 +232,95 @@ MESSAGES_OK: dict[str, str] = {
     "validation_enregistree": "Relecture humaine enregistrée : nom du relecteur et horodatage posés au moment de l'action.",
     "document_analyse": "Document lu et analysé. Chaque élément proposé porte sa source ; aucun n'est un fait avant validation humaine.",
     "element_verifie": "Action humaine enregistrée sur l'élément.",
-    "checklist_executee": "Checklist exécutée : elle croise les pièces exigées validées avec la bibliothèque.",
+    "checklist_executee": "Vérification exécutée : elle croise les pièces exigées validées avec la bibliothèque.",
+    # Import guidé (lot L5b)
+    "import_depose": "Document lu. Chaque proposition porte le passage exact dont elle vient ; rien n'entre dans votre bibliothèque sans votre décision.",
+    "proposition_acceptee": "Proposition acceptée : l'information est entrée dans votre bibliothèque, marquée « extrait d'un document — à vérifier ».",
+    "proposition_refusee": "Proposition refusée : rien n'a été écrit dans votre bibliothèque.",
+    # Mémoire technique (lot L5b)
+    "memoire_genere": "Mémoire monté à partir des critères du dossier et de votre bibliothèque. Chaque section porte ses sources.",
+    "memoire_valide": "Validation enregistrée : elle porte le nom de la personne qui a relu, la date, et l'empreinte du contenu validé.",
+    "section_relue": "Relecture de section enregistrée : elle porte le nom de la personne qui l'a faite.",
+    "section_validee": "Section validée : elle porte le nom de la personne qui l'a validée.",
+    "section_a_corriger": "Section marquée à corriger : elle repasse avant relecture.",
+}
+
+#: Vocabulaire **métier** des états d'une famille (règle § 2 du lot L5a :
+#: aucun état de code à l'écran). La traduction se fait au rendu, jamais dans
+#: le gabarit.
+LIBELLES_STATUT_FAMILLE: dict[str, str] = {
+    StatutFamille.NON_COMMENCEE.value: "À compléter",
+    StatutFamille.DEMARREE.value: "En cours",
+    StatutFamille.SOCLE_COMPLET.value: "À relire",
+    StatutFamille.VALIDEE.value: "Validée",
+}
+
+#: Classe CSS de pastille associée à chaque état de famille.
+CLASSES_STATUT_FAMILLE: dict[str, str] = {
+    StatutFamille.NON_COMMENCEE.value: "attente",
+    StatutFamille.DEMARREE.value: "attente",
+    StatutFamille.SOCLE_COMPLET.value: "info",
+    StatutFamille.VALIDEE.value: "ok",
+}
+
+#: Vocabulaire métier du statut d'une consultation déposée.
+LIBELLES_STATUT_CONSULTATION: dict[str, str] = {
+    "deposee": "Déposé",
+    "nouvelle": "Déposé",
+    "en_cours": "Analyse en cours",
+    "analyse_en_cours": "Analyse en cours",
+    "analysee": "Analysé",
+    "analyse": "Analysé",
+}
+
+#: Familles dans lesquelles l'import guidé peut déposer un document (lot L3).
+#: L'identité de l'entreprise n'y est pas : elle se saisit ou se reprend du dossier.
+FAMILLES_IMPORT: tuple[str, ...] = (
+    "references_chantiers",
+    "certifications",
+    "assurances",
+    "moyens_humains",
+    "moyens_materiels",
+    "fiches_produits",
+    "capacites_financieres",
+    "memoire_technique",
+)
+
+#: Vocabulaire **métier** des états du mémoire et de ses sections — jamais un état de
+#: code à l'écran (règle de la carte L5b).
+LIBELLES_STATUT_DOSSIER_MEMOIRE: dict[str, str] = {
+    "brouillon": "À compléter",
+    "en_relecture": "En relecture",
+    "valide": "Validé",
+}
+CLASSES_STATUT_DOSSIER_MEMOIRE: dict[str, str] = {
+    "brouillon": "attente",
+    "en_relecture": "info",
+    "valide": "ok",
+}
+LIBELLES_STATUT_SECTION_MEMOIRE: dict[str, str] = {
+    "brouillon": "À relire",
+    "relue": "Relue",
+    "validee": "Validée",
+}
+CLASSES_STATUT_SECTION_MEMOIRE: dict[str, str] = {
+    "brouillon": "attente",
+    "relue": "info",
+    "validee": "ok",
+}
+
+#: Libellé métier des décisions humaines sur une proposition d'import.
+LIBELLES_DECISION_PROPOSITION: dict[str, str] = {
+    "acceptee": "Acceptée",
+    "refusee": "Refusée",
+}
+
+#: Entité → famille, construit depuis le registre : sert au rendu des sources du
+#: mémoire, pour nommer la famille en français sans exposer de nom de table.
+_ENTITE_VERS_FAMILLE: dict[str, str] = {
+    entite: famille
+    for famille, entites in FAMILLE_VERS_ENTITES.items()
+    for entite in entites
 }
 
 
@@ -268,13 +368,49 @@ def _rendre(
     donnees.setdefault("mention_brouillon", MENTION_BROUILLON)
     donnees.setdefault("erreur", None)
     donnees.setdefault("message_ok", None)
+    donnees.setdefault("ecran", None)
+    donnees.setdefault("documents", {})
     return GABARITS.TemplateResponse(
         request=request, name=gabarit, context=donnees, status_code=code
     )
 
 
+#: Erreurs d'écran : un titre qui parle, un sous-titre, et le détail technique
+#: replié dans « Références techniques » (aucun code de code à l'écran).
+ERREURS_ECRAN: dict[int, dict[str, str]] = {
+    404: {
+        "titre": "Cette page n'existe pas",
+        "sous_titre": "L'adresse que vous avez ouverte ne correspond à aucun écran de votre espace.",
+        "corps": "Le lien est peut-être incomplet, ou la page a été déplacée depuis que vous l'avez mise en favori.",
+    },
+    403: {
+        "titre": "Cette page ne vous est pas ouverte",
+        "sous_titre": "Ce que vous demandez existe, mais n'appartient pas à votre espace.",
+        "corps": "Rien ne vous a été montré d'autre que vos propres données.",
+    },
+}
+
+
 def _erreur_html(request: Request, code: int, message: str) -> Response:
-    return _rendre(request, "erreur.html", {"code": code, "message": message}, code)
+    gabarit = ERREURS_ECRAN.get(code)
+    if gabarit is None:
+        gabarit = {
+            "titre": "Cette action n'a pas pu aboutir",
+            "sous_titre": "Rien n'a été enregistré. Vous pouvez corriger et recommencer.",
+            "corps": message,
+        }
+    return _rendre(
+        request,
+        "erreur.html",
+        {
+            "code": code,
+            "titre_erreur": gabarit["titre"],
+            "sous_titre_erreur": gabarit["sous_titre"],
+            "message": gabarit["corps"],
+            "message_technique": message,
+        },
+        code,
+    )
 
 
 def _message_ok(request: Request) -> Optional[str]:
@@ -301,6 +437,180 @@ def _stockage(request: Request) -> StockageFichiers:
     return StockageFichiers(config.repertoire_documents, config.cle_chiffrement_maitresse)
 
 
+def _date_lisible(valeur: Any) -> str:
+    """Date au format jour/mois/année, jamais l'horodatage technique complet."""
+    if valeur is None:
+        return "—"
+    if isinstance(valeur, (datetime, date)):
+        return valeur.strftime("%d/%m/%Y")
+    texte = str(valeur)
+    if len(texte) >= 10 and texte[4] == "-" and texte[7] == "-":
+        try:
+            return datetime.strptime(texte[:10], "%Y-%m-%d").strftime("%d/%m/%Y")
+        except ValueError:  # pragma: no cover — format inattendu, on rend la valeur lisible telle quelle
+            return texte
+    return texte
+
+
+def _nombre_lisible(valeur: Any) -> str:
+    """Nombre au format français : 412000.00 → « 412 000 »."""
+    texte = str(valeur).strip().replace(" ", "")
+    try:
+        nombre = float(texte.replace(",", "."))
+    except (TypeError, ValueError):
+        return str(valeur)
+    if nombre == int(nombre):
+        return f"{int(nombre):,}".replace(",", " ")
+    return f"{nombre:,.2f}".replace(",", " ").replace(".", ",")
+
+
+#: Une valeur de nomenclature stockée s'écrit avec des tirets bas —
+#: `responsabilite_civile_decennale`, `materiel_mise_en_oeuvre`. À l'écran, c'est
+#: une écriture de code : elle se lit avec des espaces, comme le titre de l'élément
+#: (`_titre_affiche`). Motif étroit : minuscules, chiffres et tirets bas seulement —
+#: un code en majuscules (« SIREN », « SAS »), un montant ou une date ne sont pas
+#: touchés.
+_MOTIF_VALEUR_CODE = re.compile(r"^[a-z][a-z0-9]*(?:_[a-z0-9]+)+$")
+
+
+def _valeur_lisible(champ: str, valeur: Any, type_connu: Optional[str]) -> str:
+    if type_connu == "date":
+        return _date_lisible(valeur)
+    if type_connu in ("entier", "decimal"):
+        return _nombre_lisible(valeur)
+    texte = str(valeur)
+    if _MOTIF_VALEUR_CODE.match(texte.strip()):
+        return texte.strip().replace("_", " ")
+    return texte
+
+
+#: Un identifiant de document n'est jamais montré tel quel : il devient le
+#: libellé du document, ou une formule neutre si le libellé est introuvable.
+_MOTIF_UUID = re.compile(
+    r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+)
+
+
+def _champs_affiches(
+    ligne: Mapping[str, Any],
+    bloc: Mapping[str, Any],
+    documents: Mapping[str, str] | None = None,
+) -> list[dict[str, str]]:
+    """Ce qu'on montre d'un élément : des libellés métier et des valeurs lisibles.
+
+    Trois retraits volontaires, tenus par la direction de design :
+    * les champs de **liaison** (identifiants de documents) sortent du corps et
+      vont dans « Références techniques » ;
+    * un champ `…_devise` ne s'affiche pas seul : il est **accolé au montant**
+      qu'il qualifie (« 412 000 EUR ») ;
+    * les dates sont écrites en jour/mois/année, jamais en horodatage technique.
+    """
+    resultat: list[dict[str, str]] = []
+    for champ in bloc["champs"]:
+        if champ in bloc.get("liaisons", ()):
+            continue
+        if str(champ).endswith("_devise"):
+            continue
+        valeur = ligne.get(champ)
+        if valeur in (None, ""):
+            continue
+        texte = _valeur_lisible(champ, valeur, bloc["types"].get(champ))
+        if str(champ).endswith("_montant"):
+            texte = _nombre_lisible(valeur)
+            devise = str(
+                ligne.get(str(champ)[: -len("_montant")] + "_devise") or ""
+            ).strip()
+            if devise:
+                texte = f"{texte} {devise}"
+        if _MOTIF_UUID.match(texte):
+            texte = (documents or {}).get(texte) or "pièce fournie (document rattaché)"
+        resultat.append({"libelle": bloc["libelles"].get(champ, champ), "valeur": texte})
+    return resultat
+
+
+def _titre_affiche(ligne: Mapping[str, Any]) -> str:
+    """Titre d'un élément en clair : « responsabilite_civile » → « responsabilite civile ».
+
+    Les tirets bas d'une valeur de nomenclature sont une écriture de code : on
+    les rend lisibles dans le titre. La valeur exacte reste affichée, elle, dans
+    la ligne du champ correspondant.
+    """
+    for champ in ("raison_sociale", "intitule_operation", "intitule", "description",
+                  "designation", "type_assurance", "nom", "titre"):
+        valeur = ligne.get(champ)
+        if valeur:
+            return str(valeur).replace("_", " ")
+    return "Élément"
+
+
+def _enrichir_lignes(
+    contenu: Mapping[str, Any],
+    blocs: Sequence[Mapping[str, Any]],
+    documents: Mapping[str, str] | None = None,
+) -> None:
+    """Ajoute à chaque élément ses champs d'affichage et ses dates lisibles."""
+    elements: Mapping[str, Any] = contenu.get("elements", {})
+    for bloc in blocs:
+        for ligne in elements.get(bloc["entite"], []):
+            ligne["champs_affiches"] = _champs_affiches(ligne, bloc, documents)
+            ligne["titre_affiche"] = _titre_affiche(ligne)
+            ligne["date_affichee"] = _date_lisible(
+                ligne.get("date_modification") or ligne.get("date_creation")
+            )
+
+
+def _statut_version_libelle(statut: Optional[str]) -> str:
+    return LIBELLES_STATUT_VERSION.get(str(statut or ""), str(statut or "—"))
+
+
+# --------------------------------------------------------------------------- #
+# Critère 6 du plan de phase 4 : aucun code interne dans le corps d'un écran
+# --------------------------------------------------------------------------- #
+#: Un code métier entre crochets — `[attestation_assurance_decennale]` — est une
+#: écriture de code produite par `app.services.checklist` (`_decrire_document`).
+#: Il ne s'affiche jamais tel quel dans le corps de l'écran : le libellé métier
+#: suffit, et le code reste disponible dans le bloc replié « Références
+#: techniques » quand il sert au support. Motif volontairement étroit : une
+#: crochetée en minuscules, trois caractères minimum — une mention française
+#: comme « [FICTIF] » n'est pas touchée.
+_MOTIF_CODE_CROCHETS = re.compile(r"\s*\[[a-z][a-z0-9_]{2,}\]")
+
+
+def _sans_code_technique(texte: Any) -> str:
+    """Rend un texte d'écran sans ses codes internes entre crochets."""
+    return _MOTIF_CODE_CROCHETS.sub("", str(texte))
+
+
+def _ligne_checklist_sans_code(ligne: Mapping[str, Any]) -> dict[str, Any]:
+    """Une ligne de checklist dont les codes internes ne sortent plus dans le corps."""
+    propre = dict(ligne)
+    for champ in ("justification", "piece_libelle"):
+        if propre.get(champ):
+            propre[champ] = _sans_code_technique(propre[champ])
+    return propre
+
+
+def _codes_retenus(lignes: Sequence[Mapping[str, Any]]) -> list[str]:
+    """Codes de type de pièce relevés dans les motifs, pour le bloc replié."""
+    codes: set[str] = set()
+    for ligne in lignes:
+        for champ in ("justification", "piece_libelle"):
+            for trouve in re.findall(r"\[([a-z][a-z0-9_]{2,})\]", str(ligne.get(champ) or "")):
+                codes.add(trouve)
+    return sorted(codes)
+
+
+def _texte_libre_sans_code(valeur: Any) -> Any:
+    """Même nettoyage pour une valeur qui peut être une liste ou un dictionnaire."""
+    if isinstance(valeur, str):
+        return _sans_code_technique(valeur)
+    if isinstance(valeur, list):
+        return [_texte_libre_sans_code(v) for v in valeur]
+    if isinstance(valeur, dict):
+        return {cle: _texte_libre_sans_code(v) for cle, v in valeur.items()}
+    return valeur
+
+
 def _entreprises_avec_fiche(service: ServiceBibliotheque, contexte: ContexteClient):
     """Entreprises du client, chacune avec sa dernière version de fiche."""
     resultat = []
@@ -317,6 +627,7 @@ def _entreprises_avec_fiche(service: ServiceBibliotheque, contexte: ContexteClie
                         "fiche_version_id": str(versions[0]["id"]),
                         "numero_version": int(versions[0]["numero_version"]),
                         "statut": str(versions[0]["statut"]),
+                        "statut_libelle": _statut_version_libelle(versions[0]["statut"]),
                     }
                     if versions
                     else None
@@ -324,6 +635,63 @@ def _entreprises_avec_fiche(service: ServiceBibliotheque, contexte: ContexteClie
             }
         )
     return resultat
+
+
+def _familles_affichees(etat: Mapping[str, Any]) -> list[dict[str, Any]]:
+    """Les neuf familles, avec un état **en français** et sa pastille."""
+    resultat = []
+    for famille in etat.get("familles", []):
+        statut = str(famille.get("statut") or StatutFamille.NON_COMMENCEE.value)
+        ligne = dict(famille)
+        ligne["statut_libelle"] = LIBELLES_STATUT_FAMILLE.get(statut, statut)
+        ligne["classe"] = CLASSES_STATUT_FAMILLE.get(statut, "attente")
+        resultat.append(ligne)
+    return resultat
+
+
+def _resume_avancement(familles: Sequence[Mapping[str, Any]]) -> dict[str, Any]:
+    """Avancement dit en métier : « N familles renseignées sur 9 », jamais un taux nu."""
+    total = len(familles) or 1
+    renseignees = sum(1 for f in familles if int(f.get("nb_elements") or 0) > 0)
+    vides = [f for f in familles if int(f.get("nb_elements") or 0) == 0]
+    return {
+        "nb_familles": len(familles),
+        "nb_familles_renseignees": renseignees,
+        "nb_familles_vides": len(vides),
+        "familles_vides_libelles": [str(f.get("libelle")) for f in vides],
+        "pourcentage": round(100 * renseignees / total, 1),
+    }
+
+
+def _consultations_pour_gabarit(
+    connexion: Connexion, contexte: ContexteClient
+) -> list[dict[str, Any]]:
+    """Consultations du client, avec statut et date **lisibles** à l'écran."""
+    resultat = []
+    for consultation in DepotConsultation(connexion).lister_pour_client(contexte):
+        ligne = dict(consultation)
+        statut = str(ligne.get("statut") or "")
+        ligne["statut_libelle"] = LIBELLES_STATUT_CONSULTATION.get(statut, "Déposé")
+        ligne["date_lisible"] = _date_lisible(ligne.get("date_creation"))
+        resultat.append(ligne)
+    return resultat
+
+
+def _libelles_documents(
+    request: Request, connexion: Connexion, contexte: ContexteClient, lignes
+) -> dict[str, str]:
+    """Identifiant de document → son libellé humain (aucun UUID à l'écran)."""
+    cle = obtenir_config(request).cle_chiffrement_maitresse
+    depot = DepotDocument(connexion, cle)
+    libelles: dict[str, str] = {}
+    for ligne in lignes:
+        document_id = str(ligne.get("source_document_id") or "")
+        if not document_id or document_id in libelles:
+            continue
+        document = depot.obtenir(contexte, document_id)
+        if document is not None:
+            libelles[document_id] = str(document["libelle"])
+    return libelles
 
 
 def _libelle_champ(champ: str) -> str:
@@ -370,6 +738,10 @@ def _definitions_pour_gabarit(service: ServiceBibliotheque, famille: str):
                 },
                 "references": references,
                 "champs_obligatoires": list(definition.champs_obligatoires),
+                # Champs de **liaison** (identifiants de documents) : ils sortent
+                # du formulaire de saisie — un humain ne tape pas un UUID — et
+                # restent consultables dans « Références techniques ».
+                "liaisons": [liaison.champ for liaison in definition.liaisons],
             }
         )
     return blocs
@@ -389,7 +761,7 @@ def ecran_connexion(
 ) -> Response:
     """Écran de connexion. Un compte est provisionné par l'exploitant, pas ici."""
     if _ouvrir_session(request, connexion) is not None:
-        return RedirectResponse("/bibliotheque", status_code=303)
+        return RedirectResponse("/accueil", status_code=303)
     return _rendre(request, "connexion.html")
 
 
@@ -412,7 +784,7 @@ def ouvrir_session(
             401,
         )
     config = obtenir_config(request)
-    reponse = RedirectResponse("/bibliotheque", status_code=303)
+    reponse = RedirectResponse("/accueil", status_code=303)
     reponse.set_cookie(
         key=NOM_COOKIE_SESSION,
         value=service.creer_cookie_session(identite),
@@ -430,6 +802,42 @@ def fermer_session() -> RedirectResponse:
     reponse = RedirectResponse("/connexion", status_code=303)
     reponse.delete_cookie(NOM_COOKIE_SESSION, path="/")
     return reponse
+
+
+# --------------------------------------------------------------------------- #
+# Accueil — ce que la plateforme apporte, et où en est l'utilisateur
+# --------------------------------------------------------------------------- #
+@router.get("/accueil", response_class=HTMLResponse)
+def ecran_accueil(
+    request: Request, connexion: Connexion = Depends(obtenir_connexion)
+) -> Response:
+    """Écran d'accueil : la promesse, l'avancement réel, une action principale."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    service = _bibliotheque(request, connexion, contexte)
+    entreprises = _entreprises_avec_fiche(service, contexte)
+
+    familles: list[dict[str, Any]] = []
+    if entreprises:
+        fiche = service.fiche_courante()
+        if fiche is not None:
+            familles = _familles_affichees(service.etat_avancement(str(fiche["id"])))
+
+    consultations = _consultations_pour_gabarit(connexion, contexte)
+    return _rendre(
+        request,
+        "accueil.html",
+        {
+            "ecran": "accueil",
+            "entreprises": entreprises,
+            "resume": {
+                **_resume_avancement(familles),
+                "nb_consultations": len(consultations),
+            },
+            "message_ok": _message_ok(request),
+        },
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -532,13 +940,17 @@ def ecran_bibliotheque(
         )
     fiche = service.fiche_courante()
     etat = service.etat_avancement(str(fiche["id"])) if fiche else None
+    familles = _familles_affichees(etat) if etat else []
     return _rendre(
         request,
         "bibliotheque.html",
         {
+            "ecran": "bibliotheque",
             "entreprises": entreprises,
             "fiche": fiche,
             "etat": etat,
+            "familles": familles,
+            "resume": _resume_avancement(familles),
             "message_ok": _message_ok(request),
             "erreur": _message_erreur_url(request),
         },
@@ -584,6 +996,49 @@ def valider_bibliotheque(
 
 
 # --------------------------------------------------------------------------- #
+# Import guidé — **enregistré avant `/bibliotheque/{famille}`** : Starlette essaie
+# les routes dans leur ordre de déclaration, et `/bibliotheque/import` doit être
+# reconnu comme un écran à part entière, pas comme le nom d'une famille.
+# --------------------------------------------------------------------------- #
+@router.get("/bibliotheque/import", response_class=HTMLResponse)
+def ecran_import_guide(
+    request: Request, connexion: Connexion = Depends(obtenir_connexion)
+) -> Response:
+    """Import guidé : dépôt des documents, propositions à valider **une par une**."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    return _rendre(
+        request,
+        "import_guide.html",
+        _contexte_import_guide(
+            request,
+            connexion,
+            contexte,
+            erreur=_message_erreur_url(request),
+            message_ok=_message_ok(request),
+        ),
+    )
+
+
+@router.post("/bibliotheque/import", response_class=HTMLResponse)
+async def traiter_import(
+    request: Request, connexion: Connexion = Depends(obtenir_connexion)
+) -> Response:
+    """Un seul chemin POST : lire un document déposé, ou décider d'une proposition."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    formulaire = await request.form()
+    action = str(formulaire.get("action") or "analyser").strip().casefold()
+    if action in ("accepter", "refuser"):
+        return _decider_proposition_import(
+            request, connexion, contexte, formulaire, action
+        )
+    return await _analyser_document_importe(request, connexion, contexte, formulaire)
+
+
+# --------------------------------------------------------------------------- #
 # Bibliothèque : une famille
 # --------------------------------------------------------------------------- #
 @router.get("/bibliotheque/{famille}", response_class=HTMLResponse)
@@ -612,17 +1067,27 @@ def ecran_famille(
         statut_fiche = service.versionnement.statut_fiche(fiche_version_id)
     except (ErreurBibliotheque, ErreurVersionnement) as exc:
         return _erreur_html(request, 404, str(exc))
+    definitions = _definitions_pour_gabarit(service, famille)
+    documents = _libelles_documents(
+        request,
+        connexion,
+        contexte,
+        [ligne for lignes in contenu["elements"].values() for ligne in lignes],
+    )
+    _enrichir_lignes(contenu, definitions, documents)
     return _rendre(
         request,
         "famille.html",
         {
+            "ecran": "bibliotheque",
             "famille": famille,
             "libelle": LIBELLES_FAMILLES.get(famille, famille),
             "fiche_version_id": fiche_version_id,
             "contenu": contenu,
-            "statut_fiche": statut_fiche,
-            "definitions": _definitions_pour_gabarit(service, famille),
+            "statut_fiche": _statut_version_libelle(statut_fiche),
+            "definitions": definitions,
             "saisie": {},
+            "documents": documents,
             "message_ok": _message_ok(request),
             "erreur": _message_erreur_url(request),
         },
@@ -720,9 +1185,9 @@ def ecran_consultations(
         request,
         "consultations.html",
         {
+            "ecran": "consultations",
             "entreprises": _entreprises_avec_fiche(service, contexte),
-            "consultations": DepotConsultation(connexion).lister_pour_client(contexte),
-            "fournisseur": os.environ.get("MODELE_FOURNISSEUR", "factice"),
+            "consultations": _consultations_pour_gabarit(connexion, contexte),
             "message_ok": _message_ok(request),
             "erreur": _message_erreur_url(request),
         },
@@ -776,11 +1241,9 @@ async def fournir_document(
             request,
             "consultations.html",
             {
+                "ecran": "consultations",
                 "entreprises": _entreprises_avec_fiche(service, contexte),
-                "consultations": DepotConsultation(connexion).lister_pour_client(
-                    contexte
-                ),
-                "fournisseur": os.environ.get("MODELE_FOURNISSEUR", "factice"),
+                "consultations": _consultations_pour_gabarit(connexion, contexte),
                 "erreur": erreur,
             },
             400,
@@ -806,13 +1269,21 @@ def ecran_consultation(
         lecture = analyse_dce.lire_consultation(connexion, contexte, consultation_id)
     except ConsultationIntrouvable as exc:
         return _erreur_html(request, 404, str(exc))
+    consultation = dict(lecture["consultation"])
+    consultation["date_lisible"] = _date_lisible(consultation.get("date_creation"))
+    elements = []
+    for element in lecture["elements"]:
+        ligne = dict(element)
+        ligne["valeur_lisible"] = _date_lisible(ligne.get("valeur"))
+        elements.append(ligne)
     return _rendre(
         request,
         "consultation.html",
         {
-            "consultation": lecture["consultation"],
+            "ecran": "consultations",
+            "consultation": consultation,
             "document": lecture["document"],
-            "elements": lecture["elements"],
+            "elements": elements,
             "elements_non_trouves": lecture["elements_non_trouves"],
             "categories": analyse_dce.LIBELLES_CATEGORIES,
             "message_ok": _message_ok(request),
@@ -905,6 +1376,607 @@ async def executer_checklist(
     )
 
 
+# --------------------------------------------------------------------------- #
+# Lot L5b — import guidé : aides de rendu
+# --------------------------------------------------------------------------- #
+def _poids_lisible(poids: Any) -> Optional[str]:
+    """Pondération affichée à la française, sans zéro inutile (« 40 », pas « 40.00 »)."""
+    if poids in (None, ""):
+        return None
+    try:
+        nombre = Decimal(str(poids))
+    except (InvalidOperation, ValueError):
+        return str(poids)
+    return format(nombre.normalize(), "f")
+
+
+def _proposition_pour_gabarit(ligne: Mapping[str, Any]) -> dict[str, Any]:
+    """Une proposition d'import, prête à l'écran : libellés métier, champs saisissables.
+
+    Deux retraits volontaires :
+    * un champ dont la valeur est un **identifiant de document** n'est pas montré comme
+      une saisie (on ne tape pas d'identifiant interne) — il est rattaché
+      automatiquement au document importé à l'acceptation ;
+    * les noms d'entité et de famille sont remplacés par leurs libellés français.
+    """
+    proposition = dict(ligne)
+    entite = str(proposition.get("entite_cible") or "")
+    champs = dict(proposition.get("champs_proposes") or {})
+    try:
+        definition = definition_entite(entite)
+        libelle_entite = definition.libelle
+        famille = definition.famille
+        obligatoires = list(definition.champs_obligatoires)
+    except KeyError:  # pragma: no cover — le service refuse déjà ces propositions
+        libelle_entite = entite.replace("_", " ")
+        famille = str(proposition.get("famille") or "")
+        obligatoires = []
+
+    champs_affiches = []
+    for champ, valeur in champs.items():
+        texte = str(valeur)
+        est_reference = bool(_MOTIF_UUID.match(texte))
+        champs_affiches.append(
+            {
+                "champ": champ,
+                "libelle": _libelle_champ(champ),
+                "valeur": "" if est_reference else texte,
+                "reference_document": est_reference,
+            }
+        )
+    manquants = [champ for champ in obligatoires if not champs.get(champ)]
+    emplacement = str(proposition.get("source_emplacement") or "")
+    proposition.update(
+        {
+            "entite": entite,
+            "entite_libelle": libelle_entite,
+            "famille_libelle": LIBELLES_FAMILLES.get(famille, famille),
+            "champs_affiches": champs_affiches,
+            "champs_manquants_libelles": [_libelle_champ(c) for c in manquants],
+            "complet": not manquants,
+            # L'emplacement vient du document ; le nom d'entité qu'il peut citer est
+            # une écriture de code : il est remplacé par son libellé français.
+            "source_emplacement_lisible": (
+                emplacement.replace(entite, libelle_entite) if entite else emplacement
+            ),
+        }
+    )
+    return proposition
+
+
+def _propositions_import(
+    connexion: Connexion, contexte: ContexteClient
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Propositions du client : celles à décider (une par une) et celles déjà décidées."""
+    en_attente: list[dict[str, Any]] = []
+    decidees: list[dict[str, Any]] = []
+    for entree in import_guide.lister_imports(connexion, contexte):
+        detail = import_guide.lire_import_document(connexion, contexte, str(entree["id"]))
+        document = detail.get("document") or {}
+        libelle_document = str(
+            document.get("libelle")
+            or entree.get("document_libelle")
+            or "document importé"
+        )
+        for proposition in detail.get("propositions") or []:
+            statut = str(proposition.get("statut") or "")
+            item = {
+                "proposition": _proposition_pour_gabarit(proposition),
+                "document_libelle": libelle_document,
+            }
+            if statut == "propose":
+                en_attente.append(item)
+                continue
+            item.update(
+                {
+                    "statut_libelle": LIBELLES_DECISION_PROPOSITION.get(statut, statut),
+                    "classe": "ok" if statut == "acceptee" else "attente",
+                    "decision_le": _date_lisible(proposition.get("date_decision")),
+                    "decide_par": str(proposition.get("decide_par") or ""),
+                }
+            )
+            decidees.append(item)
+    return en_attente, decidees
+
+
+def _contexte_import_guide(
+    request: Request,
+    connexion: Connexion,
+    contexte: ContexteClient,
+    *,
+    erreur: Optional[str] = None,
+    conseil: Optional[str] = None,
+    message_ok: Optional[str] = None,
+) -> dict[str, Any]:
+    """Tout ce que l'écran d'import affiche : dépôt, propositions, état d'avancement."""
+    service = _bibliotheque(request, connexion, contexte)
+    entreprises = _entreprises_avec_fiche(service, contexte)
+    fiche = service.fiche_courante() if entreprises else None
+    donnees: dict[str, Any] = {
+        "ecran": "bibliotheque",
+        "entreprises": entreprises,
+        "familles": [
+            {"code": code, "libelle": LIBELLES_FAMILLES.get(code, code)}
+            for code in FAMILLES_IMPORT
+        ],
+        "sans_fiche": fiche is None,
+        "en_attente": [],
+        "prochain": None,
+        "decidees": [],
+        "avancement": None,
+        "erreur": erreur,
+        "conseil": conseil,
+        "message_ok": message_ok,
+    }
+    if fiche is None:
+        return donnees
+    en_attente, decidees = _propositions_import(connexion, contexte)
+    avancement = import_guide.etat_avancement_utile(
+        connexion,
+        obtenir_config(request).cle_chiffrement_maitresse,
+        contexte,
+        str(fiche["id"]),
+    )
+    familles_avancement = []
+    for famille in avancement.get("familles", []):
+        ligne = dict(famille)
+        ligne["classe"] = "ok" if ligne.get("prete") else "attente"
+        familles_avancement.append(ligne)
+    donnees.update(
+        {
+            "en_attente": en_attente,
+            "prochain": en_attente[0] if en_attente else None,
+            "decidees": decidees,
+            "avancement": {**avancement, "familles": familles_avancement},
+        }
+    )
+    return donnees
+
+
+# --------------------------------------------------------------------------- #
+# Lot L5b — mémoire technique : aides de rendu
+# --------------------------------------------------------------------------- #
+def _source_pour_gabarit(source: Mapping[str, Any]) -> dict[str, str]:
+    """Une source citée : son libellé lisible, et la famille où elle se trouve.
+
+    Le nom de **table** n'est jamais montré : il est traduit en nom de famille
+    française. L'emplacement technique reste disponible dans « Références techniques ».
+    """
+    table = str(source.get("table_source") or "")
+    famille = _ENTITE_VERS_FAMILLE.get(table)
+    return {
+        "libelle": str(source.get("libelle_source") or ""),
+        "famille_libelle": LIBELLES_FAMILLES.get(famille, "") if famille else "",
+        "detail": str(source.get("emplacement_source") or ""),
+    }
+
+
+def _sections_pour_gabarit(sections: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Sections du mémoire, avec leur état dit en métier et les actions permises."""
+    resultat = []
+    for section in sections:
+        statut = str(section.get("statut") or "brouillon")
+        if statut == "brouillon":
+            actions = [
+                {"statut": "relue", "libelle": "Relire cette section",
+                 "classe": "btn btn--secondaire"},
+            ]
+        elif statut == "relue":
+            actions = [
+                {"statut": "validee", "libelle": "Valider cette section",
+                 "classe": "btn btn--secondaire"},
+                {"statut": "brouillon", "libelle": "Marquer à corriger",
+                 "classe": "btn btn--discret"},
+            ]
+        else:
+            actions = [
+                {"statut": "relue", "libelle": "Remettre en relecture",
+                 "classe": "btn btn--discret"},
+            ]
+        resultat.append(
+            {
+                **dict(section),
+                "statut_libelle": LIBELLES_STATUT_SECTION_MEMOIRE.get(statut, statut),
+                "classe": CLASSES_STATUT_SECTION_MEMOIRE.get(statut, "attente"),
+                "poids_lisible": _poids_lisible(section.get("critere_poids")),
+                "sources_affichees": [
+                    _source_pour_gabarit(s) for s in (section.get("sources") or [])
+                ],
+                "statut_le_lisible": _date_lisible(section.get("statut_le")),
+                "actions": actions,
+            }
+        )
+    return resultat
+
+
+def _manques_pour_gabarit(manques: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Manques du mémoire : le constat, l'action à mener, et où l'information s'ajoute."""
+    resultat = []
+    for manque in manques:
+        familles = familles_pour_critere(manque.get("critere_libelle"))
+        cible = familles[0] if familles else None
+        resultat.append(
+            {
+                **dict(manque),
+                "poids_lisible": _poids_lisible(manque.get("critere_poids")),
+                "familles_cibles": list(familles),
+                "famille_cible": cible,
+                "famille_cible_libelle": LIBELLES_FAMILLES.get(cible) if cible else None,
+                "hors_perimetre": not familles,
+            }
+        )
+    return resultat
+
+
+def _contexte_memoire(
+    request: Request,
+    connexion: Connexion,
+    contexte: ContexteClient,
+    consultation: Mapping[str, Any],
+    elements: Sequence[Mapping[str, Any]],
+    *,
+    erreur: Optional[str] = None,
+    conseil: Optional[str] = None,
+    message_ok: Optional[str] = None,
+) -> dict[str, Any]:
+    """Tout ce que l'écran du mémoire affiche : sections, sources, manques, validation."""
+    criteres = [dict(e) for e in elements if str(e.get("categorie")) == "critere"]
+    acceptes = [c for c in criteres if str(c.get("statut_verification")) == "valide"]
+    donnees: dict[str, Any] = {
+        "ecran": "consultations",
+        "consultation": dict(consultation),
+        "nb_criteres": len(criteres),
+        "nb_criteres_acceptes": len(acceptes),
+        "memoire": None,
+        "sections": [],
+        "manques": [],
+        "validations": [],
+        "sections_a_relire": [],
+        "pret_a_valider": False,
+        "valide": False,
+        "erreur": erreur,
+        "conseil": conseil,
+        "message_ok": message_ok,
+    }
+    try:
+        memoire = memoire_technique.lire_memoire(
+            connexion, contexte, str(consultation["id"])
+        )
+    except MemoireIntrouvable:
+        return donnees
+
+    dossier = dict(memoire["dossier"])
+    statut = str(dossier.get("statut") or "brouillon")
+    sections = _sections_pour_gabarit(memoire["sections"])
+    a_relire = [s for s in sections if str(s.get("statut")) == "brouillon"]
+    validations = []
+    for validation in memoire.get("validations") or []:
+        ligne = dict(validation)
+        ligne["horodatage_lisible"] = _date_lisible(ligne.get("horodatage"))
+        validations.append(ligne)
+    donnees.update(
+        {
+            "memoire": {
+                "dossier": dossier,
+                "titre": str(dossier.get("titre") or "Mémoire technique"),
+                "statut_libelle": LIBELLES_STATUT_DOSSIER_MEMOIRE.get(statut, statut),
+                "classe": CLASSES_STATUT_DOSSIER_MEMOIRE.get(statut, "attente"),
+                "genere_le": _date_lisible(dossier.get("date_creation")),
+                "avertissement": str(dossier.get("avertissement") or ""),
+                "resume": dict(memoire.get("resume") or {}),
+            },
+            "sections": sections,
+            "manques": _manques_pour_gabarit(memoire["manques"]),
+            "validations": validations,
+            "sections_a_relire": a_relire,
+            "pret_a_valider": bool(sections) and not a_relire,
+            "valide": statut == "valide",
+        }
+    )
+    return donnees
+
+
+# --------------------------------------------------------------------------- #
+# Import guidé : aides de rendu et corps des routes
+# (les deux routes HTTP sont enregistrées plus haut, avant `/bibliotheque/{famille}`)
+# --------------------------------------------------------------------------- #
+def _decider_proposition_import(
+    request: Request,
+    connexion: Connexion,
+    contexte: ContexteClient,
+    formulaire: Mapping[str, Any],
+    action: str,
+) -> Response:
+    """Accepter ou refuser une proposition — décision humaine **nommée** et horodatée."""
+    proposition_id = str(formulaire.get("proposition_id") or "").strip()
+    decide_par = str(formulaire.get("decide_par") or "").strip()
+    corrections = {
+        str(cle)[len("champ_"):]: str(valeur)
+        for cle, valeur in formulaire.items()
+        if isinstance(cle, str) and cle.startswith("champ_") and isinstance(valeur, str)
+    }
+    try:
+        import_guide.decider_proposition(
+            connexion,
+            obtenir_config(request).cle_chiffrement_maitresse,
+            contexte,
+            proposition_id=proposition_id,
+            decision=action,
+            decide_par=decide_par,
+            corrections=corrections,
+        )
+    except ImportIntrouvable as exc:
+        connexion.annuler()
+        return _erreur_html(request, 404, str(exc))
+    except ErreurImportGuide as exc:
+        connexion.annuler()
+        return _rendre(
+            request,
+            "import_guide.html",
+            _contexte_import_guide(request, connexion, contexte, erreur=str(exc)),
+        )
+    ok = "proposition_acceptee" if action == "accepter" else "proposition_refusee"
+    return RedirectResponse(f"/bibliotheque/import?ok={ok}", status_code=303)
+
+
+async def _analyser_document_importe(
+    request: Request,
+    connexion: Connexion,
+    contexte: ContexteClient,
+    formulaire: Mapping[str, Any],
+) -> Response:
+    """Dépôt → lecture → propositions sourcées en attente de décision."""
+
+    def _reecran(*, erreur: Optional[str] = None, conseil: Optional[str] = None) -> Response:
+        return _rendre(
+            request,
+            "import_guide.html",
+            _contexte_import_guide(
+                request, connexion, contexte, erreur=erreur, conseil=conseil
+            ),
+        )
+
+    famille_cible = str(formulaire.get("famille_cible") or "").strip()
+    if famille_cible not in FAMILLES_IMPORT:
+        return _reecran(
+            erreur="Choisissez la famille dans laquelle ranger ce document : sans "
+            "elle, l'outil ne sait pas où écrire."
+        )
+    fichier = formulaire.get("fichier")
+    nom_fichier = str(getattr(fichier, "filename", "") or "")
+    if fichier is None or not nom_fichier:
+        return _reecran(
+            erreur="Aucun fichier reçu. Choisissez un document PDF ou texte, puis "
+            "relancez la lecture."
+        )
+    service = _bibliotheque(request, connexion, contexte)
+    fiche = service.fiche_courante()
+    if fiche is None:
+        return _reecran(
+            erreur="Votre bibliothèque n'existe pas encore : créez d'abord votre "
+            "entreprise et sa fiche."
+        )
+    contenu = await fichier.read()
+    if not contenu:
+        return _reecran(erreur="Fichier vide : il n'y a rien à lire.")
+    if len(contenu) > TAILLE_MAX_DOCUMENT:
+        return _reecran(
+            erreur=f"Fichier refusé : supérieur à {TAILLE_MAX_DOCUMENT // (1024 * 1024)} Mo."
+        )
+    try:
+        import_guide.importer_document(
+            connexion,
+            contexte,
+            _stockage(request),
+            fiche_version_id=str(fiche["id"]),
+            famille_cible=famille_cible,
+            nom_fichier=nom_fichier,
+            contenu=contenu,
+            type_mime=getattr(fichier, "content_type", None),
+        )
+    except ImportNonValidable as exc:
+        # Refus explicite du garde-fou anti-invention : un résultat, pas une panne.
+        connexion.annuler()
+        return _reecran(conseil=str(exc))
+    except ErreurFournisseurModele:
+        # La lecture automatique n'est pas active sur cette installation : on le dit
+        # en français, sans jargon d'architecture, et rien n'est enregistré.
+        connexion.annuler()
+        return _reecran(
+            conseil="La lecture automatique de vos documents n'est pas active sur cette "
+            "installation : aucun élément ne peut en être tiré pour l'instant. Votre "
+            "document n'a pas été enregistré. Vous pouvez saisir les informations à la "
+            "main dans votre bibliothèque, ou recommencer plus tard."
+        )
+    except (ErreurImportGuide, ErreurAnalyseDce, ErreurDepot, ErreurBibliotheque) as exc:
+        connexion.annuler()
+        return _reecran(erreur=str(exc))
+    return RedirectResponse("/bibliotheque/import?ok=import_depose", status_code=303)
+
+
+# --------------------------------------------------------------------------- #
+# Mémoire technique : génération, relecture, validation (chemins gelés § 2.D)
+# --------------------------------------------------------------------------- #
+def _charger_consultation_ecran(
+    request: Request,
+    connexion: Connexion,
+    contexte: ContexteClient,
+    consultation_id: str,
+) -> tuple[Optional[dict[str, Any]], Optional[list[dict[str, Any]]], Optional[Response]]:
+    """Charge l'analyse de la consultation ; 404 si elle appartient à un autre client."""
+    try:
+        lecture = analyse_dce.lire_consultation(connexion, contexte, consultation_id)
+    except ConsultationIntrouvable as exc:
+        return None, None, _erreur_html(request, 404, str(exc))
+    consultation = dict(lecture["consultation"])
+    consultation["date_lisible"] = _date_lisible(consultation.get("date_creation"))
+    return consultation, [dict(e) for e in lecture["elements"]], None
+
+
+@router.get("/consultations/{consultation_id}/memoire", response_class=HTMLResponse)
+def ecran_memoire(
+    request: Request,
+    consultation_id: str,
+    connexion: Connexion = Depends(obtenir_connexion),
+) -> Response:
+    """Mémoire généré : sections dans l'ordre des critères, sources citées, manques."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    consultation, elements, reponse = _charger_consultation_ecran(
+        request, connexion, contexte, consultation_id
+    )
+    if reponse is not None:
+        return reponse
+    return _rendre(
+        request,
+        "memoire.html",
+        _contexte_memoire(
+            request,
+            connexion,
+            contexte,
+            consultation,  # type: ignore[arg-type]
+            elements or [],
+            erreur=_message_erreur_url(request),
+            message_ok=_message_ok(request),
+        ),
+    )
+
+
+@router.post("/consultations/{consultation_id}/memoire", response_class=HTMLResponse)
+def demander_memoire(
+    request: Request,
+    consultation_id: str,
+    titre: Optional[str] = Form(None),
+    connexion: Connexion = Depends(obtenir_connexion),
+) -> Response:
+    """Demande de génération — le plan suit les critères acceptés du dossier."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    try:
+        memoire_technique.generer_memoire(
+            connexion,
+            obtenir_config(request).cle_chiffrement_maitresse,
+            contexte,
+            consultation_id=consultation_id,
+            titre=(titre or None),
+        )
+    except MemoireIntrouvable as exc:
+        connexion.annuler()
+        return _erreur_html(request, 404, str(exc))
+    except ErreurMemoire as exc:
+        connexion.annuler()
+        consultation, elements, reponse = _charger_consultation_ecran(
+            request, connexion, contexte, consultation_id
+        )
+        if reponse is not None:
+            return reponse
+        return _rendre(
+            request,
+            "memoire.html",
+            _contexte_memoire(
+                request,
+                connexion,
+                contexte,
+                consultation,  # type: ignore[arg-type]
+                elements or [],
+                conseil=str(exc),
+            ),
+        )
+    return RedirectResponse(
+        f"/consultations/{quote(consultation_id)}/memoire?ok=memoire_genere",
+        status_code=303,
+    )
+
+
+@router.post(
+    "/consultations/{consultation_id}/memoire/sections/{section_id}",
+    response_class=HTMLResponse,
+)
+async def statut_section_memoire(
+    request: Request,
+    consultation_id: str,
+    section_id: str,
+    connexion: Connexion = Depends(obtenir_connexion),
+) -> Response:
+    """Relire, valider ou remettre à corriger **une section** — humain nommé exigé."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    formulaire = await request.form()
+    statut = str(formulaire.get("statut") or "").strip().casefold()
+    par = str(formulaire.get("par") or "").strip()
+    try:
+        memoire = memoire_technique.lire_memoire(connexion, contexte, consultation_id)
+    except MemoireIntrouvable as exc:
+        return _erreur_html(request, 404, str(exc))
+    # La section doit appartenir à un mémoire **de cette consultation** : 404 sinon.
+    if section_id not in {str(s["id"]) for s in memoire["sections"]}:
+        return _erreur_html(request, 404, "Section introuvable pour ce mémoire.")
+    try:
+        memoire_technique.changer_statut_section(
+            connexion, contexte, section_id=section_id, statut=statut, par=par
+        )
+    except MemoireIntrouvable as exc:
+        connexion.annuler()
+        return _erreur_html(request, 404, str(exc))
+    except ErreurMemoire as exc:
+        connexion.annuler()
+        return RedirectResponse(
+            f"/consultations/{quote(consultation_id)}/memoire?erreur={quote(str(exc))}",
+            status_code=303,
+        )
+    message = {
+        "relue": "section_relue",
+        "validee": "section_validee",
+        "brouillon": "section_a_corriger",
+    }.get(statut, "")
+    return RedirectResponse(
+        f"/consultations/{quote(consultation_id)}/memoire?ok={message}", status_code=303
+    )
+
+
+@router.post(
+    "/consultations/{consultation_id}/memoire/validation",
+    response_class=HTMLResponse,
+)
+async def valider_memoire(
+    request: Request,
+    consultation_id: str,
+    connexion: Connexion = Depends(obtenir_connexion),
+) -> Response:
+    """Validation **nommée et horodatée** du mémoire entier — obligatoire avant export."""
+    if _ouvrir_session(request, connexion) is None:
+        return _redirection_connexion(request)
+    contexte = request.state.contexte_client
+    formulaire = await request.form()
+    try:
+        memoire = memoire_technique.lire_memoire(connexion, contexte, consultation_id)
+    except MemoireIntrouvable as exc:
+        return _erreur_html(request, 404, str(exc))
+    dossier_id = str(memoire["dossier"]["id"])
+    try:
+        memoire_technique.valider_dossier(
+            connexion,
+            contexte,
+            dossier_id=dossier_id,
+            nom_validateur=str(formulaire.get("nom_validateur") or ""),
+            fonction_validateur=str(formulaire.get("fonction_validateur") or ""),
+            format_export=(str(formulaire.get("format_export") or "") or None),
+        )
+    except ErreurMemoire as exc:
+        connexion.annuler()
+        return RedirectResponse(
+            f"/consultations/{quote(consultation_id)}/memoire?erreur={quote(str(exc))}",
+            status_code=303,
+        )
+    return RedirectResponse(
+        f"/consultations/{quote(consultation_id)}/memoire?ok=memoire_valide",
+        status_code=303,
+    )
+
+
 @router.get(
     "/consultations/{consultation_id}/checklist", response_class=HTMLResponse
 )
@@ -927,23 +1999,78 @@ def ecran_checklist(
             request,
             "checklist.html",
             {
+                "ecran": "consultations",
                 "consultation": lecture["consultation"],
                 "pas_de_checklist": True,
                 "message_ok": _message_ok(request),
             },
         )
+    lignes = [_ligne_checklist_sans_code(ligne) for ligne in resultat["lignes"]]
     return _rendre(
         request,
         "checklist.html",
         {
+            "ecran": "consultations",
             "consultation": resultat["consultation"],
             "execution": resultat["execution"],
-            "lignes": resultat["lignes"],
-            "contradictions": resultat["contradictions"],
-            "resume": resultat["resume"],
-            "avertissements": resultat["avertissements"],
+            "lignes": lignes,
+            "codes_retenus": _codes_retenus(resultat["lignes"]),
+            "contradictions": _texte_libre_sans_code(resultat["contradictions"]),
+            "resume": _texte_libre_sans_code(resultat["resume"]),
+            "avertissements": _texte_libre_sans_code(resultat["avertissements"]),
             "mention": resultat["mention"],
             "pas_de_checklist": False,
             "message_ok": _message_ok(request),
         },
     )
+
+
+# --------------------------------------------------------------------------- #
+# Dernier recours : une adresse inconnue montre la page d'erreur du produit
+# --------------------------------------------------------------------------- #
+async def gestionnaire_404(request: Request, exc: Exception) -> Response:
+    """Adresse inconnue : la page d'erreur du produit, pas le JSON de FastAPI.
+
+    Enregistré sur l'application par `app.main` (`add_exception_handler(404, …)`) :
+    un gestionnaire d'exception vit sur l'application, pas sur un routeur — c'est le
+    seul endroit d'où le `{"detail":"Not Found"}` par défaut peut être remplacé.
+
+    Deux garde-fous : le préfixe d'API et les fichiers statiques gardent **le
+    gestionnaire JSON d'origine de FastAPI** (contrats de l'annexe C, et le message
+    précis que la route a levé : « Provisionnez une entreprise », par exemple — un
+    message générique les effacerait). Et le message d'écran ne reprend ni l'adresse
+    demandée ni aucune donnée.
+    """
+    if request.url.path.startswith(("/api/", "/static/")):
+        if isinstance(exc, HTTPException):  # message et en-têtes de la route, intacts
+            return await http_exception_handler(request, exc)
+        return JSONResponse({"detail": "Not Found"}, status_code=404)
+    _poser_identite_sans_route(request)
+    return _erreur_html(
+        request,
+        404,
+        "Aucune route de l'application ne correspond à cette adresse.",
+    )
+
+
+def _poser_identite_sans_route(request: Request) -> None:
+    """Barre de navigation juste, même quand aucune route n'a pu lire la session.
+
+    Aucune route n'a été trouvée, donc aucune dépendance de route n'a posé
+    `request.state.identite` : sans ça, la page d'erreur afficherait la navigation
+    d'un visiteur déconnecté à un utilisateur connecté. On ouvre une connexion
+    **uniquement** si un cookie de session est présent, et toute erreur est sans
+    conséquence : la page d'erreur s'affiche de toute façon.
+    """
+    if not request.cookies.get(NOM_COOKIE_SESSION):
+        return
+    connexion: Optional[Connexion] = None
+    try:
+        config = obtenir_config(request)
+        connexion = Connexion(config.database_url).ouvrir()
+        _ouvrir_session(request, connexion)
+    except Exception:  # noqa: BLE001 — une page d'erreur ne doit jamais échouer
+        return
+    finally:
+        if connexion is not None:
+            connexion.fermer()

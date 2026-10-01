@@ -1,0 +1,353 @@
+{# Écran du mémoire technique (lot L5b, chemins gelés § 2.D).
+   HTML servi côté serveur, aucun JavaScript, aucune ressource tierce.
+
+   Ce que l'écran tient :
+   * sections dans l'ordre des critères pondérés du dossier ; chaque section porte
+     **ses sources** (élément de bibliothèque + famille), jamais un argument sans
+     source ;
+   * les manques ne sont **pas** des erreurs : bloc mis en avant (`.carte--conseil`),
+     constat + action à mener, et où l'information s'ajoute ;
+   * une seule action principale (`.btn--action`) : « Relire et valider » ;
+   * vocabulaire métier seulement (jamais « brouillon », « en_relecture », ni un
+     identifiant technique) ;
+   * aucun bouton de dépôt, d'envoi ou de signature, aucun prix. #}
+{% extends "base.html" %}
+{% block titre %}Mémoire technique{% endblock %}
+{% block contenu %}
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>{{ memoire.titre if memoire else "Votre mémoire technique" }}</h1>
+    <p class="sous-titre">Dossier&nbsp;: {{ consultation.libelle }}.
+       {% if memoire %}Monté le {{ memoire.genere_le }} à partir de votre bibliothèque.
+       Les sections suivent l'ordre des critères du dossier, du plus lourd au plus
+       léger.{% endif %}</p>
+  </div>
+  {% if memoire and sections %}
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="#relire-et-valider">Relire et valider</a>
+  </div>
+  {% endif %}
+</div>
+
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'action n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if conseil %}
+<div class="encart encart--attention" role="status">
+  <p class="encart__titre">Ce qu'il faut faire d'abord</p>
+  <p>{{ conseil }}</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+
+<p><a href="/consultations/{{ consultation.id }}">Revenir à l'analyse du dossier</a></p>
+
+{% if not memoire %}
+<div class="carte" id="generer">
+  <h2 class="carte__titre">Monter le mémoire technique</h2>
+  <p>Le plan du mémoire suit les critères d'attribution du dossier, du plus lourd au
+     plus léger. Une section n'est écrite que si elle s'appuie sur un élément réel de
+     votre bibliothèque&nbsp;: ce qui ne s'y trouve pas devient un manque écrit, jamais
+     un paragraphe inventé.</p>
+  <p><strong>{{ nb_criteres_acceptes }}</strong> critère{% if nb_criteres_acceptes > 1 %}s{% endif %}
+     d'attribution accepté{% if nb_criteres_acceptes > 1 %}s{% endif %} par vous,
+     sur {{ nb_criteres }} lu{% if nb_criteres > 1 %}s{% endif %} dans le dossier.</p>
+  {% if nb_criteres_acceptes == 0 %}
+  <div class="encart encart--attention" role="status">
+    <p class="encart__titre">Ce qu'il faut faire d'abord</p>
+    <p>Aucun critère d'attribution n'est encore accepté. Le plan suit les critères que
+       vous avez relus et acceptés&nbsp;: ouvrez l'analyse du dossier, relisez les
+       critères lus et acceptez-les.</p>
+    <div class="actions">
+      <a class="btn btn--principal btn--action" href="/consultations/{{ consultation.id }}">Ouvrir l'analyse du dossier</a>
+    </div>
+  </div>
+  {% else %}
+  <form method="post" action="/consultations/{{ consultation.id }}/memoire">
+    <div class="actions">
+      <button type="submit" class="btn btn--principal btn--action">Demander le mémoire technique</button>
+    </div>
+  </form>
+  {% endif %}
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Ce que le mémoire ne fera jamais</summary>
+    <div class="reponse">
+      <p>Il n'écrit aucun prix, aucun chiffre inventé, aucune conformité promise. Il ne
+         dépose aucun pli et ne signe rien&nbsp;: ce que vous produisez reste un
+         brouillon à relire et à signer.</p>
+    </div>
+  </details>
+</div>
+
+{% else %}
+
+<div class="carte">
+  <h2 class="carte__titre">Avancement du mémoire</h2>
+  <ul class="liste">
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">État du mémoire</span>
+        <span class="liste__complement">Un mémoire ne devient «&nbsp;Validé&nbsp;» que
+           par une validation nommée et horodatée.</span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--{{ memoire.classe }}">{{ memoire.statut_libelle }}</span>
+      </div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">{{ memoire.resume.nb_sections }} section{% if memoire.resume.nb_sections > 1 %}s{% endif %} rédigée{% if memoire.resume.nb_sections > 1 %}s{% endif %}</span>
+        <span class="liste__complement">{{ memoire.resume.nb_sections_relues }} relue{% if memoire.resume.nb_sections_relues > 1 %}s{% endif %},
+           {{ memoire.resume.nb_sections_validees }} validée{% if memoire.resume.nb_sections_validees > 1 %}s{% endif %}.</span>
+      </div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">{{ memoire.resume.nb_manques }} critère{% if memoire.resume.nb_manques > 1 %}s{% endif %} sans référence dans votre bibliothèque</span>
+        <span class="liste__complement">Chacun est listé plus bas avec l'action qui le
+           lèvera.</span>
+      </div>
+    </li>
+  </ul>
+  {% if not valide %}
+  <form method="post" action="/consultations/{{ consultation.id }}/memoire">
+    <div class="actions">
+      <button type="submit" class="btn btn--discret">Mettre à jour le mémoire après correction de la bibliothèque</button>
+    </div>
+  </form>
+  <p class="aide">Un mémoire mis à jour crée une version plus récente&nbsp;: la
+     précédente reste consultable telle qu'elle a été relue.</p>
+  {% endif %}
+</div>
+
+{% if manques %}
+<h2 id="manques">Ce qui manque, et ce que vous pouvez faire</h2>
+<div class="carte carte--conseil">
+  <p>Ces critères du dossier n'ont <strong>aucune référence correspondante dans votre
+     bibliothèque</strong>. L'outil ne les invente pas&nbsp;: il vous dit ce qui
+     manque et l'action qui le lèvera. C'est le point le plus utile de cette page.</p>
+  {% for m in manques %}
+  <div class="manque">
+    <p class="manque__titre">{{ m.critere_libelle }}{% if m.poids_lisible %} — {{ m.poids_lisible }}&nbsp;%{% endif %}</p>
+    <p class="manque__quoi"><span class="liste__libelle">Constat&nbsp;:</span> {{ m.constat }}</p>
+    <p class="manque__faire"><span class="liste__libelle">Pour renforcer ce critère&nbsp;:</span> {{ m.action_attendue }}</p>
+    {% if m.famille_cible %}
+    <div class="actions">
+      <a class="btn btn--secondaire" href="/bibliotheque/{{ m.famille_cible }}">Ajouter une information — {{ m.famille_cible_libelle }}</a>
+    </div>
+    {% else %}
+    <p class="aide">Ce critère ne se traite pas dans le mémoire technique&nbsp;: aucune
+       section n'est écrite ici pour lui.</p>
+    {% endif %}
+  </div>
+  {% endfor %}
+  <div class="actions">
+    <a class="btn btn--secondaire" href="/bibliotheque/import">Importer un document existant</a>
+  </div>
+</div>
+{% endif %}
+
+<h2>Le mémoire, critère par critère</h2>
+{% if sections %}
+{% for s in sections %}
+<div class="carte" id="section-{{ loop.index }}">
+  <h3>{{ s.critere_libelle }}{% if s.poids_lisible %} — {{ s.poids_lisible }}&nbsp;%{% endif %}</h3>
+  <p>
+    <span class="etat etat--{{ s.classe }}">{{ s.statut_libelle }}</span>
+    {% if s.statut_par and s.statut != 'brouillon' %}
+    <span class="liste__complement">le {{ s.statut_le_lisible }} par {{ s.statut_par }}</span>
+    {% endif %}
+  </p>
+  <div class="section-texte">{{ s.contenu }}</div>
+  {% if s.sources_affichees %}
+  <ul class="sources">
+    {% for source in s.sources_affichees %}
+    <li><span class="source-etiquette">Votre source&nbsp;:</span>
+        {{ source.libelle }}{% if source.famille_libelle %} — {{ source.famille_libelle }}{% endif %}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p class="aide">Aucune source&nbsp;: cette section ne devrait pas exister.</p>
+  {% endif %}
+  <form method="post" action="/consultations/{{ consultation.id }}/memoire/sections/{{ s.id }}">
+    <div class="champ">
+      <label for="par-{{ loop.index }}">Votre nom</label>
+      <p class="aide" id="aide-par-{{ loop.index }}">La relecture porte le nom de la
+         personne qui l'a faite et la date. Sans nom, aucune relecture n'est
+         enregistrée.</p>
+      <input type="text" id="par-{{ loop.index }}" name="par" required
+             autocomplete="name" aria-describedby="aide-par-{{ loop.index }}">
+    </div>
+    <div class="actions">
+      {% for a in s.actions %}
+      <button type="submit" name="statut" value="{{ a.statut }}" class="{{ a.classe }}">{{ a.libelle }}</button>
+      {% endfor %}
+    </div>
+  </form>
+</div>
+{% endfor %}
+
+<details class="pourquoi">
+  <summary>Pourquoi&nbsp;? Je ne peux pas réécrire le texte d'une section ici</summary>
+  <div class="reponse">
+    <p>Chaque phrase d'une section est construite à partir d'éléments réels de votre
+       bibliothèque, et la liste des sources juste en dessous dit lesquels. Réécrire le
+       texte librement le détacherait de ces sources&nbsp;— et un argument sans source
+       ne doit pas s'afficher comme un argument.</p>
+    <p>Pour corriger une section&nbsp;: corrigez ou complétez l'élément de votre
+       bibliothèque cité, puis demandez une mise à jour du mémoire. Une section qui ne
+       correspond plus à rien peut être remise en relecture.</p>
+  </div>
+</details>
+{% else %}
+<div class="encart encart--attention" role="status">
+  <p class="encart__titre">Aucune section rédigée pour l'instant</p>
+  <p>Aucun critère accepté du dossier n'a trouvé de référence dans votre
+     bibliothèque. Le mémoire ne se remplit pas de paragraphes creux&nbsp;: les critères
+     concernés sont listés ci-dessus comme manques, avec l'action qui les lèvera.</p>
+</div>
+{% endif %}
+
+<div class="carte" id="relire-et-valider">
+  <h2 class="carte__titre">Relire et valider le mémoire</h2>
+  {% if pret_a_valider %}
+  <p>La validation porte votre nom, votre fonction et la date, et elle enregistre
+     l'empreinte du contenu validé. Si le contenu change ensuite, le téléchargement est
+     refusé et vous le savez. C'est elle qui autorise l'export.</p>
+  <form method="post" action="/consultations/{{ consultation.id }}/memoire/validation">
+    <div class="grille">
+      <div class="champ">
+        <label for="nom_validateur">Votre nom</label>
+        <p class="aide" id="aide-nom-validateur">Obligatoire&nbsp;: aucune validation
+           n'est enregistrée sans un humain nommé.</p>
+        <input type="text" id="nom_validateur" name="nom_validateur" required
+               autocomplete="name" aria-describedby="aide-nom-validateur">
+      </div>
+      <div class="champ">
+        <label for="fonction_validateur">Votre fonction</label>
+        <p class="aide" id="aide-fonction-validateur">Obligatoire&nbsp;: elle est reprise
+           avec la validation.</p>
+        <input type="text" id="fonction_validateur" name="fonction_validateur" required
+               aria-describedby="aide-fonction-validateur">
+      </div>
+      <div class="champ pleine">
+        <label for="format_export">Format de fichier souhaité</label>
+        <p class="aide" id="aide-format">Le téléchargement reprend le contenu validé,
+           tel quel. Le format Word sert à retravailler le document&nbsp;; le format
+           texte balisé sert de contrôle.</p>
+        <select id="format_export" name="format_export" aria-describedby="aide-format">
+          <option value="docx">Document Word (.docx)</option>
+          <option value="md">Texte balisé (.md)</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--secondaire">Enregistrer la validation du mémoire</button>
+    </div>
+  </form>
+  {% elif not sections %}
+  <div class="encart encart--attention" role="status">
+    <p class="encart__titre">Ce qu'il faut faire d'abord</p>
+    <p>Ce mémoire ne contient encore aucune section&nbsp;: il n'y a rien à valider.
+       Complétez votre bibliothèque — un critère accepté sans référence y gagnera une
+       section — puis demandez une mise à jour du mémoire.</p>
+    <div class="actions">
+      <a class="btn btn--secondaire" href="/bibliotheque/import">Importer un document existant</a>
+    </div>
+  </div>
+  {% else %}
+  <div class="encart encart--attention" role="status">
+    <p class="encart__titre">Il reste des sections à relire</p>
+    <p>{{ sections_a_relire | length }} section{% if sections_a_relire | length > 1 %}s{% endif %}
+       doi{% if sections_a_relire | length > 1 %}vent{% else %}t{% endif %} être
+       relue{% if sections_a_relire | length > 1 %}s{% endif %} avec votre nom avant de
+       pouvoir valider le mémoire&nbsp;: brouillon → relue → validée.</p>
+    <ul class="liste">
+      {% for s in sections_a_relire %}
+      <li>
+        <div class="liste__principal">
+          <span class="liste__libelle">{{ s.critere_libelle }}</span>
+          <span class="liste__complement">À relire dans cette page.</span>
+        </div>
+        <div class="liste__fin"><span class="etat etat--attente">À relire</span></div>
+      </li>
+      {% endfor %}
+    </ul>
+  </div>
+  {% endif %}
+  {% if validations %}
+  <p class="aide">Dernière validation&nbsp;: {{ validations[0].nom_validateur }}{% if validations[0].fonction_validateur %}, {{ validations[0].fonction_validateur }}{% endif %},
+     le {{ validations[0].horodatage_lisible }}.</p>
+  {% endif %}
+</div>
+
+<div class="carte">
+  <h2 class="carte__titre">Télécharger le mémoire</h2>
+  {% if valide and validations %}
+  <p>Le fichier reprend le contenu que vous avez relu et validé, avec les sources de
+     chaque argument. Il est enregistré sur votre ordinateur&nbsp;: l'outil n'envoie
+     rien à personne et ne signe rien.</p>
+  <ul class="liste">
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Document Word (.docx)</span>
+        <span class="liste__complement">À retravailler dans votre traitement de texte.</span>
+      </div>
+      <div class="liste__fin">
+        <a href="/consultations/{{ consultation.id }}/memoire/export?format=docx">Télécharger le document Word (.docx)</a>
+      </div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Texte balisé (.md)</span>
+        <span class="liste__complement">Format de contrôle, ouvrable partout.</span>
+      </div>
+      <div class="liste__fin">
+        <a href="/consultations/{{ consultation.id }}/memoire/export?format=md">Télécharger le fichier de contrôle (.md)</a>
+      </div>
+    </li>
+  </ul>
+  {% else %}
+  <p>Le téléchargement apparaîtra dès que le mémoire sera validé par un humain nommé.
+     Sans cette validation, l'export est refusé — c'est ce qui garantit qu'un humain a
+     relu le document.</p>
+  {% endif %}
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Le fichier ne part nulle part</summary>
+    <div class="reponse">
+      <p>Le téléchargement pose le fichier sur votre ordinateur, et rien d'autre.
+         L'outil n'envoie aucun pli à l'acheteur, ne signe rien et ne fixe aucun prix.</p>
+    </div>
+  </details>
+</div>
+
+{% if memoire.avertissement %}
+<div class="encart">
+  <p class="encart__titre">Ce que ce mémoire est, et ce qu'il n'est pas</p>
+  <p>Chaque affirmation est adossée à un élément réel de votre bibliothèque (voir ses
+     sources). Rien n'est signé, rien n'est garanti&nbsp;: un humain nommé doit le relire
+     et le valider avant tout usage. Aucune conformité n'est promise, aucun prix n'est
+     fixé.</p>
+</div>
+{% endif %}
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Titre enregistré&nbsp;: <code>{{ memoire.dossier.titre }}</code> —
+       statut <code>{{ memoire.dossier.statut }}</code>.</p>
+    {% for s in sections %}
+    <p>Section {{ s.ordre | int + 1 }} — <code>{{ s.id }}</code> ({{ s.critere_libelle }}){% if s.sources_affichees %} —
+       sources&nbsp;: {% for source in s.sources_affichees %}<code>{{ source.detail }}</code>{% if not loop.last %} ; {% endif %}{% endfor %}{% endif %}</p>
+    {% endfor %}
+    <p>Cette zone sert au support technique. Vous n'avez pas besoin de la lire.</p>
+  </div>
+</details>
+
+{% endif %}
+{% endblock %}

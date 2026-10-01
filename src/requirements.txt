@@ -21,3 +21,11 @@ itsdangerous==2.2.0         # signature du cookie de session
 # --- Tests --------------------------------------------------------------------
 pytest==9.1.1               # exécuteur de tests
 httpx==0.28.1               # client HTTP pour TestClient (tests d'API)
+
+# --- Export du mémoire (lot L6) -----------------------------------------------
+# Dépendance de CONFORT uniquement : le format canonique (.md) n'en dépend pas et
+# reste produit par la bibliothèque standard. Annoncée et justifiée dans
+# docs/MEMOIRE-TECHNIQUE.md § 8.2 AVANT installation. Pure Python ; lxml arrive en
+# roue précompilée (aucun compilateur requis). Si absente, l'export DOCX répond
+# « non disponible » avec sa raison et le lot Markdown reste valide.
+python-docx==1.2.0          # écriture .docx (format de confort)

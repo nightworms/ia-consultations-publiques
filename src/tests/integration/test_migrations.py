@@ -13,7 +13,7 @@ from __future__ import annotations
 import pytest
 
 from app.storage.connexion import ConnexionAdministration
-from app.storage.migrations import ExecuteurMigrations
+from app.storage.migrations import ExecuteurMigrations, lister_migrations
 
 from .conftest import URL_MAINTENANCE, URL_MIGRATIONS
 
@@ -72,8 +72,11 @@ def test_up_puis_down_de_chaque_migration(base_dediee):
     admin = ConnexionAdministration(base_dediee).ouvrir()
     try:
         # -- up ------------------------------------------------------------ #
+        # Modifié par le lot L3 (phase 4) : la séquence n'est plus écrite en dur —
+        # elle est lue dans le dossier de migrations, donc vrai à chaque ajout de lot.
+        attendues = [m.numero for m in lister_migrations()]
         appliquees = executeur.up()
-        assert appliquees == ["0001", "0002", "0003", "0004"], appliquees
+        assert appliquees == attendues, appliquees
         n_plein = _nb_tables(admin)
         assert _table_existe(admin, "client")
         assert _table_existe(admin, "entreprise")
@@ -86,38 +89,43 @@ def test_up_puis_down_de_chaque_migration(base_dediee):
         assert _table_existe(admin, "checklist_execution")  # 0004
         assert _table_existe(admin, "checklist_ligne")  # 0004
 
-        # -- 0004 : down puis structure retirée ---------------------------- #
-        assert executeur.down(1) == ["0004"]
-        assert not _table_existe(admin, "checklist_ligne")
-        assert not _table_existe(admin, "checklist_execution")
-        assert _table_existe(admin, "consultation")  # 0003 encore là
-
-        # -- 0003 : down --------------------------------------------------- #
-        assert executeur.down(1) == ["0003"]
-        assert not _table_existe(admin, "extraction_element")
-        assert not _table_existe(admin, "consultation")
-        assert not _colonne_existe(admin, "document", "nature")
-        assert _table_existe(admin, "fiche_version")  # 0001 encore là
-
-        # -- 0002 : down --------------------------------------------------- #
-        assert executeur.down(1) == ["0002"]
-        assert not _table_existe(admin, "assurance")
-        assert _table_existe(admin, "entreprise")  # 0001 encore là
-
-        # -- 0001 : down --------------------------------------------------- #
-        assert executeur.down(1) == ["0001"]
-        assert not _table_existe(admin, "client")
+        # -- down complet, une migration à la fois, dans l'ordre inverse ---- #
+        # Conditions attendues après l'annulation d'un numéro donné (celles que le
+        # test vérifiait autrefois en dur, désormais déclenchées par numéro).
+        etapes = {
+            "0004": lambda: (
+                not _table_existe(admin, "checklist_ligne")
+                and not _table_existe(admin, "checklist_execution")
+                and _table_existe(admin, "consultation")  # 0003 encore là
+            ),
+            "0003": lambda: (
+                not _table_existe(admin, "extraction_element")
+                and not _table_existe(admin, "consultation")
+                and not _colonne_existe(admin, "document", "nature")
+                and _table_existe(admin, "fiche_version")  # 0001 encore là
+            ),
+            "0002": lambda: (
+                not _table_existe(admin, "assurance")
+                and _table_existe(admin, "entreprise")  # 0001 encore là
+            ),
+            "0001": lambda: not _table_existe(admin, "client"),
+        }
+        for numero in reversed(attendues):
+            assert executeur.down(1) == [numero], f"annulation inattendue de {numero}"
+            controle = etapes.get(numero)
+            if controle is not None:
+                assert controle(), f"état inattendu après l'annulation de {numero}"
         assert _nb_tables(admin) == 1  # seul reste `schema_migration`
 
         # -- remontée complète : la base revient à l'état plein ------------- #
         remontees = executeur.up()
-        assert remontees == ["0001", "0002", "0003", "0004"], remontees
+        assert remontees == attendues, remontees
         assert _nb_tables(admin) == n_plein
         assert _table_existe(admin, "client")
         assert _table_existe(admin, "checklist_ligne")
         assert _colonne_existe(admin, "document", "nature")
 
         print(f"\n[migrations] tables après up complet : {n_plein}")
-        print("[migrations] séquence up/down rejouée : 0001, 0002, 0003, 0004")
+        print("[migrations] séquence up/down rejouée : " + ", ".join(attendues))
     finally:
         admin.fermer()

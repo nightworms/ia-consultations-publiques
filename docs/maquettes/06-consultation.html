@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dossier de consultation — maquette</title>
+<style>
+/* ==========================================================================
+   Feuille de style unique — interface de réponse aux consultations publiques.
+   Livrée par le lot L4 (designer) pour être reprise telle quelle par dev-web.
+
+   Principes tenus ici :
+   - HTML servi côté serveur, aucun JavaScript, aucune ressource externe ;
+   - une action principale par écran (classe .btn--action), une seule ;
+   - aucun état porté par la couleur seule : chaque couleur accompagne un mot ;
+   - contrastes vérifiés (WCAG AA / RGAA), focus visible partout ;
+   - mobile d'abord : la mise en page tient à 320 px sans défilement horizontal.
+   ========================================================================== */
+
+:root {
+  --encre:        #16202b;   /* texte principal          — 16,5:1 sur blanc */
+  --encre-2:      #4a5768;   /* texte secondaire         —  7,4:1 sur blanc */
+  --fond:         #f2f4f7;
+  --carte:        #ffffff;
+  --bord:         #c9d2dc;
+  --bord-fort:    #788799;   /* bordures de champs        —  3,7:1 sur blanc */
+  --accent:       #14507a;   /* bouton principal         —  8,5:1 sur blanc */
+  --accent-fonce: #0d3554;   /* bandeau, survols         — 12,7:1 sur blanc */
+  --accent-clair: #e8f0f7;
+  --ok-t:         #125c37;   --ok-f:  #e6f4ec;   --ok-b:  #9fd0b4;
+  --att-t:        #7a4f00;   --att-f: #fdf3e0;   --att-b: #e6c489;
+  --err-t:        #9b2c12;   --err-f: #fdeee9;   --err-b: #e9b3a3;
+  --info-f:       #eef3f8;
+  --rayon:        8px;
+  --rayon-s:      6px;
+  --ombre: 0 1px 2px rgba(16,32,48,.06), 0 2px 10px rgba(16,32,48,.05);
+}
+
+* { box-sizing: border-box; }
+html { font-size: 100%; -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--fond);
+  color: var(--encre);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+               "Helvetica Neue", Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+/* --- Accessibilité : lien d'évitement, focus visible, contenu réservé ------ */
+.lien-evitement {
+  position: absolute; left: -9999px; top: 0; z-index: 20;
+  background: var(--accent-fonce); color: #fff; padding: .6rem 1rem;
+}
+.lien-evitement:focus { left: 0; }
+a:focus-visible, button:focus-visible, input:focus-visible,
+select:focus-visible, textarea:focus-visible, summary:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--accent-fonce); outline-offset: 2px;
+}
+.visuellement-cache {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* --- Bandeau -------------------------------------------------------------- */
+.bandeau { background: var(--accent-fonce); color: #fff; }
+.bandeau__int {
+  max-width: 68rem; margin: 0 auto; padding: .6rem 1rem;
+  display: flex; flex-wrap: wrap; gap: .5rem 1rem;
+  align-items: center; justify-content: space-between;
+}
+.bandeau__marque {
+  color: #fff; text-decoration: none; font-weight: 700; font-size: 1.05rem;
+  padding: .3rem 0;
+}
+.bandeau nav { display: flex; flex-wrap: wrap; gap: .15rem; align-items: center; }
+.bandeau nav a {
+  color: #fff; text-decoration: none; padding: .45rem .6rem;
+  border-radius: var(--rayon-s); font-size: .95rem;
+}
+.bandeau nav a:hover { background: rgba(255,255,255,.14); }
+.bandeau nav a[aria-current="page"] {
+  background: rgba(255,255,255,.2); text-decoration: underline;
+}
+.bandeau nav .lien-quitter { border: 1px solid rgba(255,255,255,.55); }
+.bandeau nav form { margin: 0; display: inline; }
+.bandeau nav button {
+  font: inherit; font-size: .95rem; cursor: pointer;
+  background: none; color: #fff; border: 1px solid rgba(255,255,255,.55);
+  border-radius: var(--rayon-s); padding: .45rem .6rem;
+}
+.bandeau nav button:hover { background: rgba(255,255,255,.14); }
+.bandeau__qui { font-size: .95rem; opacity: .95; }
+
+/* --- Mise en page --------------------------------------------------------- */
+.page { max-width: 68rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.bandeau-mention {
+  background: #e8ecf1; color: var(--encre-2); font-size: .85rem;
+  text-align: center; padding: .35rem 1rem;
+}
+
+/* Titre d'écran + action principale, côte à côte puis empilés en mobile */
+.entete-ecran {
+  display: flex; flex-wrap: wrap; gap: 1rem;
+  align-items: flex-start; justify-content: space-between;
+  margin: 0 0 1.25rem;
+}
+.entete-ecran__texte { flex: 1 1 22rem; }
+.entete-ecran h1 { margin: 0; font-size: 1.5rem; line-height: 1.25; }
+.entete-ecran .sous-titre {
+  margin: .4rem 0 0; color: var(--encre-2); max-width: 44rem;
+}
+.entete-ecran__action { flex: 0 0 auto; }
+
+h2 { font-size: 1.18rem; margin: 1.75rem 0 .6rem; }
+h3 { font-size: 1rem; margin: 1.15rem 0 .4rem; }
+h4 { font-size: .95rem; margin: 1rem 0 .3rem; text-transform: uppercase;
+     letter-spacing: .04em; color: var(--encre-2); }
+p { margin: .5rem 0; }
+ul, ol { margin: .5rem 0; padding-left: 1.15rem; }
+li { margin: .2rem 0; }
+
+/* --- Cartes --------------------------------------------------------------- */
+.carte {
+  background: var(--carte); border: 1px solid var(--bord);
+  border-radius: var(--rayon); padding: 1.1rem; margin: 0 0 1.25rem;
+  box-shadow: var(--ombre);
+}
+.carte > :first-child { margin-top: 0; }
+.carte > :last-child { margin-bottom: 0; }
+.carte--plate { box-shadow: none; }
+.carte__titre { font-size: 1.05rem; margin: 0 0 .5rem; }
+
+/* --- Boutons -------------------------------------------------------------- */
+.btn {
+  display: inline-block; font: inherit; font-weight: 600; cursor: pointer;
+  padding: .6rem 1.1rem; border: 2px solid transparent; border-radius: var(--rayon-s);
+  text-decoration: none; text-align: center; line-height: 1.3;
+}
+.btn--principal { background: var(--accent); color: #fff; border-color: var(--accent); }
+.btn--principal:hover { background: var(--accent-fonce); border-color: var(--accent-fonce); }
+.btn--secondaire { background: #fff; color: var(--accent-fonce); border-color: var(--accent); }
+.btn--secondaire:hover { background: var(--accent-clair); }
+.btn--discret {
+  background: transparent; color: var(--accent-fonce); border-color: transparent;
+  text-decoration: underline; padding: .4rem .3rem;
+}
+.btn--action { font-size: 1.05rem; padding: .8rem 1.3rem; }
+.actions { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-top: 1rem; }
+@media (max-width: 30rem) {
+  .btn--action { display: block; width: 100%; }
+  .entete-ecran__action { flex: 1 1 100%; }
+}
+
+/* --- Encarts (information, attention, réussite, erreur) ------------------- */
+.encart {
+  border-left: 5px solid var(--bord-fort); background: var(--info-f);
+  padding: .85rem 1rem; margin: 0 0 1.25rem;
+  border-radius: 0 var(--rayon-s) var(--rayon-s) 0;
+}
+.encart__titre { font-weight: 700; margin: 0 0 .25rem; }
+.encart p:last-child, .encart ul:last-child { margin-bottom: 0; }
+.encart--ok       { border-left-color: var(--ok-t);  background: var(--ok-f);  color: #0d3d26; }
+.encart--attention{ border-left-color: var(--att-t); background: var(--att-f); color: #5a3a00; }
+.encart--erreur   { border-left-color: var(--err-t); background: var(--err-f); color: #7d2410; }
+
+/* --- États textuels ------------------------------------------------------- */
+.etat {
+  display: inline-block; font-size: .85rem; font-weight: 600;
+  padding: .1rem .55rem; border-radius: 999px; border: 1px solid;
+  white-space: nowrap;
+}
+.etat--ok       { color: var(--ok-t);  background: var(--ok-f);  border-color: var(--ok-b); }
+.etat--attente  { color: var(--att-t); background: var(--att-f); border-color: var(--att-b); }
+.etat--erreur   { color: var(--err-t); background: var(--err-f); border-color: var(--err-b); }
+.etat--info     { color: var(--accent-fonce); background: var(--accent-clair); border-color: #a8c4da; }
+
+/* --- Avancement ----------------------------------------------------------- */
+.progression { list-style: none; margin: 0; padding: 0; display: grid; gap: .8rem; }
+.progression > li { display: grid; grid-template-columns: 2rem 1fr; gap: .8rem; align-items: start; margin: 0; }
+.progression .puce {
+  width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center;
+  font-weight: 700; font-size: .9rem;
+  border: 2px solid var(--bord-fort); background: #fff; color: var(--encre-2);
+}
+.progression .fait .puce    { background: var(--ok-t);  border-color: var(--ok-t);  color: #fff; }
+.progression .encours .puce { background: var(--accent); border-color: var(--accent); color: #fff; }
+.progression .titre { font-weight: 600; }
+.progression .detail { margin: .1rem 0 0; color: var(--encre-2); font-size: .95rem; }
+
+.jauge { height: .8rem; background: #e3e8ee; border: 1px solid var(--bord);
+         border-radius: 999px; overflow: hidden; margin: .5rem 0 .3rem; }
+.jauge__part { height: 100%; background: var(--accent); }
+.jauge-legende { margin: 0; color: var(--encre-2); font-size: .95rem; }
+
+/* --- Listes --------------------------------------------------------------- */
+.liste { list-style: none; margin: 0; padding: 0; }
+.liste > li {
+  display: flex; flex-wrap: wrap; gap: .3rem 1rem;
+  align-items: baseline; justify-content: space-between;
+  padding: .8rem 0; border-bottom: 1px solid #e4e9ef; margin: 0;
+}
+.liste > li:last-child { border-bottom: 0; }
+.liste__principal { flex: 1 1 16rem; }
+.liste__libelle { font-weight: 600; }
+.liste__complement { display: block; color: var(--encre-2); font-size: .95rem; }
+.liste__fin { display: flex; flex-wrap: wrap; gap: .5rem .9rem; align-items: center; }
+
+/* Ligne « fiche » : un titre, un état, des sources */
+.fiche-ligne {
+  border: 1px solid var(--bord); border-radius: var(--rayon-s);
+  padding: .85rem .95rem; margin: 0 0 .7rem; background: var(--carte);
+}
+.fiche-ligne__tete {
+  display: flex; flex-wrap: wrap; gap: .4rem .9rem;
+  align-items: baseline; justify-content: space-between;
+}
+.fiche-ligne__titre { font-weight: 600; }
+
+/* --- Sources -------------------------------------------------------------- */
+.sources { list-style: none; margin: .6rem 0 0; padding: 0; font-size: .92rem; color: var(--encre-2); }
+.sources li { margin: .15rem 0; }
+.sources .source-etiquette { font-weight: 600; color: var(--encre); }
+
+/* --- Plier / déplier ------------------------------------------------------ */
+details.pourquoi { margin: .6rem 0 0; }
+details.pourquoi > summary {
+  cursor: pointer; color: var(--accent-fonce); font-weight: 600;
+  font-size: .95rem; padding: .3rem 0; display: inline-block;
+}
+details.pourquoi > summary::marker { color: var(--accent-fonce); }
+details.pourquoi .reponse {
+  margin: .4rem 0 0; padding: .8rem 1rem; background: var(--info-f);
+  border-radius: var(--rayon-s); color: var(--encre-2);
+  max-width: 46rem; font-size: .95rem;
+}
+details.references { margin: 1rem 0 0; }
+details.references > summary { cursor: pointer; color: var(--encre-2); font-size: .9rem; }
+details.references .reponse { font-size: .9rem; color: var(--encre-2); margin: .4rem 0 0; }
+details.references code { font-size: .9rem; word-break: break-all; }
+
+/* --- Formulaires ---------------------------------------------------------- */
+fieldset {
+  border: 1px solid var(--bord); border-radius: var(--rayon);
+  padding: .9rem 1rem 1.1rem; margin: 0 0 1.25rem; background: var(--carte);
+}
+legend { font-weight: 700; padding: 0 .4rem; }
+.champ { margin: 0 0 .95rem; }
+.champ:last-child { margin-bottom: 0; }
+.champ > label { display: block; font-weight: 600; margin-bottom: .25rem; }
+.champ .aide { margin: 0 0 .35rem; color: var(--encre-2); font-size: .9rem; }
+input[type="text"], input[type="password"], input[type="email"],
+input[type="search"], input[type="file"], select, textarea {
+  width: 100%; max-width: 100%; font: inherit; padding: .55rem .6rem;
+  border: 1px solid var(--bord-fort); border-radius: var(--rayon-s);
+  background: #fff; color: var(--encre);
+}
+textarea { min-height: 6rem; }
+.grille { display: grid; gap: 0 1.25rem; grid-template-columns: 1fr; }
+.grille .pleine { grid-column: 1 / -1; }
+@media (min-width: 48rem) {
+  .grille { grid-template-columns: 1fr 1fr; }
+}
+.case { display: flex; gap: .6rem; align-items: flex-start; margin: 0 0 .6rem; }
+.case input { margin-top: .3rem; flex: 0 0 auto; width: 1.1rem; height: 1.1rem; }
+.case label { font-weight: 400; }
+
+/* --- Pied de page --------------------------------------------------------- */
+.pied {
+  border-top: 1px solid var(--bord); background: #fff;
+  margin-top: 2rem; padding: 1.25rem 1rem; color: var(--encre-2); font-size: .92rem;
+}
+.pied__int { max-width: 68rem; margin: 0 auto; }
+.pied p { margin: .3rem 0; }
+</style>
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="02-accueil.html">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      <a href="02-accueil.html">Accueil</a><a href="03-bibliotheque.html">Bibliothèque</a><a href="05-depot-dce.html" aria-current="page">Consultations</a>
+      <span class="bandeau__qui">Étanch' OI (exemple fictif)</span>
+      <a class="lien-quitter" href="01-connexion.html">Se déconnecter</a>
+    </nav>
+  </div>
+</header>
+<p class="bandeau-mention">Maquette de démonstration — contenu entièrement fictif, aucune donnée réelle.</p>
+<main id="contenu" class="page">
+
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Réfection de l'étanchéité des toitures — groupe scolaire Les Filaos
+      <span class="etat etat--info">Document fictif</span></h1>
+    <p class="sous-titre">Dossier analysé le 30/09/2026. Ce qui suit a été lu
+       dans le document que vous avez déposé, et rien d'autre.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="08-memoire.html">Demander le mémoire technique</a>
+  </div>
+</div>
+
+<div class="carte">
+  <h2 class="carte__titre">L'essentiel</h2>
+  <ul class="liste">
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Date limite de remise : 12/10/2026 à 12h00</span>
+        <span class="liste__complement">Dans 12 jours.</span>
+      </div>
+      <div class="liste__fin"><a href="#date-limite">Voir la source</a></div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">8 pièces exigées</span>
+        <span class="liste__complement">5 déjà dans votre bibliothèque, 3 à
+          fournir.</span>
+      </div>
+      <div class="liste__fin"><span class="etat etat--attente">3 manques</span>
+        <a href="07-checklist.html">Vérifier le dossier</a></div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">4 critères d'attribution</span>
+        <span class="liste__complement">Le plus lourd pèse 40 %&nbsp;: la valeur
+          technique.</span>
+      </div>
+      <div class="liste__fin"><a href="#criteres">Voir les critères</a></div>
+    </li>
+  </ul>
+</div>
+
+<h2 id="criteres">Critères d'attribution</h2>
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">Valeur technique de l'offre — 40 %</span>
+    <span class="etat etat--info">Poids lu dans le dossier</span>
+  </div>
+  <p>Le mémoire technique répond à ce critère : c'est la section qui sera
+     développée le plus longuement.</p>
+  <ul class="sources">
+    <li><span class="source-etiquette">Source :</span> dossier de consultation, page 14, « Critères d'attribution »</li>
+  </ul>
+</div>
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">Prix des prestations — 30 %</span>
+    <span class="etat etat--info">Poids lu dans le dossier</span>
+  </div>
+  <p>Le prix ne se traite pas ici : il reste de votre ressort.</p>
+  <ul class="sources">
+    <li><span class="source-etiquette">Source :</span> dossier de consultation, page 14, « Critères d'attribution »</li>
+  </ul>
+</div>
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">Valeur environnementale — 20 %</span>
+    <span class="etat etat--attente">Sans référence dans votre bibliothèque</span>
+  </div>
+  <p>Aucun élément de votre bibliothèque ne documente ce point pour l'instant.
+     Il apparaîtra dans les manques du mémoire.</p>
+  <ul class="sources">
+    <li><span class="source-etiquette">Source :</span> dossier de consultation, page 15, « Critères d'attribution »</li>
+  </ul>
+</div>
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">Délai d'exécution — 10 %</span>
+    <span class="etat etat--info">Poids lu dans le dossier</span>
+  </div>
+  <ul class="sources">
+    <li><span class="source-etiquette">Source :</span> dossier de consultation, page 15, « Critères d'attribution »</li>
+  </ul>
+</div>
+
+<h2>Pièces exigées</h2>
+<ul class="liste">
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">Attestation d'assurance décennale</span>
+      <span class="liste__complement">Source : page 8, « Pièces à fournir »</span>
+    </div>
+    <div class="liste__fin"><span class="etat etat--attente">À fournir</span></div>
+  </li>
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">Références de chantiers comparables</span>
+      <span class="liste__complement">Source : page 8, « Pièces à fournir »</span>
+    </div>
+    <div class="liste__fin"><span class="etat etat--ok">Dans votre bibliothèque</span></div>
+  </li>
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">Moyens humains affectés au chantier</span>
+      <span class="liste__complement">Source : page 9, « Pièces à fournir »</span>
+    </div>
+    <div class="liste__fin"><span class="etat etat--ok">Dans votre bibliothèque</span></div>
+  </li>
+</ul>
+
+<h2 id="date-limite">Date limite de remise</h2>
+<div class="carte carte--plate">
+  <p><strong>12 octobre 2026 à 12h00.</strong></p>
+  <ul class="sources">
+    <li><span class="source-etiquette">Source :</span> dossier de consultation, page 3, « Remise des offres »</li>
+  </ul>
+  <details class="pourquoi">
+    <summary>Pourquoi ? Certaines lignes disent « non trouvé dans le document »</summary>
+    <div class="reponse">
+      <p>Quand une information attendue n'est pas dans le dossier, l'outil le
+         dit au lieu de la deviner. Une case vide reste vide&nbsp;: c'est vous
+         qui décidez si c'est un oubli de l'acheteur ou une absence de votre
+         côté.</p>
+    </div>
+  </details>
+</div>
+
+</main>
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne
+       garantit aucune conformité. Ce que vous produisez reste un brouillon
+       à relire et à signer.</p>
+  </div>
+</footer>
+</body>
+</html>

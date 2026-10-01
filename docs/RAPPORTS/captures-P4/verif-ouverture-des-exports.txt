@@ -1,0 +1,49 @@
+== Markdown ==
+   taille : 27638 caracteres | 220 lignes
+   empreinte SHA-256 du fichier : b586fcc54290d6db7c7fba844db0b4cb
+   --- 25 premieres lignes ---
+   | # Mémoire technique — FICTIF — réfection étanchéité toitures-terrasses (2 groupes scolaires fictifs)
+   | 
+   | *Mémoire technique généré automatiquement à partir de VOTRE bibliothèque et des critères du DCE. Brouillon : chaque affi
+   | 
+   | *Ce document est produit à partir de votre bibliothèque d'entreprise. Aucun prix n'est fixé ici, aucune conformité n'est
+   | 
+   | ## Relecture et validation humaine
+   | 
+   | - Relu et validé par : QA L8 — vérification indépendante (Verification independante)
+   | - Date de validation : 30/09/2026 à 19:49
+   | - Empreinte du contenu validé (SHA-256) : c89db700346d294cae373fa9b7d995f63f2b9c8a427884263ddfc8956b4094ce
+   | 
+   | ## 1. Étanchéité de toitures-terrasses sur bâtiments scolaires
+   | 
+   | *Critère « Étanchéité de toitures-terrasses sur bâtiments scolaires » — pondération 40 %.*
+   | 
+   | Éléments de votre bibliothèque mobilisés : 19 (familles : Références de chantiers, Moyens humains, Moyens matériels, Fic
+   | - Référence « FICTIF — Réfection de l'étanchéité des toitures-terrasses — groupe scolaire « Les Filaos » » — maître d'ou
+   | - Référence « FICTIF — Étanchéité de toiture-terrasse — collège « Les Alizés » » — maître d'ouvrage Régie scolaire ficti
+   | - Référence « FICTIF — Étanchéité de bâtiments administratifs — site occupé » — maître d'ouvrage Communauté FICTIVE des 
+   | - Référence « FICTIF — Réfection d'étanchéité — école « Roche-Plate » » — maître d'ouvrage S.I.F.E.P.F. (maître d'ouvrag
+   | - Effectif Étancheur, etancheur : 16.
+   | - Effectif Chef d'équipe étanchéité, chef_equipe : 4.
+   | - Effectif Conducteur de travaux, conducteur_travaux : 2.
+   | - Effectif Responsable qualité, sécurité, environnement, responsable_qse : 1.
+   --- lignes contenant 'manque' / 'source' (5) ---
+   | *Mémoire technique généré automatiquement à partir de VOTRE bibliothèque et des critères du DCE. Brouillon : chaque affirmation est adossée à un élément réel (v
+   occurrences de 'Manque' : 1
+   occurrences de 'végétalis' : 2
+
+== DOCX (ouvert avec python-docx) ==
+   paragraphes non vides : 183
+   tableaux : 0
+   [0] Mémoire technique — FICTIF — réfection étanchéité toitures-terrasses (2 groupes scolaires fictifs)
+   [1] Mémoire technique généré automatiquement à partir de VOTRE bibliothèque et des critères du DCE. Brouillon : chaque affir
+   [2] Ce document est produit à partir de votre bibliothèque d'entreprise. Aucun prix n'est fixé ici, aucune conformité n'est 
+   [3] Relecture et validation humaine
+   [4] Relu et validé par : QA L8 — vérification indépendante (Verification independante)
+   [5] Date de validation : 30/09/2026 à 19:49
+   [6] Empreinte du contenu validé (SHA-256) : c89db700346d294cae373fa9b7d995f63f2b9c8a427884263ddfc8956b4094ce
+   [7] 1. Étanchéité de toitures-terrasses sur bâtiments scolaires
+   [8] Critère « Étanchéité de toitures-terrasses sur bâtiments scolaires » — pondération 40 %.
+   [9] Éléments de votre bibliothèque mobilisés : 19 (familles : Références de chantiers, Moyens humains, Moyens matériels, Fic
+   [10] Référence « FICTIF — Réfection de l'étanchéité des toitures-terrasses — groupe scolaire « Les Filaos » » — maître d'ouvr
+   [11] Référence « FICTIF — Étanchéité de toiture-terrasse — collège « Les Alizés » » — maître d'ouvrage Régie scolaire fictive

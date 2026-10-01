@@ -1,0 +1,9 @@
+export markdown : 25585 caracteres, 5 sections, 1 manques
+codes de nomenclature : aucun
+crochets de validite : aucun
+--- 5 premieres sources exportees ---
+- Méthode d'exécution d'une étanchéité de toiture-terrasse — bibliothèque — Mémoire technique type / Chapitre du mémoire technique type
+- FICTIF — Étanchéité de bâtiments administratifs — site occupé Communauté FICTIVE des services du Plateau (FICTIF) — bibliothèque — Références de chantiers / Référence de chantier
+- Organisation d'un chantier en site occupé — bibliothèque — Mémoire technique type / Chapitre du mémoire technique type
+- Membrane bitumineuse bicouche autoprotégée REF-FICTIVE-BIT-42 FOURNISSEUR-FICTIF (FICTIF) — bibliothèque — Fiches techniques produits / Produit et fiche technique — validité : valide
+- FICTIF — Réfection d'étanchéité — école « Roche-Plate » S.I.F.E.P.F. (maître d'ouvrage FICTIF) — bibliothèque — Références de chantiers / Référence de chantier

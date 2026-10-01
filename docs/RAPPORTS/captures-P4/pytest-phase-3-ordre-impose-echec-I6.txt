@@ -1,0 +1,159 @@
+........................................................................ [ 39%]
+........................................................................ [ 79%]
+........F............................                                    [100%]
+=================================== FAILURES ===================================
+_____________________ test_invariants_i1_a_i8_par_comptage _____________________
+
+connexion = <app.storage.connexion.Connexion object at 0x10d049430>
+connexion_admin = <app.storage.connexion.ConnexionAdministration object at 0x10d04b470>
+contexte_a = ContexteClient(8f4a2558-8264-45a1-9b51-03555cd86399)
+contexte_b = ContexteClient(27e37546-8bc2-47bb-93a8-ffca1ce8c60f)
+
+    def test_invariants_i1_a_i8_par_comptage(connexion, connexion_admin, contexte_a, contexte_b):
+        # Jeu fictif : deux clients, un peuplé (A), un vide (B), pour ne pas compter du vide.
+        _preparer_donnees_a(connexion, contexte_a)
+        # Un second client, avec une entreprise/fiche, pour éprouver le cloisonnement des comptages.
+        from app.services.bibliotheque import ServiceBibliotheque
+    
+        service_b = ServiceBibliotheque(
+            connexion, charger_config().cle_chiffrement_maitresse, contexte_b
+        )
+        entreprise_b = service_b.creer_entreprise(f"Entreprise fictive B — {MENTION}")
+        connexion.valider()
+        service_b.ouvrir_fiche(entreprise_b)
+        connexion.valider()
+    
+        tables = tables_avec_client_id(connexion_admin)
+        colonnes = {table: _colonnes(connexion_admin, table) for table in tables}
+        ecarts: dict[str, int] = {}
+        details: dict[str, object] = {}
+    
+        # -- I1 : client_id non nul sur toute entité de contenu ------------------ #
+        i1 = sum(
+            _compte(connexion_admin, f"SELECT count(*) FROM {t} WHERE client_id IS NULL;")
+            for t in tables
+        )
+        ecarts["I1"] = i1
+    
+        # -- I2 : client_id cohérent avec l'entreprise et la fiche_version ------- #
+        i2 = 0
+        for t in tables:
+            if "entreprise_id" in colonnes[t]:
+                i2 += _compte(
+                    connexion_admin,
+                    f"SELECT count(*) FROM {t} x JOIN entreprise e ON e.id = x.entreprise_id "
+                    "WHERE x.entreprise_id IS NOT NULL AND x.client_id <> e.client_id;",
+                )
+            if "fiche_version_id" in colonnes[t]:
+                i2 += _compte(
+                    connexion_admin,
+                    f"SELECT count(*) FROM {t} x JOIN fiche_version f ON f.id = x.fiche_version_id "
+                    "WHERE x.fiche_version_id IS NOT NULL AND x.client_id <> f.client_id;",
+                )
+        ecarts["I2"] = i2
+    
+        # -- I3 : aucune entité orpheline --------------------------------------- #
+        i3 = 0
+        for t in tables:
+            if "entreprise_id" in colonnes[t]:
+                i3 += _compte(
+                    connexion_admin,
+                    f"SELECT count(*) FROM {t} x WHERE x.entreprise_id IS NOT NULL "
+                    "AND NOT EXISTS (SELECT 1 FROM entreprise e WHERE e.id = x.entreprise_id);",
+                )
+            if "fiche_version_id" in colonnes[t]:
+                i3 += _compte(
+                    connexion_admin,
+                    f"SELECT count(*) FROM {t} x WHERE x.fiche_version_id IS NOT NULL "
+                    "AND NOT EXISTS (SELECT 1 FROM fiche_version f WHERE f.id = x.fiche_version_id);",
+                )
+        ecarts["I3"] = i3
+    
+        # -- I4 : source d'une valeur du même client ---------------------------- #
+        ecarts["I4"] = _compte(
+            connexion_admin,
+            "SELECT count(*) FROM tracabilite_valeur t JOIN document d ON d.id = t.source_document_id "
+            "WHERE t.source_document_id IS NOT NULL AND t.client_id <> d.client_id;",
+        )
+    
+        # -- I5 : les jeux de référence globaux ne portent aucun client_id ------- #
+        i5 = _compte(
+            connexion_admin,
+            "SELECT count(*) FROM information_schema.columns WHERE table_schema = 'public' "
+            "AND table_name IN ('jeu_reference', 'valeur_reference') AND column_name = 'client_id';",
+        )
+        ecarts["I5"] = i5
+    
+        # -- I6 : une validation `validee` dont l'empreinte ne concorde plus ----- #
+        fiches = connexion_admin.lire("SELECT id, client_id FROM fiche_version;")
+        i6 = 0
+        for fiche_id, client_id in fiches:
+            svc = ServiceVersionnement(
+                connexion, charger_config().cle_chiffrement_maitresse, ContexteClient(str(client_id))
+            )
+            i6 += len(svc.controler_validations(str(fiche_id)))
+        ecarts["I6"] = i6
+    
+        # -- I7 : cohérence nature ⇔ rattachements de `document` ---------------- #
+        ecarts["I7"] = _compte(
+            connexion_admin,
+            "SELECT count(*) FROM document WHERE NOT ( "
+            "(nature = 'piece_bibliotheque' AND entreprise_id IS NOT NULL "
+            "AND fiche_version_id IS NOT NULL) OR "
+            "(nature = 'dce' AND consultation_id IS NOT NULL) );",
+        )
+    
+        # -- I8 : cohérence statut ⇔ document_id des lignes de checklist --------- #
+        i8 = _compte(
+            connexion_admin,
+            "SELECT count(*) FROM checklist_ligne l WHERE "
+            "(l.statut = 'presente' AND l.document_id IS NULL) OR "
+            "(l.statut = 'manquante' AND l.document_id IS NOT NULL);",
+        )
+        i8 += _compte(
+            connexion_admin,
+            "SELECT count(*) FROM checklist_ligne l JOIN document d ON d.id = l.document_id "
+            "WHERE l.document_id IS NOT NULL AND d.client_id <> l.client_id;",
+        )
+        ecarts["I8"] = i8
+    
+        # -- Volume réellement contrôlé (pour que le comptage ne soit pas vide) -- #
+        volumes = {
+            t: _compte(connexion_admin, f"SELECT count(*) FROM {t};")
+            for t in ("entreprise", "fiche_version", "assurance", "document",
+                      "consultation", "extraction_element", "checklist_ligne",
+                      "validation_relecture")
+        }
+        details["volumes"] = volumes
+        details["nb_tables_portant_client_id"] = len(tables)
+    
+        print("\n[invariants] volume contrôlé :", volumes)
+        print(f"[invariants] tables portant client_id : {len(tables)}")
+        print("[invariants] écarts par invariant :", ecarts)
+    
+        assert volumes["checklist_ligne"] > 0, "le comptage I8 porterait sur du vide"
+        assert volumes["validation_relecture"] > 0, "le comptage I6 porterait sur du vide"
+>       assert ecarts == {k: 0 for k in ecarts}, f"invariants en écart : {ecarts}"
+E       AssertionError: invariants en écart : {'I1': 0, 'I2': 0, 'I3': 0, 'I4': 0, 'I5': 0, 'I6': 1, 'I7': 0, 'I8': 0}
+E       assert {'I1': 0, 'I2... 'I4': 0, ...} == {'I1': 0, 'I2... 'I4': 0, ...}
+E         
+E         Omitting 7 identical items, use -vv to show
+E         Differing items:
+E         {'I6': 1} != {'I6': 0}
+E         Use -v to get more diff
+
+tests/integration/test_invariants.py:162: AssertionError
+----------------------------- Captured stdout call -----------------------------
+
+[invariants] volume contrôlé : {'entreprise': 29, 'fiche_version': 31, 'assurance': 4, 'document': 11, 'consultation': 6, 'extraction_element': 60, 'checklist_ligne': 2, 'validation_relecture': 8}
+[invariants] tables portant client_id : 41
+[invariants] écarts par invariant : {'I1': 0, 'I2': 0, 'I3': 0, 'I4': 0, 'I5': 0, 'I6': 1, 'I7': 0, 'I8': 0}
+=============================== warnings summary ===============================
+../.venv/lib/python3.12/site-packages/fastapi/testclient.py:1
+  /Users/pause/Projets/ia-consultations-publiques/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.
+    from starlette.testclient import TestClient as TestClient  # noqa
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/integration/test_invariants.py::test_invariants_i1_a_i8_par_comptage
+1 failed, 180 passed, 1 warning in 13.45s

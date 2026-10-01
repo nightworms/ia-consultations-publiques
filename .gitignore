@@ -1,6 +1,8 @@
 # Ignorer les données locales et les secrets
 data/
 data-restaure/
+# Donnees de verification (blobs chiffres d'un run de test) : hors depot.
+verif-data/
 .env
 .env.*
 # Exception : le modèle d'exemple est versionné (aucune valeur secrète dedans).

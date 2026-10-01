@@ -1,175 +1,209 @@
 {% extends "base.html" %}
 {% block titre %}Bibliothèque d'entreprise{% endblock %}
 {% block contenu %}
-<h2>Bibliothèque d'entreprise — état d'avancement</h2>
-
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
-{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
-
-{% if etat %}
-<div class="carte">
-  <h3>État de la fiche courante</h3>
-  <dl class="source">
-    <dt>Version de fiche :</dt><dd>{{ fiche.numero_version if fiche else '?' }}</dd>
-    <dt>État :</dt><dd>{{ etat.statut_libelle }} ({{ etat.statut }})</dd>
-    <dt>Identifiant :</dt><dd><code>{{ etat.fiche_version_id }}</code></dd>
-  </dl>
-  <p class="aide">
-    L'état « Relue et validée » ne peut être posé que par une action humaine
-    nommée et horodatée, depuis le formulaire de validation en bas de page.
-    Aucun chemin automatique n'y mène.
-  </p>
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Votre bibliothèque d'entreprise</h1>
+    <p class="sous-titre">Tout ce qui sert à écrire vos mémoires&nbsp;: chantiers,
+       certifications, moyens, assurances, produits.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="/bibliotheque/import">Importer vos documents existants</a>
+  </div>
 </div>
 
-<h3>Avancement par famille</h3>
-<table>
-  <caption>Une ligne par famille : nombre d'éléments saisis, état d'avancement, complétude structurelle</caption>
-  <thead>
-    <tr>
-      <th scope="col">Famille</th>
-      <th scope="col">Éléments</th>
-      <th scope="col">État d'avancement</th>
-      <th scope="col">Complétude</th>
-      <th scope="col">Saisir</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for f in etat.familles %}
-    <tr>
-      <td>{{ f.libelle }}</td>
-      <td>{{ f.nb_elements }}</td>
-      <td>{{ f.statut }}</td>
-      <td>
-        {% if f.completude_famille == 'complete' %}au moins un élément{% else %}aucun élément{% endif %}
-      </td>
-      <td><a href="/bibliotheque/{{ f.famille }}">Ouvrir {{ f.libelle }}</a></td>
-    </tr>
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'action n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+
+{% if etat %}
+<div class="encart {% if etat.statut == 'validee' %}encart--ok{% else %}encart--attention{% endif %}">
+  <p class="encart__titre">Relecture de votre bibliothèque&nbsp;: {{ etat.statut_libelle }}</p>
+  <p>La relecture porte toujours le nom de la personne qui l'a faite et la date.
+     Toute information ajoutée ensuite fait repasser la bibliothèque en relecture.</p>
+</div>
+
+{% set familles_vides = etat.familles | selectattr('nb_elements', 'equalto', 0) | list %}
+<div class="carte">
+  <h2 class="carte__titre">Ce qui vous manque pour être prêt à concourir</h2>
+  {% if familles_vides %}
+  <p>Ces familles ne contiennent encore aucune information. Un critère du
+     dossier qui s'appuie dessus produira un manque écrit, pas un argument
+     inventé.</p>
+  <ul class="liste">
+    {% for f in familles_vides %}
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">{{ f.libelle }}</span>
+        <span class="liste__complement">Aucune information enregistrée.</span>
+      </div>
+      <div class="liste__fin">
+        <a href="/bibliotheque/{{ f.famille }}">Ajouter une information</a>
+      </div>
+    </li>
     {% endfor %}
-  </tbody>
-</table>
-<p class="aide">
-  Complétude <strong>structurelle</strong> seulement : l'outil n'affirme pas
-  qu'une famille est complète au sens réglementaire, il constate qu'elle contient
-  au moins un élément.
-</p>
+  </ul>
+  {% else %}
+  <p><strong>Chaque famille contient au moins une information.</strong></p>
+  <p>Cela ne veut pas dire qu'elles sont complètes au sens réglementaire&nbsp;:
+     l'outil constate ce qui est renseigné, il ne certifie rien.</p>
+  {% endif %}
+</div>
+
+<h2>Avancement par famille</h2>
+<div class="carte">
+  <div class="jauge" role="img"
+       aria-label="{{ resume.nb_familles_renseignees }} familles renseignées sur {{ resume.nb_familles }}">
+    <div class="jauge__part" style="width:{{ resume.pourcentage }}%"></div>
+  </div>
+  <p class="jauge-legende">{{ resume.nb_familles_renseignees }} familles
+     renseignées sur {{ resume.nb_familles }}.
+     {% if resume.nb_familles_vides == 0 %}Aucune ne reste à compléter.
+     {% elif resume.nb_familles_vides == 1 %}Une seule reste à compléter.
+     {% else %}{{ resume.nb_familles_vides }} restent à compléter.{% endif %}</p>
+  <ul class="liste">
+    {% for f in familles %}
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">{{ f.libelle }}</span>
+        <span class="liste__complement">
+          {% if f.nb_elements %}{{ f.nb_elements }} information{% if f.nb_elements > 1 %}s{% endif %}
+          {% else %}aucune information{% endif %}
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--{{ f.classe }}">{{ f.statut_libelle }}</span>
+        <a href="/bibliotheque/{{ f.famille }}">{% if f.nb_elements %}Ouvrir{% else %}Compléter{% endif %}</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Ce que « renseigné » veut dire ici</summary>
+    <div class="reponse">
+      <p>L'outil constate qu'une famille contient au moins une information. Il
+         n'affirme pas qu'elle est complète au sens réglementaire&nbsp;: c'est
+         votre relecture, et elle seule, qui engage.</p>
+    </div>
+  </details>
+</div>
 
 {% if etat.anomalies_empreinte %}
-<div class="message message-erreur">
-  <p>Anomalie d'empreinte détectée (invariant I6) — à relire :</p>
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">Une relecture enregistrée ne correspond plus au contenu</p>
+  <p>Le contenu a changé depuis la relecture&nbsp;: relisez et validez à nouveau.</p>
   <ul>
     {% for a in etat.anomalies_empreinte %}
-    <li>{{ a.famille_code or a.cible_type }} : {{ a.motif or 'empreinte recalculée différente' }}</li>
+    <li>{{ a.famille_code or a.cible_type }} — {{ a.motif or 'le contenu a été modifié après la relecture' }}</li>
     {% endfor %}
   </ul>
 </div>
 {% endif %}
 
-<h3>Validations de relecture enregistrées</h3>
+<h2>Relectures enregistrées</h2>
 {% if etat.validations %}
-<table>
-  <caption>Validations de relecture de cette version de fiche</caption>
-  <thead>
-    <tr><th scope="col">Cible</th><th scope="col">Famille</th><th scope="col">Relecteur</th><th scope="col">Statut</th></tr>
-  </thead>
-  <tbody>
-    {% for v in etat.validations %}
-    <tr>
-      <td>{{ v.cible_type }}</td>
-      <td>{{ v.famille_code or '—' }}</td>
-      <td>{{ v.relecteur_nom }}</td>
-      <td>{{ v.statut }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<ul class="liste">
+  {% for v in etat.validations %}
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">{{ v.relecteur_nom }}</span>
+      <span class="liste__complement">
+        {% if v.cible_type == 'fiche' %}Toute la bibliothèque{% else %}Famille {{ v.famille_code }}{% endif %}
+      </span>
+    </div>
+    <div class="liste__fin">
+      <span class="etat etat--{% if v.statut == 'validee' %}ok{% else %}erreur{% endif %}">
+        {% if v.statut == 'validee' %}Validée{% else %}Révoquée par une modification{% endif %}
+      </span>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 {% else %}
-<p>Aucune validation de relecture enregistrée pour cette version.</p>
+<p>Aucune relecture enregistrée pour cette version.</p>
 {% endif %}
 
 <div class="carte">
-  <h3>Relecture humaine bloquante</h3>
-  <p>
-    Deux verrous distincts : la <strong>validation de la bibliothèque</strong>
-    (ce formulaire) et la <strong>validation des éléments extraits d'un DCE</strong>
-    (écran d'analyse). Aucun des deux ne se court-circuite.
-  </p>
+  <h2 class="carte__titre">Valider votre bibliothèque</h2>
+  <p>Relire et valider vos informations, c'est ce qui autorise le mémoire à
+     s'appuyer dessus. La relecture porte toujours le nom de la personne qui l'a
+     faite et la date.</p>
   {% if erreur_validation %}
-  <div class="message message-erreur" role="alert">{{ erreur_validation }}</div>
+  <div class="encart encart--erreur" role="alert">{{ erreur_validation }}</div>
   {% endif %}
   <form method="post" action="/bibliotheque/validation">
     <input type="hidden" name="fiche_version_id" value="{{ etat.fiche_version_id }}">
-    <div class="champ">
-      <label for="relecteur_nom">Nom du relecteur (obligatoire)</label>
-      <input type="text" id="relecteur_nom" name="relecteur_nom" required
-             autocomplete="name" aria-describedby="aide-relecteur">
-      <p class="aide" id="aide-relecteur">
-        Le nom de l'humain qui a relu. Une validation sans nom est refusée.
-      </p>
+    <div class="grille">
+      <div class="champ">
+        <label for="relecteur_nom">Votre nom</label>
+        <p class="aide" id="aide-relecteur">La personne qui a relu. Une
+           validation sans nom n'est pas enregistrée.</p>
+        <input type="text" id="relecteur_nom" name="relecteur_nom" required
+               autocomplete="name" aria-describedby="aide-relecteur">
+      </div>
+      <div class="champ">
+        <label for="cible_type">Ce que vous validez</label>
+        <select id="cible_type" name="cible_type">
+          <option value="fiche">Toute la bibliothèque</option>
+          <option value="famille">Une seule famille</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="famille_code">Famille concernée (si vous validez une seule famille)</label>
+        <select id="famille_code" name="famille_code">
+          <option value="">—</option>
+          {% for f in familles %}
+          <option value="{{ f.famille }}">{{ f.libelle }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="champ">
+        <label for="commentaire">Commentaire <span class="liste__complement">facultatif</span></label>
+        <textarea id="commentaire" name="commentaire"></textarea>
+      </div>
     </div>
-    <div class="champ">
-      <label for="cible_type">Périmètre de la validation</label>
-      <select id="cible_type" name="cible_type">
-        <option value="fiche">La fiche entière</option>
-        <option value="famille">Une seule famille</option>
-      </select>
-    </div>
-    <div class="champ">
-      <label for="famille_code">Famille (si validation d'une famille)</label>
-      <select id="famille_code" name="famille_code">
-        <option value="">—</option>
-        {% for f in etat.familles %}
-        <option value="{{ f.famille }}">{{ f.libelle }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="champ">
-      <label for="attestation_cochee">
-        <input type="checkbox" id="attestation_cochee" name="attestation_cochee" value="1">
-        J'ai relu et corrigé les informations ci-dessus (attestation obligatoire)
-      </label>
-    </div>
-    <div class="champ">
-      <label for="commentaire">Commentaire (facultatif)</label>
-      <textarea id="commentaire" name="commentaire"></textarea>
+    <div class="case">
+      <input type="checkbox" id="attestation_cochee" name="attestation_cochee" value="1">
+      <label for="attestation_cochee">J'ai relu et corrigé ces informations.</label>
     </div>
     <div class="actions">
-      <button type="submit">Enregistrer la relecture humaine</button>
+      <button type="submit" class="btn btn--secondaire">Enregistrer la relecture</button>
     </div>
   </form>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Deux relectures distinctes</summary>
+    <div class="reponse">
+      <p>La validation de votre bibliothèque (ce formulaire) et la validation
+         des éléments extraits d'un dossier de consultation (écran d'analyse)
+         sont deux relectures différentes. Aucune des deux ne se
+         court-circuite.</p>
+    </div>
+  </details>
 </div>
 
-<h3>Entreprises et versions de fiche</h3>
-<table>
-  <caption>Entreprises du client de la session</caption>
-  <thead>
-    <tr><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Dernière version</th><th scope="col">Action</th></tr>
-  </thead>
-  <tbody>
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Fiche de bibliothèque n° {{ fiche.numero_version if fiche else '—' }} —
+       identifiant <code>{{ etat.fiche_version_id }}</code>.</p>
+    <p>Cette zone sert au support technique. Vous n'avez pas besoin de la lire.</p>
     {% for e in entreprises %}
-    <tr>
-      <td>{{ e.libelle_court }}</td>
-      <td>{{ e.statut }}</td>
-      <td>
-        {% if e.derniere_fiche %}n°{{ e.derniere_fiche.numero_version }} — {{ e.derniere_fiche.statut }}{% else %}—{% endif %}
-      </td>
-      <td>
-        <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches">
-          <button type="submit" class="secondaire">Ouvrir une nouvelle version</button>
-        </form>
-      </td>
-    </tr>
+    <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches">
+      <button type="submit" class="btn btn--secondaire">Ouvrir une nouvelle fiche — {{ e.libelle_court }}</button>
+    </form>
     {% endfor %}
-  </tbody>
-</table>
-
+  </div>
+</details>
 {% else %}
-<div class="message">
-  <p>
-    Aucune fiche de bibliothèque pour ce client :
-    <a href="/entreprises/nouvelle">créer une entreprise et sa première version de fiche</a>.
-  </p>
+<div class="encart">
+  <p>Aucune bibliothèque n'existe encore.
+     <a href="/entreprises/nouvelle">Créer une entreprise et sa première fiche</a>.</p>
 </div>
 {% endif %}
-
-<p><a href="/consultations">Consultations et analyse de DCE</a></p>
 {% endblock %}

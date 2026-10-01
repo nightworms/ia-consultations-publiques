@@ -1,0 +1,41 @@
+ 
+   Pourquoi&nbsp;? Je ne peux pas réécrire le texte d'une section ici 
+   
+     Chaque phrase d'une section est construite à partir d'éléments réels de votre
+       bibliothèque, et la liste des sources juste en dessous dit lesquels. Réécrire le
+       texte librement le détacherait de ces sources&nbsp;— et un argument sans source
+       ne doit pas s'afficher comme un argument. 
+     Pour corriger une section&nbsp;: corrigez ou complétez l'élément de votre
+       bibliothèque cité, puis demandez une mise à jour du mémoire. Une section qui ne
+       correspond plus à rien peut être remise en relecture. 
+   
+   
+     Pourquoi&nbsp;? Le fichier ne part nulle part 
+     
+       Le téléchargement pose le fichier sur votre ordinateur, et rien d'autre.
+         L'outil n'envoie aucun pli à l'acheteur, ne signe rien et ne fixe aucun prix. 
+     
+     
+   Références techniques 
+   
+     Titre enregistré&nbsp;:  Mémoire technique — FICTIF — réfection étanchéité toitures-terrasses (2 groupes scolaires fictifs)  —
+       statut  brouillon . 
+    
+     Section 1 —  d02197ac-cc20-4112-b4f2-227555653438  (Étanchéité de toitures-terrasses sur bâtiments scolaires) —
+       sources&nbsp;:  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Fiches techniques produits / Produit et fiche technique — validité : valide  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : valide  ;  bibliothèque — Moyens humains / Organigramme  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Fiches techniques produits / Produit et fiche technique — validité : valide  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : échéance dépassée  
+    
+     Section 2 —  a854269a-4031-4ce4-828b-1e534a14bc01  (Traitement des relevés d&#39;étanchéité et des points singuliers) —
+       sources&nbsp;:  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : échéance dépassée  ;  bibliothèque — Fiches techniques produits / Produit et fiche technique — validité : valide  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Fiches techniques produits / Produit et fiche technique — validité : valide  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Organigramme  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : valide  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Moyens matériels / Moyen matériel  
+    
+     Section 3 —  2dd2b533-6894-4473-98c1-b94876c21252  (Exécution en site occupé et planning par phases) —
+       sources&nbsp;:  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  
+    
+     Section 4 —  cb2bb735-d440-413e-bee2-a07a174a4ae1  (Moyens humains et matériels affectés au marché) —
+       sources&nbsp;:  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Moyens humains / Effectif par métier  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : valide  ;  bibliothèque — Moyens humains / Organigramme  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Certifications et qualifications / Certification ou qualification — validité : échéance dépassée  
+    
+     Section 6 —  2355f319-9a80-41e1-8b6c-3349a3b76500  (Délai d&#39;exécution et engagement de planning) —
+       sources&nbsp;:  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Mémoire technique type / Chapitre du mémoire technique type  ;  bibliothèque — Moyens matériels / Moyen matériel  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Références de chantiers / Référence de chantier  ;  bibliothèque — Références de chantiers / Référence de chantier  
+    
+     Cette zone sert au support technique. Vous n'avez pas besoin de la lire. 
+   
+ 

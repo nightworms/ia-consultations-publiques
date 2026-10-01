@@ -205,8 +205,12 @@ def test_migration_0004_up_down_up(connexion_admin, base_migree):
     assert _table_existe(connexion_admin, "checklist_execution")
     assert _table_existe(connexion_admin, "checklist_ligne")
 
-    annulees = executeur.down(1)
-    assert annulees == ["0004"]
+    # Modifié par le lot L3 (phase 4) : l'annulation portait sur la seule dernière
+    # migration (0004). Chaque ajout de migration invalide cette hypothèse ; elle
+    # porte donc sur toutes les migrations postérieures à 0003, ce qui reste vrai.
+    apres_0003 = [m.numero for m in lister_migrations() if m.numero > "0003"]
+    annulees = executeur.down(len(apres_0003))
+    assert "0004" in annulees
     assert not _table_existe(connexion_admin, "checklist_execution")
     assert not _table_existe(connexion_admin, "checklist_ligne")
 
@@ -217,7 +221,7 @@ def test_migration_0004_up_down_up(connexion_admin, base_migree):
     assert restes == []
 
     reappliquees = executeur.up()
-    assert reappliquees == ["0004"]
+    assert set(reappliquees) == set(annulees)
     assert _table_existe(connexion_admin, "checklist_execution")
     assert _table_existe(connexion_admin, "checklist_ligne")
     valeurs = connexion_admin.lire(

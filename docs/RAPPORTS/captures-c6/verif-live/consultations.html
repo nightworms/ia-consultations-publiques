@@ -1,0 +1,131 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Déposer un dossier de consultation — Consultations publiques</title>
+  <link rel="stylesheet" href="http://127.0.0.1:8098/static/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="/accueil">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      
+      <a href="/accueil">Accueil</a>
+      <a href="/bibliotheque">Bibliothèque</a>
+      <a href="/consultations" aria-current="page">Consultations</a>
+      <span class="bandeau__qui">Compte de démonstration (FICTIF)</span>
+      <form method="post" action="/deconnexion">
+        <button type="submit">Se déconnecter</button>
+      </form>
+      
+    </nav>
+  </div>
+</header>
+
+<main id="contenu" class="page">
+  
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Déposer le dossier de consultation</h1>
+    <p class="sous-titre">Le dossier vient de vous&nbsp;: l'outil ne va rien
+       chercher sur une plateforme d'achat et ne dépose aucun pli à votre place.</p>
+  </div>
+</div>
+
+
+
+
+<div class="carte">
+  <h2 class="carte__titre">Le dossier</h2>
+  <form method="post" action="/consultations" enctype="multipart/form-data">
+    <div class="grille">
+      <div class="champ pleine">
+        <label for="libelle">Nom donné à ce dossier</label>
+        <input type="text" id="libelle" name="libelle" maxlength="255" required>
+      </div>
+      <div class="champ">
+        <label for="entreprise_id">Entreprise concernée</label>
+        <select id="entreprise_id" name="entreprise_id" required>
+          
+          <option value="d0000000-0000-4000-8000-000000000003">FICTIF — Océan Étanchéité</option>
+          
+        </select>
+        
+      </div>
+      <div class="champ">
+        <label for="fichier">Le dossier de consultation</label>
+        <input type="file" id="fichier" name="fichier" accept=".pdf,.txt,application/pdf,text/plain" required>
+        <p class="aide">PDF, y compris un document scanné, ou texte brut.</p>
+      </div>
+      <div class="champ">
+        <label for="reference_consultation">Référence du marché <span class="liste__complement">facultatif</span></label>
+        <input type="text" id="reference_consultation" name="reference_consultation">
+      </div>
+      <div class="champ">
+        <label for="maitre_ouvrage_declare">Maître d'ouvrage <span class="liste__complement">facultatif</span></label>
+        <p class="aide" id="aide-mo">Ce que vous saisissez ici est repris tel
+           quel. L'outil ne le devine pas.</p>
+        <input type="text" id="maitre_ouvrage_declare" name="maitre_ouvrage_declare"
+               aria-describedby="aide-mo">
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--principal btn--action">Analyser le dossier</button>
+    </div>
+  </form>
+</div>
+
+<div class="carte carte--plate">
+  <h3>Ce que vous obtiendrez</h3>
+  <ul>
+    <li>les pièces exigées, avec l'endroit du document où chacune est écrite&nbsp;;</li>
+    <li>les critères d'attribution et leur poids, quand le dossier les donne&nbsp;;</li>
+    <li>la date limite de remise, si elle figure dans le dossier.</li>
+  </ul>
+  <p>Ce qui n'est pas dans le document est affiché « non trouvé dans le
+     document ». Rien n'est complété par déduction.</p>
+</div>
+
+<h2>Vos dossiers déposés</h2>
+
+<ul class="liste">
+  
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">FICTIF — réfection étanchéité toitures-terrasses (2 groupes scolaires fictifs)</span>
+      <span class="liste__complement">Déposé le 30/09/2026</span>
+    </div>
+    <div class="liste__fin">
+      <span class="etat etat--ok">Analysé</span>
+      <a href="/consultations/b3d0ff50-b7b9-457e-89f0-68415ca3cdf7">Ouvrir l'analyse</a>
+    </div>
+  </li>
+  
+</ul>
+
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Pour essayer&nbsp;: un dossier de démonstration fictif est fourni avec
+       l'application (<code>src/tests/fixtures/dce_fictif.pdf</code>), signalé
+       « DOCUMENT FICTIF — DÉMONSTRATION ».</p>
+  </div>
+</details>
+
+</main>
+
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un <strong>brouillon — à relire et à signer</strong>.</p>
+  </div>
+</footer>
+</body>
+</html>

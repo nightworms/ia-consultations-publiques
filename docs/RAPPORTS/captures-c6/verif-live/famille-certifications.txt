@@ -1,0 +1,303 @@
+
+ 
+ 
+ 
+   
+   
+   Certifications et qualifications — Consultations publiques 
+   
+ 
+ 
+ Aller au contenu principal 
+ 
+   
+     Consultations publiques 
+     
+      
+       Accueil 
+       Bibliothèque 
+       Consultations 
+       Compte de démonstration (FICTIF) 
+       
+         Se déconnecter 
+       
+      
+     
+   
+ 
+
+ 
+  
+ 
+   
+     Certifications et qualifications 
+     Ce que vous enregistrez ici sert de source au mémoire
+       technique. Une information sans source est signalée comme non vérifiée. 
+   
+   
+     Ajouter un élément 
+   
+ 
+
+
+
+
+ 
+   Ce qui est enregistré 
+  
+  
+   Certification ou qualification 
+  
+  
+   
+     
+       Qualification étanchéité de toitures-terrasses 
+       
+        Déclaré, non vérifié
+        
+       
+     
+     
+      
+        Intitulé :  Qualification étanchéité de toitures-terrasses 
+      
+        Organisme :  O.C.F.E. — Organisme Certificat Fictif Étanchéité (FICTIF) 
+      
+        Domaine (référence) :  etancheite 
+      
+        Numéro de certificat :  CERT-FICTIF-2021-0457 
+      
+        Date d&#39;obtention :  01/09/2021 
+      
+        Date d&#39;échéance :  15/09/2026 
+      
+        Justificatif :  pièce fournie (document rattaché) 
+      
+        Origine : 
+        saisie par vous
+        
+       
+        Source : 
+        
+          aucune source — valeur  non vérifiée 
+        
+       
+      
+        Validité :  expire 
+      
+        Mis à jour le :  30/09/2026 
+     
+    
+   
+  
+   
+     
+       Habilitation travaux en hauteur 
+       
+        Déclaré, non vérifié
+        
+       
+     
+     
+      
+        Intitulé :  Habilitation travaux en hauteur 
+      
+        Organisme :  ORGANISME-FICTIF (FICTIF) 
+      
+        Domaine (référence) :  travaux en hauteur 
+      
+        Numéro de certificat :  HAB-FICTIF-2025-3391 
+      
+        Date d&#39;obtention :  10/03/2025 
+      
+        Date d&#39;échéance :  10/03/2028 
+      
+        Justificatif :  pièce fournie (document rattaché) 
+      
+        Origine : 
+        saisie par vous
+        
+       
+        Source : 
+        
+          aucune source — valeur  non vérifiée 
+        
+       
+      
+        Validité :  valide 
+      
+        Mis à jour le :  30/09/2026 
+     
+    
+   
+  
+  
+  
+ 
+
+ Ajouter un élément 
+ Une valeur sans source s'affiche comme  non vérifiée &nbsp;:
+   l'outil ne présente jamais une valeur non sourcée comme un fait. Toute
+   écriture fait repasser la famille concernée en relecture. 
+
+
+ 
+   Nouvel élément — Certification ou qualification 
+  
+   
+    Champs obligatoires&nbsp;:
+    Intitulé, Organisme, Domaine (référence), Justificatif.
+   
+  
+   
+     
+     
+     
+      
+      
+      
+       
+         Intitulé 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Organisme 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Domaine (référence) 
+        
+          
+           
+          
+          
+           
+            Cette valeur vient d'une liste de référence — jeu  non chargé &nbsp;:
+            si votre valeur n'apparaît pas, créez-la ci-dessous sans quitter ce
+            formulaire. Elle est enregistrée sur cet élément, marquée à vérifier.
+           
+          
+           
+            Valeur absente de la liste (créer pour cet élément)
+           
+           
+          
+       
+      
+      
+      
+      
+       
+         Numéro de certificat 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Date d&#39;obtention 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Date d&#39;échéance 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Justificatif 
+        
+           
+          
+          
+       
+      
+      
+       
+         D'où vient cette information 
+         
+           Choisissez… 
+           Je la saisis moi-même 
+           Elle vient d'un document que je fournis 
+         
+       
+       
+         Niveau de confiance 
+         
+           À vérifier (par défaut) 
+           Déclaré, non vérifié 
+           Vérifié (exige une source et un contrôle humain nommé) 
+         
+       
+       
+         Contrôle humain par (si « vérifié ») 
+         
+       
+       
+         Sensibilité de l'information 
+         
+           Valeur par défaut 
+           Publique 
+           Interne 
+           Confidentiel 
+         
+       
+       
+         Document source (si l'information vient d'un document) 
+         
+         
+          Renseigné automatiquement par l'import. Laisser vide si vous ne savez
+          pas&nbsp;: la valeur sera marquée non vérifiée. 
+       
+     
+     
+       Enregistrer cet élément 
+     
+   
+ 
+
+
+ 
+
+ 
+
+ 
+   
+      Ce que fait l'outil :  il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références. 
+     Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un  brouillon — à relire et à signer . 
+   
+ 
+ 
+ 

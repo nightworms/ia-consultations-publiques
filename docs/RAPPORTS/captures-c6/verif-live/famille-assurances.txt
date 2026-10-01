@@ -1,0 +1,355 @@
+
+ 
+ 
+ 
+   
+   
+   Assurances — Consultations publiques 
+   
+ 
+ 
+ Aller au contenu principal 
+ 
+   
+     Consultations publiques 
+     
+      
+       Accueil 
+       Bibliothèque 
+       Consultations 
+       Compte de démonstration (FICTIF) 
+       
+         Se déconnecter 
+       
+      
+     
+   
+ 
+
+ 
+  
+ 
+   
+     Assurances 
+     Ce que vous enregistrez ici sert de source au mémoire
+       technique. Une information sans source est signalée comme non vérifiée. 
+   
+   
+     Ajouter un élément 
+   
+ 
+
+
+
+
+ 
+   Ce qui est enregistré 
+  
+  
+   Contrat d&#39;assurance 
+  
+  
+   
+     
+       responsabilite civile decennale 
+       
+        Déclaré, non vérifié
+        
+       
+     
+     
+      
+        Type d&#39;assurance :  responsabilite civile decennale 
+      
+        Assureur :  ASSURANCES-FICTIVES OCÉANE (FICTIF) 
+      
+        Numéro de contrat :  FICTIF-RCD-2026-1187 
+      
+        Montant de garantie :  1 500 000 EUR 
+      
+        Franchise :  5 000 EUR 
+      
+        Date de début :  01/01/2026 
+      
+        Date d&#39;échéance :  15/10/2026 
+      
+        Activités couvertes :  Étanchéité de toitures-terrasses, relevés et points singuliers, travaux en site occupé (FICTIF). 
+      
+        Justificatif :  pièce fournie (document rattaché) 
+      
+        Origine : 
+        saisie par vous
+        
+       
+        Source : 
+        
+          aucune source — valeur  non vérifiée 
+        
+       
+      
+        Validité :  valide 
+      
+        Mis à jour le :  30/09/2026 
+     
+    
+   
+  
+   
+     
+       responsabilite civile professionnelle 
+       
+        Déclaré, non vérifié
+        
+       
+     
+     
+      
+        Type d&#39;assurance :  responsabilite civile professionnelle 
+      
+        Assureur :  ASSURANCES-FICTIVES OCÉANE (FICTIF) 
+      
+        Numéro de contrat :  FICTIF-RCP-2026-1188 
+      
+        Montant de garantie :  800 000 EUR 
+      
+        Franchise :  2 500 EUR 
+      
+        Date de début :  01/01/2026 
+      
+        Date d&#39;échéance :  31/01/2027 
+      
+        Activités couvertes :  Travaux d&#39;étanchéité et activités connexes (FICTIF). 
+      
+        Justificatif :  pièce fournie (document rattaché) 
+      
+        Origine : 
+        saisie par vous
+        
+       
+        Source : 
+        
+          aucune source — valeur  non vérifiée 
+        
+       
+      
+        Validité :  valide 
+      
+        Mis à jour le :  30/09/2026 
+     
+    
+   
+  
+  
+  
+ 
+
+ Ajouter un élément 
+ Une valeur sans source s'affiche comme  non vérifiée &nbsp;:
+   l'outil ne présente jamais une valeur non sourcée comme un fait. Toute
+   écriture fait repasser la famille concernée en relecture. 
+
+
+ 
+   Nouvel élément — Contrat d&#39;assurance 
+  
+   
+    Champs obligatoires&nbsp;:
+    Type d&#39;assurance, Assureur, Date de début, Date d&#39;échéance, Justificatif.
+   
+  
+   
+     
+     
+     
+      
+      
+      
+       
+         Type d&#39;assurance 
+        
+          
+           
+          
+          
+           
+            Cette valeur vient d'une liste de référence — jeu  non chargé &nbsp;:
+            si votre valeur n'apparaît pas, créez-la ci-dessous sans quitter ce
+            formulaire. Elle est enregistrée sur cet élément, marquée à vérifier.
+           
+          
+           
+            Valeur absente de la liste (créer pour cet élément)
+           
+           
+          
+       
+      
+      
+      
+      
+       
+         Assureur 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Numéro de contrat 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Montant de garantie 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Devise de la garantie 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Franchise 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Devise de la franchise 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Date de début 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Date d&#39;échéance 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Activités couvertes 
+        
+           
+          
+          
+       
+      
+      
+      
+      
+       
+         Justificatif 
+        
+           
+          
+          
+       
+      
+      
+       
+         D'où vient cette information 
+         
+           Choisissez… 
+           Je la saisis moi-même 
+           Elle vient d'un document que je fournis 
+         
+       
+       
+         Niveau de confiance 
+         
+           À vérifier (par défaut) 
+           Déclaré, non vérifié 
+           Vérifié (exige une source et un contrôle humain nommé) 
+         
+       
+       
+         Contrôle humain par (si « vérifié ») 
+         
+       
+       
+         Sensibilité de l'information 
+         
+           Valeur par défaut 
+           Publique 
+           Interne 
+           Confidentiel 
+         
+       
+       
+         Document source (si l'information vient d'un document) 
+         
+         
+          Renseigné automatiquement par l'import. Laisser vide si vous ne savez
+          pas&nbsp;: la valeur sera marquée non vérifiée. 
+       
+     
+     
+       Enregistrer cet élément 
+     
+   
+ 
+
+
+ 
+
+ 
+
+ 
+   
+      Ce que fait l'outil :  il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références. 
+     Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un  brouillon — à relire et à signer . 
+   
+ 
+ 
+ 

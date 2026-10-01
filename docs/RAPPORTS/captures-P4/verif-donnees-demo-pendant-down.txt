@@ -1,0 +1,6 @@
+NOTICE:  database "ia_consultations_qa_l8_mig2" does not exist, skipping
+AVANT down : client=2 entreprise=2 reference=5 document=13 assurance=3 certification=2 consultation=2 utilisateur=2
+Migrations annulées : 0006, 0005
+APRES down (0005+0006 annulees) : client=2 entreprise=2 reference=5 document=13 assurance=3 certification=2 consultation=2 utilisateur=2
+APRES up : client=2 entreprise=2 reference=5 document=13 assurance=3 certification=2 consultation=2 utilisateur=2
+copie supprimee

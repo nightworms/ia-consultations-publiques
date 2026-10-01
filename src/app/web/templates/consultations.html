@@ -1,39 +1,30 @@
 {% extends "base.html" %}
-{% block titre %}Consultations{% endblock %}
+{% block titre %}Déposer un dossier de consultation{% endblock %}
 {% block contenu %}
-<h2>Consultations — analyse d'un DCE</h2>
-
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
-{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
-
-<div class="message message-brouillon">
-  brouillon — à relire et à signer
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Déposer le dossier de consultation</h1>
+    <p class="sous-titre">Le dossier vient de vous&nbsp;: l'outil ne va rien
+       chercher sur une plateforme d'achat et ne dépose aucun pli à votre place.</p>
+  </div>
 </div>
 
-<div class="message">
-  <p>
-    Vous fournissez vous-même le document : l'outil ne va rien chercher, ne
-    consulte aucune plateforme d'achat et ne dépose aucun pli à votre place.
-    Il lit le document et propose des éléments <strong>avec leur source</strong> ;
-    seul un élément validé par un humain alimente ensuite la checklist.
-  </p>
-  <p>
-    Générateur d'analyse : <code>{{ fournisseur }}</code>
-    {% if fournisseur == 'factice' %}
-    — fournisseur <strong>factice</strong> (règles de lecture déterministes,
-    aucun modèle de langage, aucun appel réseau). Le chemin réel France/UE est
-    codé mais non testé faute de clé d'API.
-    {% endif %}
-  </p>
-  <p>Formats acceptés : PDF (y compris scanné, via OCR) et texte brut. Les formats bureautiques sont refusés explicitement.</p>
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">Le dossier n'a pas pu être analysé</p>
+  <p>{{ erreur }}</p>
 </div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
 
 <div class="carte">
-  <h3>Fournir un document de consultation</h3>
+  <h2 class="carte__titre">Le dossier</h2>
   <form method="post" action="/consultations" enctype="multipart/form-data">
     <div class="grille">
-      <div class="champ">
-        <label for="libelle">Libellé de la consultation</label>
+      <div class="champ pleine">
+        <label for="libelle">Nom donné à ce dossier</label>
         <input type="text" id="libelle" name="libelle" maxlength="255" required>
       </div>
       <div class="champ">
@@ -43,55 +34,71 @@
           <option value="{{ e.entreprise_id }}">{{ e.libelle_court }}</option>
           {% endfor %}
         </select>
+        {% if not entreprises %}
+        <p class="aide">Aucune entreprise n'est déclarée&nbsp;:
+           <a href="/entreprises/nouvelle">créez-la d'abord</a>.</p>
+        {% endif %}
       </div>
       <div class="champ">
-        <label for="reference_consultation">Référence de la consultation (saisie par l'humain)</label>
+        <label for="fichier">Le dossier de consultation</label>
+        <input type="file" id="fichier" name="fichier" accept=".pdf,.txt,application/pdf,text/plain" required>
+        <p class="aide">PDF, y compris un document scanné, ou texte brut.</p>
+      </div>
+      <div class="champ">
+        <label for="reference_consultation">Référence du marché <span class="liste__complement">facultatif</span></label>
         <input type="text" id="reference_consultation" name="reference_consultation">
       </div>
       <div class="champ">
-        <label for="maitre_ouvrage_declare">Maître d'ouvrage déclaré (saisi par l'humain, jamais déduit)</label>
-        <input type="text" id="maitre_ouvrage_declare" name="maitre_ouvrage_declare">
-      </div>
-      <div class="champ pleine-largeur">
-        <label for="fichier">Document (PDF ou .txt)</label>
-        <input type="file" id="fichier" name="fichier" accept=".pdf,.txt,application/pdf,text/plain" required>
-        <p class="aide">
-          Jeu de démonstration fictif disponible dans le dépôt :
-          <code>src/tests/fixtures/dce_fictif.pdf</code> (document signalé
-          « DOCUMENT FICTIF — DÉMONSTRATION »).
-        </p>
+        <label for="maitre_ouvrage_declare">Maître d'ouvrage <span class="liste__complement">facultatif</span></label>
+        <p class="aide" id="aide-mo">Ce que vous saisissez ici est repris tel
+           quel. L'outil ne le devine pas.</p>
+        <input type="text" id="maitre_ouvrage_declare" name="maitre_ouvrage_declare"
+               aria-describedby="aide-mo">
       </div>
     </div>
     <div class="actions">
-      <button type="submit">Analyser ce document</button>
+      <button type="submit" class="btn btn--principal btn--action">Analyser le dossier</button>
     </div>
   </form>
 </div>
 
-<h3>Consultations déjà enregistrées pour ce client</h3>
+<div class="carte carte--plate">
+  <h3>Ce que vous obtiendrez</h3>
+  <ul>
+    <li>les pièces exigées, avec l'endroit du document où chacune est écrite&nbsp;;</li>
+    <li>les critères d'attribution et leur poids, quand le dossier les donne&nbsp;;</li>
+    <li>la date limite de remise, si elle figure dans le dossier.</li>
+  </ul>
+  <p>Ce qui n'est pas dans le document est affiché « non trouvé dans le
+     document ». Rien n'est complété par déduction.</p>
+</div>
+
+<h2>Vos dossiers déposés</h2>
 {% if consultations %}
-<table>
-  <caption>Consultations du client de la session</caption>
-  <thead>
-    <tr>
-      <th scope="col">Libellé</th>
-      <th scope="col">Statut</th>
-      <th scope="col">Créée le</th>
-      <th scope="col">Analyse</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for c in consultations %}
-    <tr>
-      <td>{{ c.libelle }}</td>
-      <td>{{ c.statut }}</td>
-      <td>{{ c.date_creation }}</td>
-      <td><a href="/consultations/{{ c.id }}">Ouvrir l'analyse</a></td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<ul class="liste">
+  {% for c in consultations %}
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">{{ c.libelle }}</span>
+      <span class="liste__complement">Déposé le {{ c.date_lisible }}</span>
+    </div>
+    <div class="liste__fin">
+      <span class="etat etat--{% if c.statut_libelle == 'Analysé' %}ok{% else %}attente{% endif %}">{{ c.statut_libelle }}</span>
+      <a href="/consultations/{{ c.id }}">Ouvrir l'analyse</a>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 {% else %}
-<p>Aucune consultation enregistrée pour ce client.</p>
+<p>Aucun dossier n'a encore été déposé.</p>
 {% endif %}
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Pour essayer&nbsp;: un dossier de démonstration fictif est fourni avec
+       l'application (<code>src/tests/fixtures/dce_fictif.pdf</code>), signalé
+       « DOCUMENT FICTIF — DÉMONSTRATION ».</p>
+  </div>
+</details>
 {% endblock %}

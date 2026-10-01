@@ -1,0 +1,330 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Certifications et qualifications — Consultations publiques</title>
+  <link rel="stylesheet" href="http://127.0.0.1:8098/static/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="/accueil">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      
+      <a href="/accueil">Accueil</a>
+      <a href="/bibliotheque" aria-current="page">Bibliothèque</a>
+      <a href="/consultations">Consultations</a>
+      <span class="bandeau__qui">Compte de démonstration (FICTIF)</span>
+      <form method="post" action="/deconnexion">
+        <button type="submit">Se déconnecter</button>
+      </form>
+      
+    </nav>
+  </div>
+</header>
+
+<main id="contenu" class="page">
+  
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Certifications et qualifications</h1>
+    <p class="sous-titre">Ce que vous enregistrez ici sert de source au mémoire
+       technique. Une information sans source est signalée comme non vérifiée.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="#ajouter">Ajouter un élément</a>
+  </div>
+</div>
+
+
+
+
+<div class="carte">
+  <h2 class="carte__titre">Ce qui est enregistré</h2>
+  
+  
+  <h3>Certification ou qualification</h3>
+  
+  
+  <div class="fiche-ligne">
+    <div class="fiche-ligne__tete">
+      <span class="fiche-ligne__titre">Qualification étanchéité de toitures-terrasses</span>
+      <span class="etat etat--attente">
+        Déclaré, non vérifié
+        
+      </span>
+    </div>
+    <ul class="sources">
+      
+      <li><span class="source-etiquette">Intitulé :</span> Qualification étanchéité de toitures-terrasses</li>
+      
+      <li><span class="source-etiquette">Organisme :</span> O.C.F.E. — Organisme Certificat Fictif Étanchéité (FICTIF)</li>
+      
+      <li><span class="source-etiquette">Domaine (référence) :</span> etancheite</li>
+      
+      <li><span class="source-etiquette">Numéro de certificat :</span> CERT-FICTIF-2021-0457</li>
+      
+      <li><span class="source-etiquette">Date d&#39;obtention :</span> 01/09/2021</li>
+      
+      <li><span class="source-etiquette">Date d&#39;échéance :</span> 15/09/2026</li>
+      
+      <li><span class="source-etiquette">Justificatif :</span> pièce fournie (document rattaché)</li>
+      
+      <li><span class="source-etiquette">Origine :</span>
+        saisie par vous
+        
+      </li>
+      <li><span class="source-etiquette">Source :</span>
+        
+          aucune source — valeur <strong>non vérifiée</strong>
+        
+      </li>
+      
+      <li><span class="source-etiquette">Validité :</span> expire</li>
+      
+      <li><span class="source-etiquette">Mis à jour le :</span> 30/09/2026</li>
+    </ul>
+    
+  </div>
+  
+  <div class="fiche-ligne">
+    <div class="fiche-ligne__tete">
+      <span class="fiche-ligne__titre">Habilitation travaux en hauteur</span>
+      <span class="etat etat--attente">
+        Déclaré, non vérifié
+        
+      </span>
+    </div>
+    <ul class="sources">
+      
+      <li><span class="source-etiquette">Intitulé :</span> Habilitation travaux en hauteur</li>
+      
+      <li><span class="source-etiquette">Organisme :</span> ORGANISME-FICTIF (FICTIF)</li>
+      
+      <li><span class="source-etiquette">Domaine (référence) :</span> travaux en hauteur</li>
+      
+      <li><span class="source-etiquette">Numéro de certificat :</span> HAB-FICTIF-2025-3391</li>
+      
+      <li><span class="source-etiquette">Date d&#39;obtention :</span> 10/03/2025</li>
+      
+      <li><span class="source-etiquette">Date d&#39;échéance :</span> 10/03/2028</li>
+      
+      <li><span class="source-etiquette">Justificatif :</span> pièce fournie (document rattaché)</li>
+      
+      <li><span class="source-etiquette">Origine :</span>
+        saisie par vous
+        
+      </li>
+      <li><span class="source-etiquette">Source :</span>
+        
+          aucune source — valeur <strong>non vérifiée</strong>
+        
+      </li>
+      
+      <li><span class="source-etiquette">Validité :</span> valide</li>
+      
+      <li><span class="source-etiquette">Mis à jour le :</span> 30/09/2026</li>
+    </ul>
+    
+  </div>
+  
+  
+  
+</div>
+
+<h2 id="ajouter">Ajouter un élément</h2>
+<p>Une valeur sans source s'affiche comme <strong>non vérifiée</strong>&nbsp;:
+   l'outil ne présente jamais une valeur non sourcée comme un fait. Toute
+   écriture fait repasser la famille concernée en relecture.</p>
+
+
+<fieldset>
+  <legend>Nouvel élément — Certification ou qualification</legend>
+  
+  <p class="aide">
+    Champs obligatoires&nbsp;:
+    Intitulé, Organisme, Domaine (référence), Justificatif.
+  </p>
+  
+  <form method="post" action="/bibliotheque/certifications">
+    <input type="hidden" name="entite" value="certification">
+    <input type="hidden" name="fiche_version_id" value="d0000000-0000-4000-8000-000000000004">
+    <div class="grille">
+      
+      
+      
+      <div class="champ">
+        <label for="certification-intitule">Intitulé</label>
+        
+          <input type="text"
+                 id="certification-intitule" name="champ_intitule"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-organisme">Organisme</label>
+        
+          <input type="text"
+                 id="certification-organisme" name="champ_organisme"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-domaine_code">Domaine (référence)</label>
+        
+          
+          <input type="text" id="certification-domaine_code" name="champ_domaine_code">
+          
+          
+          <p class="aide" id="aide-certification-domaine_code">
+            Cette valeur vient d'une liste de référence — jeu <strong>non chargé</strong>&nbsp;:
+            si votre valeur n'apparaît pas, créez-la ci-dessous sans quitter ce
+            formulaire. Elle est enregistrée sur cet élément, marquée à vérifier.
+          </p>
+          
+          <label for="certification-domaine_code-nouvelle">
+            Valeur absente de la liste (créer pour cet élément)
+          </label>
+          <input type="text" id="certification-domaine_code-nouvelle"
+                 name="champ_domaine_code__nouvelle"
+                 aria-describedby="aide-certification-domaine_code">
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-numero_certificat">Numéro de certificat</label>
+        
+          <input type="text"
+                 id="certification-numero_certificat" name="champ_numero_certificat"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-date_obtention">Date d&#39;obtention</label>
+        
+          <input type="date"
+                 id="certification-date_obtention" name="champ_date_obtention"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-date_echeance">Date d&#39;échéance</label>
+        
+          <input type="date"
+                 id="certification-date_echeance" name="champ_date_echeance"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      
+      
+      <div class="champ">
+        <label for="certification-piece">Justificatif</label>
+        
+          <input type="text"
+                 id="certification-piece" name="champ_piece"
+                 
+                 >
+          
+          
+      </div>
+      
+      
+      <div class="champ">
+        <label for="certification-origine">D'où vient cette information</label>
+        <select id="certification-origine" name="origine" required>
+          <option value="">Choisissez…</option>
+          <option value="saisie_entreprise">Je la saisis moi-même</option>
+          <option value="document_extrait">Elle vient d'un document que je fournis</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="certification-confiance">Niveau de confiance</label>
+        <select id="certification-confiance" name="confiance">
+          <option value="">À vérifier (par défaut)</option>
+          <option value="declare_non_verifie">Déclaré, non vérifié</option>
+          <option value="verifie">Vérifié (exige une source et un contrôle humain nommé)</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="certification-controle">Contrôle humain par (si « vérifié »)</label>
+        <input type="text" id="certification-controle" name="controle_humain_par">
+      </div>
+      <div class="champ">
+        <label for="certification-sensibilite">Sensibilité de l'information</label>
+        <select id="certification-sensibilite" name="sensibilite">
+          <option value="">Valeur par défaut</option>
+          <option value="publique">Publique</option>
+          <option value="interne">Interne</option>
+          <option value="confidentiel">Confidentiel</option>
+        </select>
+      </div>
+      <div class="champ">
+        <label for="certification-source">Document source (si l'information vient d'un document)</label>
+        <input type="text" id="certification-source" name="source_document_id"
+               aria-describedby="aide-certification-source">
+        <p class="aide" id="aide-certification-source">
+          Renseigné automatiquement par l'import. Laisser vide si vous ne savez
+          pas&nbsp;: la valeur sera marquée non vérifiée.</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button type="submit" class="btn btn--secondaire">Enregistrer cet élément</button>
+    </div>
+  </form>
+</fieldset>
+
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Famille <code>certifications</code> — fiche
+       <code>d0000000-0000-4000-8000-000000000004</code> — état « Socle complet (non relue) ».</p>
+  </div>
+</details>
+
+</main>
+
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un <strong>brouillon — à relire et à signer</strong>.</p>
+  </div>
+</footer>
+</body>
+</html>

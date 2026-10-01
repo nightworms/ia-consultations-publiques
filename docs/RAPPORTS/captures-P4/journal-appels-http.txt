@@ -1,0 +1,165 @@
+INFO:     Started server process [94627]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8099 (Press CTRL+C to quit)
+INFO:     127.0.0.1:61682 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61699 - "POST /connexion HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:61699 - "GET /accueil HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61699 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61707 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61707 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61707 - "GET /bibliotheque HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61707 - "GET /consultations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61707 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61716 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61716 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61740 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61740 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61740 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:61740 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61740 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61759 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61777 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61777 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61777 - "GET /bibliotheque/import?ok=import_depose HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61828 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61828 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61828 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61828 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61828 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61842 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61842 - "POST /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61842 - "GET /bibliotheque/import?ok=proposition_acceptee HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61842 - "GET /bibliotheque/assurances HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "GET /consultations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61871 - "POST /consultations HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61871 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0?ok=document_analyse HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61906 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/13611684-8c58-4079-aa0b-873500414a4f HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/4f17f228-1d27-455c-a8c5-26b932ebada8 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/7d67bf64-3c2f-4b66-9be2-e7f6e397d64c HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/b8fa2ffe-db3e-45da-9474-217edef5cfd6 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/eb85e5db-76d5-46d5-bf46-f4d31939f987 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/f4d885ac-7ab9-44ac-8293-52981b3c7f84 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/73290e6e-91a9-47e0-a758-a65a2ea6b9bb HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/273cadf9-5d03-49dc-b485-86d7b927ae53 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/300c29da-69c5-4276-8a09-cc856224133a HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/397e1a49-5143-404b-ae95-158da7f1d09f HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/45815257-ea6a-4d6d-8c78-9c547d21b394 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/9857e7f6-b7eb-4437-86f8-bf61dc81535b HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/b393b9d6-e3d4-4230-af36-4f84d5654e4b HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/cd02b996-cbeb-4684-8124-c6f8824be176 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/elements/d27ca9dd-33f4-41ac-924d-b9f15e9402b3 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61906 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61939 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61939 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61945 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61945 - "POST /deconnexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61945 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61965 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61973 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61973 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61973 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire?ok=memoire_genere HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61994 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=md HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:61994 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=docx HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/bf6a8e89-28f1-43d3-b43a-b4df4da1eac7 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/validation HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/bf6a8e89-28f1-43d3-b43a-b4df4da1eac7 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/a95d893f-29b8-4a79-8078-b3bdc3c27e6d HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/d0d1aa1a-5614-49f0-ab99-0f8e26fbf0fb HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/33bf3b82-13f0-4187-ab49-ec3effadb140 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/67785c63-f829-4a7d-bfe3-54043eee2380 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/3a701d86-4e3d-43b9-97b3-b97c74cd8ee4 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/validation HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:61994 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=md HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:61994 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=docx HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:61994 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=pdf HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:62019 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=md HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:62019 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=docx HTTP/1.1" 409 Conflict
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/bf6a8e89-28f1-43d3-b43a-b4df4da1eac7 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/validation HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/bf6a8e89-28f1-43d3-b43a-b4df4da1eac7 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/a95d893f-29b8-4a79-8078-b3bdc3c27e6d HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/d0d1aa1a-5614-49f0-ab99-0f8e26fbf0fb HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/33bf3b82-13f0-4187-ab49-ec3effadb140 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/67785c63-f829-4a7d-bfe3-54043eee2380 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/sections/3a701d86-4e3d-43b9-97b3-b97c74cd8ee4 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "POST /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/validation HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62019 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=md HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62019 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=docx HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62019 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire/export?format=pdf HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:62059 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62080 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62080 - "GET /api/v1/import/documents/b0000000-0000-4000-8000-000000000b01 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /api/v1/consultations/b0000000-0000-4000-8000-000000000c01 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /api/v1/consultations/b0000000-0000-4000-8000-000000000c01/memoire HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /consultations/b0000000-0000-4000-8000-000000000c01/memoire HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /consultations/b0000000-0000-4000-8000-000000000c01/memoire/export?format=md HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /consultations/b0000000-0000-4000-8000-000000000c01/checklist HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "GET /consultations/b0000000-0000-4000-8000-000000000c01 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62080 - "POST /api/v1/bibliotheque/references_chantiers HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:62080 - "GET /api/v1/bibliotheque/references_chantiers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62080 - "GET /api/v1/bibliotheque HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62080 - "POST /api/v1/memoire/sections/00000000-0000-0000-0000-000000000001 HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62100 - "GET /openapi.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62113 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62113 - "POST /api/v1/bibliotheque/references_chantiers HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:62211 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62211 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/identite HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/capacites_financieres HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/assurances HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/certifications HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/references_chantiers HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/moyens_humains HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/moyens_materiels HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/fiches_produits HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /bibliotheque/memoire_technique HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /consultations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /entreprises/nouvelle HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62211 - "GET /route-qui-nexiste-pas HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62230 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62230 - "GET /accueil HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62230 - "GET /bibliotheque HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62230 - "GET /consultations HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62230 - "GET /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62261 - "GET /route-inconnue HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:62261 - "GET /connexion HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /accueil HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion?suivant=/accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /bibliotheque HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion?suivant=/bibliotheque HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /bibliotheque/import HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion?suivant=/bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion?suivant=/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62261 - "GET /connexion?suivant=/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62291 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62291 - "GET /connexion?suivant=/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62306 - "POST /connexion HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:62312 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62312 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64108 - "GET /entreprises/nouvelle HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64108 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64108 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:64108 - "POST /entreprises HTTP/1.1" 303 See Other
+INFO:     127.0.0.1:64108 - "GET /bibliotheque?ok=entreprise_creee HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /accueil HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /bibliotheque HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /bibliotheque/import HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64133 - "GET /connexion HTTP/1.1" 200 OK

@@ -1,0 +1,23 @@
+client B (fictif) en place : b0000000-0000-4000-8000-000000000001
+POST /connexion -> 303 Location=/accueil
+cookie de session posé : oui (valeur non affichée)
+
+== A tente d'ouvrir les ressources de B ==
+   API import de B            -> HTTP 404 | donnee de B affichee : non
+   API consultation de B      -> HTTP 404 | donnee de B affichee : non
+   API memoire de B           -> HTTP 404 | donnee de B affichee : non
+   ecran memoire de B         -> HTTP 404 | donnee de B affichee : non
+   export du memoire de B     -> HTTP 404 | donnee de B affichee : non
+   checklist de B             -> HTTP 404 | donnee de B affichee : non
+   analyse de B               -> HTTP 404 | donnee de B affichee : non
+
+== A tente d'ecrire dans la bibliotheque de B ==
+   POST element de B -> 422 | {"detail":[{"type":"missing","loc":["body","entite"],"msg":"Field required","input":{"element_id":"b0000000-0000-4000-80
+   intitule en base apres tentative : FICTIF — chantier confidentiel du client B (ne doit jamais s
+
+== A ne voit pas la reference de B dans sa propre bibliotheque ==
+   GET bibliotheque de A -> 200 | libelle de B present : False
+   GET toutes familles de A -> 200 | libelle de B present : False
+
+== A ne peut pas lire le memoire de B par la section ==
+   POST section inconnue -> 404

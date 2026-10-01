@@ -126,10 +126,13 @@ def test_migration_0003_down_puis_up(connexion_admin, base_migree):
     assert _colonne_existe(connexion_admin, "document", "nature")
     assert _colonne_existe(connexion_admin, "document", "consultation_id")
 
-    # Modifié par le lot L4 (phase 3) : l'annulation portait sur « 0003 » en dur,
-    # ce que l'ajout de la migration 0004 (checklist) invalide. Elle porte désormais
-    # sur les deux dernières migrations, ce qui reste vrai à chaque ajout de lot.
-    annulees = executeur.down(2)
+    # Modifié par le lot L3 (phase 3 puis phase 4) : l'annulation portait sur un
+    # nombre écrit en dur, ce que chaque ajout de migration invalide. Elle porte
+    # désormais sur **toutes** les migrations postérieures à 0002, ce qui reste vrai
+    # à chaque nouveau lot (0003 analyse, 0004 checklist, puis les migrations de la
+    # phase 4).
+    apres_0002 = [m.numero for m in lister_migrations() if m.numero > "0002"]
+    annulees = executeur.down(len(apres_0002))
     assert "0003" in annulees
     assert not _table_existe(connexion_admin, "consultation")
     assert not _table_existe(connexion_admin, "extraction_element")

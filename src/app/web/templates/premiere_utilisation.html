@@ -1,65 +1,75 @@
 {% extends "base.html" %}
 {% block titre %}Première utilisation{% endblock %}
 {% block contenu %}
-<h2>Première utilisation — aucune bibliothèque n'existe encore</h2>
-
-<div class="message">
-  <p>
-    Ce client n'a pas encore d'<strong>entreprise</strong> ni de
-    <strong>version de fiche</strong>. C'est la situation qui répondait
-    auparavant « Provisionnez une entreprise et une version de fiche » — elle
-    n'est plus un cul-de-sac : créez l'entreprise ci-dessous.
-  </p>
-  <p>
-    Rien ne se remplit tout seul : le libellé court est saisi par l'humain
-    (annexe C § C2).
-  </p>
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Première utilisation&nbsp;: créez votre entreprise</h1>
+    <p class="sous-titre">Tant qu'aucune entreprise n'existe, il n'y a pas de
+       bibliothèque où ranger vos chantiers, vos assurances et vos références.</p>
+  </div>
 </div>
 
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">La création n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
 
 <div class="carte">
+  <h2 class="carte__titre">Votre entreprise</h2>
+  <p>Le nom que vous saisissez ici est repris tel quel. L'outil ne va chercher
+     aucune information sur vous&nbsp;: il n'interroge aucun registre et ne
+     complète rien par déduction.</p>
   <form method="post" action="/entreprises">
     <div class="champ">
-      <label for="libelle_court">Libellé court de l'entreprise</label>
-      <p class="aide" id="aide-libelle">
-        Nom d'usage de l'entreprise, tel que saisi par l'humain. Aucune donnée
-        externe n'est consultée. Les jeux de démonstration sont fictifs.
-      </p>
+      <label for="libelle_court">Nom d'usage de l'entreprise</label>
+      <p class="aide" id="aide-libelle">Le nom sous lequel on vous reconnaît.
+         Vous pourrez le corriger plus tard.</p>
       <input type="text" id="libelle_court" name="libelle_court" maxlength="255"
              aria-describedby="aide-libelle" required>
     </div>
     <div class="actions">
-      <button type="submit">Créer l'entreprise et sa première version de fiche</button>
+      <button type="submit" class="btn btn--principal btn--action">Créer mon entreprise</button>
     </div>
   </form>
 </div>
 
 {% if entreprises %}
-<h3>Entreprises déjà déclarées pour ce client</h3>
-<table>
-  <caption>Entreprises du client de la session</caption>
-  <thead>
-    <tr><th scope="col">Libellé</th><th scope="col">Statut</th><th scope="col">Dernière version de fiche</th></tr>
-  </thead>
-  <tbody>
-    {% for e in entreprises %}
-    <tr>
-      <td>{{ e.libelle_court }}</td>
-      <td>{{ e.statut }}</td>
-      <td>
+<h2>Entreprises déjà déclarées</h2>
+<ul class="liste">
+  {% for e in entreprises %}
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">{{ e.libelle_court }}</span>
+      <span class="liste__complement">
         {% if e.derniere_fiche %}
-          n°{{ e.derniere_fiche.numero_version }} — {{ e.derniere_fiche.statut }}
-          <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches" style="display:inline">
-            <button type="submit" class="secondaire">Ouvrir une nouvelle version de fiche</button>
-          </form>
+          Fiche n° {{ e.derniere_fiche.numero_version }} — {{ e.derniere_fiche.statut_libelle }}
         {% else %}
-          aucune version de fiche
+          Aucune fiche ouverte pour cette entreprise.
         {% endif %}
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+      </span>
+    </div>
+    <div class="liste__fin">
+      <form method="post" action="/entreprises/{{ e.entreprise_id }}/fiches">
+        <button type="submit" class="btn btn--secondaire">Ouvrir une nouvelle fiche</button>
+      </form>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
 {% endif %}
+
+<details class="pourquoi">
+  <summary>Pourquoi rien ne se remplit tout seul&nbsp;?</summary>
+  <div class="reponse">
+    <p>Chaque information de votre bibliothèque doit pouvoir être rattachée à
+       quelque chose de réel&nbsp;: ce que vous avez saisi, ou un document que
+       vous avez fourni. C'est ce qui permet au mémoire technique de citer ses
+       sources au lieu d'affirmer.</p>
+  </div>
+</details>
 {% endblock %}

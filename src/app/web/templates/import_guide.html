@@ -1,0 +1,286 @@
+{# Écran d'import guidé (lot L5b, chemin gelé § 2.D).
+   HTML servi côté serveur, aucun JavaScript, aucune ressource tierce.
+
+   Ce que l'écran tient :
+   * une seule action principale (`.btn--action`) : dépister un document quand aucune
+     proposition n'attend, sinon « Valider cette proposition » ;
+   * les propositions se décident **une par une** ; chacune montre le passage exact
+     dont elle vient (document, emplacement, extrait littéral) ;
+   * aucun libellé de bouton ne dit « déposer », « envoyer » ou « signer » : l'outil
+     ne transmet rien à personne ;
+   * l'état d'avancement dit, famille par famille, **ce qui manque pour concourir** —
+     ce sont des conseils, jamais des erreurs. #}
+{% extends "base.html" %}
+{% block titre %}Importer vos documents{% endblock %}
+{% block contenu %}
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Importer vos documents existants</h1>
+    <p class="sous-titre">Votre ancien mémoire, une plaquette, une attestation, un
+       CV&nbsp;: déposez-les, l'outil en tire des propositions. Vous validez, ou vous
+       refusez — rien n'entre dans votre bibliothèque sans votre décision.</p>
+  </div>
+</div>
+
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'action n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if conseil %}
+<div class="encart encart--attention" role="status">
+  <p class="encart__titre">Ce document n'a pas pu être lu jusqu'au bout</p>
+  <p>{{ conseil }}</p>
+  <p>Il n'a pas été enregistré. Rien n'a été écrit dans votre bibliothèque.</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
+
+{% if sans_fiche %}
+<div class="encart encart--attention" role="status">
+  <p class="encart__titre">Ce qu'il faut faire d'abord</p>
+  <p>Votre bibliothèque n'existe pas encore. L'import range les documents dans une
+     famille de votre bibliothèque&nbsp;: commencez par créer votre entreprise.</p>
+  <div class="actions">
+    <a class="btn btn--principal btn--action" href="/entreprises/nouvelle">Créer mon entreprise</a>
+  </div>
+</div>
+{% else %}
+
+<div class="carte">
+  <h2 class="carte__titre">Où vous en êtes</h2>
+  <ol class="progression">
+    <li class="{{ 'fait' if en_attente or decidees else 'encours' }}">
+      <span class="puce" aria-hidden="true">1</span>
+      <div>
+        <p class="titre">Lire un document
+          {% if en_attente or decidees %}
+          <span class="etat etat--ok">Terminé</span>
+          {% else %}
+          <span class="etat etat--info">Étape en cours</span>
+          {% endif %}
+        </p>
+        <p class="detail">PDF, y compris un document scanné, ou texte brut. Les autres
+           formats sont refusés, et vous êtes prévenu.</p>
+      </div>
+    </li>
+    <li class="{{ 'encours' if en_attente else 'none' }}">
+      <span class="puce" aria-hidden="true">2</span>
+      <div>
+        <p class="titre">Valider les propositions, une par une
+          {% if en_attente %}
+          <span class="etat etat--attente">{{ en_attente | length }} à décider</span>
+          {% else %}
+          <span class="etat etat--info">À faire</span>
+          {% endif %}
+        </p>
+        <p class="detail">Chaque proposition montre le passage exact du document dont
+           elle vient. La décision porte votre nom et la date.</p>
+      </div>
+    </li>
+    <li class="{{ 'fait' if decidees else 'none' }}">
+      <span class="puce" aria-hidden="true">3</span>
+      <div>
+        <p class="titre">C'est dans votre bibliothèque
+          {% if decidees %}
+          <span class="etat etat--ok">{{ decidees | length }} décision{% if decidees | length > 1 %}s{% endif %}</span>
+          {% else %}
+          <span class="etat etat--info">À faire</span>
+          {% endif %}
+        </p>
+        <p class="detail">Ce que vous acceptez entre dans la famille choisie, marqué
+           « extrait d'un document — à vérifier ». C'est à vous de confirmer qu'il est
+           exact et à jour.</p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<h2 id="analyser">Lire un document</h2>
+<div class="carte">
+  <form method="post" action="/bibliotheque/import" enctype="multipart/form-data">
+    <div class="grille">
+      <div class="champ pleine">
+        <label for="fichier">Document à lire</label>
+        <p class="aide" id="aide-fichier">PDF, y compris un document scanné, ou texte
+           brut. Le document est rangé sous le nom de son fichier.</p>
+        <input type="file" id="fichier" name="fichier"
+               accept=".pdf,.txt,application/pdf,text/plain" required
+               aria-describedby="aide-fichier">
+      </div>
+      <div class="champ">
+        <label for="famille_cible">Dans quelle famille&nbsp;?</label>
+        <p class="aide" id="aide-famille">La famille oriente la lecture et reçoit ce que
+           vous accepterez. Vous pouvez changer d'avis avant d'accepter.</p>
+        <select id="famille_cible" name="famille_cible" aria-describedby="aide-famille">
+          {% for f in familles %}<option value="{{ f.code }}">{{ f.libelle }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      {% if prochain %}
+      <button type="submit" name="action" value="analyser" class="btn btn--secondaire">Lire ce document</button>
+      {% else %}
+      <button type="submit" name="action" value="analyser" class="btn btn--principal btn--action">Lire ce document</button>
+      {% endif %}
+    </div>
+  </form>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Ce que l'outil lit, et ce qu'il ne devine pas</summary>
+    <div class="reponse">
+      <p>Il ne lit que le texte du document, jamais votre fichier d'origine. Une page
+         illisible est signalée. Chaque proposition qu'il en tire porte l'endroit exact
+         et l'extrait dont elle vient&nbsp;: une proposition sans source vérifiable est
+         refusée, jamais enregistrée « au cas où ».</p>
+    </div>
+  </details>
+</div>
+
+{% if prochain %}
+<h2 id="proposition">Proposition à valider</h2>
+<p>{{ en_attente | length }} proposition{% if en_attente | length > 1 %}s{% endif %}
+   en attente. Vous en décidez une à la fois&nbsp;: la suivante s'affichera après
+   votre décision.</p>
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">{{ prochain.proposition.entite_libelle }} —
+      {{ prochain.proposition.famille_libelle }}</span>
+    <span class="etat etat--attente">À valider</span>
+  </div>
+  <ul class="sources">
+    <li><span class="source-etiquette">Tirée de&nbsp;:</span>
+        {{ prochain.document_libelle }}, {{ prochain.proposition.source_emplacement_lisible }}</li>
+    {% if prochain.proposition.source_extrait %}
+    <li><span class="source-etiquette">Passage&nbsp;:</span>
+        « {{ prochain.proposition.source_extrait }} »</li>
+    {% endif %}
+  </ul>
+
+  <form method="post" action="/bibliotheque/import">
+    <input type="hidden" name="proposition_id" value="{{ prochain.proposition.id }}">
+    <h3>Ce qui sera ajouté à votre bibliothèque</h3>
+    {% if prochain.proposition.champs_manquants_libelles %}
+    <p class="aide">Il manque encore&nbsp;: {{ prochain.proposition.champs_manquants_libelles | join(', ') }}.
+       Vous pouvez les compléter ci-dessous avant de valider.</p>
+    {% endif %}
+    <div class="grille">
+      {% for c in prochain.proposition.champs_affiches %}
+      <div class="champ">
+        {% if c.reference_document %}
+        <p><span class="liste__libelle">{{ c.libelle }}</span> —
+           <span class="liste__complement">pièce du document, rattachée
+           automatiquement. Aucune saisie&nbsp;: un identifiant de document ne se tape
+           pas à la main.</span></p>
+        {% else %}
+        <label for="champ-{{ c.champ }}">{{ c.libelle }}</label>
+        <input type="text" id="champ-{{ c.champ }}" name="champ_{{ c.champ }}"
+               value="{{ c.valeur }}">
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <div class="champ">
+      <label for="decide_par">Votre nom</label>
+      <p class="aide" id="aide-decide">Obligatoire&nbsp;: aucune proposition n'est
+         acceptée ni refusée sans un humain nommé. La décision est horodatée.</p>
+      <input type="text" id="decide_par" name="decide_par" required
+             autocomplete="name" aria-describedby="aide-decide">
+    </div>
+    <div class="actions">
+      <button type="submit" name="action" value="accepter" class="btn btn--principal btn--action">Valider cette proposition</button>
+      <button type="submit" name="action" value="refuser" class="btn btn--secondaire">Refuser cette proposition</button>
+    </div>
+  </form>
+</div>
+
+<details class="pourquoi">
+  <summary>Pourquoi&nbsp;? Ce que devient une proposition acceptée</summary>
+  <div class="reponse">
+    <p>Un élément accepté entre dans votre bibliothèque avec la mention « extrait d'un
+       document — à vérifier ». C'est à vous de confirmer qu'il est exact et à jour.</p>
+    <p>Une proposition refusée disparaît de la file&nbsp;: rien n'est écrit dans votre
+       bibliothèque. Une décision ne se rejoue pas.</p>
+  </div>
+</details>
+{% endif %}
+
+{% if decidees %}
+<h2>Décisions déjà prises</h2>
+<ul class="liste">
+  {% for d in decidees %}
+  <li>
+    <div class="liste__principal">
+      <span class="liste__libelle">{{ d.proposition.entite_libelle }} — {{ d.proposition.famille_libelle }}</span>
+      <span class="liste__complement">{{ d.document_libelle }}{% if d.decide_par %}, décidée par {{ d.decide_par }} le {{ d.decision_le }}{% endif %}</span>
+    </div>
+    <div class="liste__fin">
+      <span class="etat etat--{{ d.classe }}">{{ d.statut_libelle }}</span>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if avancement %}
+<h2 id="avancement">Ce qui vous manque pour être prêt à concourir</h2>
+<div class="carte carte--conseil">
+  {% if avancement.pret_a_concourir %}
+  <p><strong>Chaque famille contient au moins une information exploitable.</strong>
+     Cela ne veut pas dire que votre dossier est complet au sens réglementaire&nbsp;:
+     l'outil constate ce qui est renseigné, il ne certifie rien.</p>
+  {% else %}
+  <p>Voici, famille par famille, ce qui manque encore — et ce qu'il faut ajouter. Ce
+     ne sont pas des erreurs&nbsp;: ce sont les points que le jury cherchera et que
+     votre bibliothèque ne documente pas encore.</p>
+  {% endif %}
+  <ul class="liste">
+    {% for f in avancement.familles %}
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">{{ f.libelle }}</span>
+        <span class="liste__complement">
+          {% if f.prete %}Rien ne manque pour cette famille.
+          {% else %}{{ f.manques | join(' ') }}{% endif %}
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--{{ f.classe }}">{% if f.prete %}Prête{% else %}À compléter{% endif %}</span>
+        <a href="/bibliotheque/{{ f.famille }}">{% if f.prete %}Ouvrir{% else %}Ajouter une information{% endif %}</a>
+      </div>
+    </li>
+    {% endfor %}
+  </ul>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Aucun pourcentage de complétion</summary>
+    <div class="reponse">
+      <p>Un pourcentage ne dit pas quoi faire. Chaque ligne ci-dessus nomme un manque
+         concret et l'information qui le lèvera&nbsp;: une référence de chantier
+         comparable, une attestation d'assurance en cours de validité, une fiche
+         technique de produit.</p>
+    </div>
+  </details>
+</div>
+{% endif %}
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Famille de destination&nbsp;: <code>{{ familles | map(attribute='code') | join(', ') }}</code>.</p>
+    {% if avancement %}
+    <p>{{ avancement.manques_total }} constat{% if avancement.manques_total > 1 %}s{% endif %}
+       de manque sur l'ensemble des familles.</p>
+    {% endif %}
+    {% if prochain %}
+    <p>Proposition en cours de décision&nbsp;: <code>{{ prochain.proposition.id }}</code>
+       — famille <code>{{ prochain.proposition.famille }}</code>,
+       entité <code>{{ prochain.proposition.entite }}</code>.</p>
+    {% endif %}
+    <p>Cette zone sert au support technique. Vous n'avez pas besoin de la lire.</p>
+  </div>
+</details>
+
+{% endif %}
+{% endblock %}

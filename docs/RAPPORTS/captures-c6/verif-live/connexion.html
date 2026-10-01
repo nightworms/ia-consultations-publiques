@@ -1,0 +1,144 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Accueil — Consultations publiques</title>
+  <link rel="stylesheet" href="http://127.0.0.1:8098/static/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="/accueil">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      
+      <a href="/accueil" aria-current="page">Accueil</a>
+      <a href="/bibliotheque">Bibliothèque</a>
+      <a href="/consultations">Consultations</a>
+      <span class="bandeau__qui">Compte de démonstration (FICTIF)</span>
+      <form method="post" action="/deconnexion">
+        <button type="submit">Se déconnecter</button>
+      </form>
+      
+    </nav>
+  </div>
+</header>
+
+<main id="contenu" class="page">
+  
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Répondez à une consultation publique sans repartir de zéro</h1>
+    <p class="sous-titre">Déposez le dossier de consultation&nbsp;: nous en
+       sortons les pièces exigées, les critères notés et la date limite. Votre
+       mémoire technique se monte ensuite avec vos propres références.</p>
+  </div>
+  <div class="entete-ecran__action">
+    
+    <a class="btn btn--principal btn--action" href="/consultations">Déposer un dossier de consultation</a>
+    
+  </div>
+</div>
+
+
+
+<div class="carte">
+  <h2 class="carte__titre">Où vous en êtes</h2>
+  <ol class="progression">
+    <li class="fait">
+      <span class="puce" aria-hidden="true">1</span>
+      <div>
+        <p class="titre">Votre entreprise est déclarée
+          
+          <span class="etat etat--ok">Terminé</span>
+          
+        </p>
+        <p class="detail">
+          
+            FICTIF — Océan Étanchéité — fiche n° 1, En cours de saisie.
+          
+        </p>
+      </div>
+    </li>
+    <li class="fait">
+      <span class="puce" aria-hidden="true">2</span>
+      <div>
+        <p class="titre">Votre bibliothèque se remplit
+          
+          <span class="etat etat--ok">Renseignée</span>
+          
+        </p>
+        <p class="detail">
+          
+            9 familles sur 9
+            contiennent au moins une information.
+            
+          
+        </p>
+      </div>
+    </li>
+    <li class="fait">
+      <span class="puce" aria-hidden="true">3</span>
+      <div>
+        <p class="titre">Votre mémoire technique
+          
+          <span class="etat etat--ok">1 dossier déposé</span>
+          
+        </p>
+        <p class="detail">
+          
+            Un dossier de consultation est analysé&nbsp;: le mémoire se monte à
+            partir des critères de ce dossier.
+          
+        </p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<h2>Ce que la plateforme fait pour vous</h2>
+<div style="display:grid;gap:1rem">
+  <div class="carte carte--plate">
+    <h3>Elle lit le dossier à votre place</h3>
+    <p>Pièces exigées, critères d'attribution et date limite de remise, chacun
+       avec l'endroit exact du document où il a été lu.</p>
+  </div>
+  <div class="carte carte--plate">
+    <h3>Elle écrit votre mémoire avec vos références</h3>
+    <p>Chaque argument renvoie à un chantier, une certification ou un moyen
+       réellement enregistré dans votre bibliothèque.</p>
+  </div>
+  <div class="carte carte--plate">
+    <h3>Elle dit ce qui manque, et quoi faire</h3>
+    <p>« Aucune référence comparable pour ce montant — ajoutez une référence de
+       chantier du bon ordre de grandeur. » Un manque est une information, pas
+       un échec.</p>
+  </div>
+</div>
+
+<details class="pourquoi">
+  <summary>Pourquoi&nbsp;? Ce que l'outil ne fait pas</summary>
+  <div class="reponse">
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit
+       aucune conformité. Ce que vous produisez reste un brouillon à relire et à
+       signer.</p>
+    <p>Il n'écrit que ce qu'il peut rattacher à un élément de votre
+       bibliothèque. Tout le reste est signalé comme manquant, jamais
+       inventé.</p>
+  </div>
+</details>
+
+</main>
+
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un <strong>brouillon — à relire et à signer</strong>.</p>
+  </div>
+</footer>
+</body>
+</html>

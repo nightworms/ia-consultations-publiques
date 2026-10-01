@@ -26,10 +26,12 @@ from app.services.fournisseur_modele.base import (
     ErreurFournisseurModele,
     FournisseurModele,
     PropositionElement,
+    PropositionImport,
     ReponseModeleInvalide,
     ResultatAnalyse,
     source_presente,
     verifier_propositions,
+    verifier_propositions_import,
 )
 from app.services.fournisseur_modele.fournisseur_factice import FournisseurFactice
 
@@ -45,10 +47,12 @@ __all__ = [
     "FournisseurFactice",
     "FournisseurModele",
     "PropositionElement",
+    "PropositionImport",
     "ReponseModeleInvalide",
     "ResultatAnalyse",
     "source_presente",
     "verifier_propositions",
+    "verifier_propositions_import",
     "creer_fournisseur",
     "fournisseurs_disponibles",
 ]

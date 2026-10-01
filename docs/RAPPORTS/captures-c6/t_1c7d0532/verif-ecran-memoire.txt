@@ -1,0 +1,11 @@
+connexion : 200 http://127.0.0.1:8098/accueil
+regeneration du memoire : 200
+--- texte visible (28365 caracteres) ---
+OK        memoire (visible)
+OK        memoire (blocs replies)
+OK        libelle metier : 'Effectif Étancheur : 16.'
+OK        libelle metier : 'Moyen matériel Nacelle élévatrice (engin elevation)'
+OK        libelle metier : 'Votre source'
+OK        libelle metier : 'Nacelle élévatrice'
+
+Aucune anomalie : ni code de nomenclature, ni crochet dans le mémoire servi.

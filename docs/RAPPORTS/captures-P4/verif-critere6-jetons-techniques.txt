@@ -1,0 +1,76 @@
+ecran | zone | motif | extrait
+/accueil | visible | nom de table ou de colonne | document
+/accueil | visible | code d'état interne | brouillon, relue
+/bibliotheque | visible | code d'état interne | brouillon, relue
+/bibliotheque | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/import | visible | nom de table ou de colonne | Document, document
+/bibliotheque/import | visible | code d'état interne | brouillon
+/bibliotheque/import | visible | référence interne au projet | L8
+/bibliotheque/import | bloc replié | nom de table ou de colonne | memoire_technique
+/bibliotheque/identite | visible | nom de table ou de colonne | Document, document
+/bibliotheque/identite | visible | code d'état interne | brouillon
+/bibliotheque/identite | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/identite | bloc replié | code d'état interne | relue
+/bibliotheque/capacites_financieres | visible | nom de table ou de colonne | Document, document
+/bibliotheque/capacites_financieres | visible | code d'état interne | brouillon
+/bibliotheque/capacites_financieres | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/capacites_financieres | bloc replié | code d'état interne | relue
+/bibliotheque/assurances | visible | nom de table ou de colonne | Document, document
+/bibliotheque/assurances | visible | code d'état interne | brouillon, valide
+/bibliotheque/assurances | visible | identifiant à underscores | responsabilite_civile_decennale, responsabilite_civile_professionnelle
+/bibliotheque/assurances | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/assurances | bloc replié | code d'état interne | relue
+/bibliotheque/certifications | visible | nom de table ou de colonne | Document, document
+/bibliotheque/certifications | visible | code d'état interne | brouillon, valide
+/bibliotheque/certifications | visible | identifiant à underscores | travaux_en_hauteur
+/bibliotheque/certifications | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/certifications | bloc replié | code d'état interne | relue
+/bibliotheque/references_chantiers | visible | nom de table ou de colonne | Document, document
+/bibliotheque/references_chantiers | visible | code d'état interne | brouillon
+/bibliotheque/references_chantiers | visible | identifiant à underscores | etancheite_site_occupe, etancheite_toiture_terrasse
+/bibliotheque/references_chantiers | bloc replié | UUID | d0000000-0000-4000-8000-000000000004, d0000000-0000-4000-8000-000000000901, d0000000-0000-4000-8000-000000000902, d0000000-0000-4000-8000-000000000903, d0000000-0000-4000-8000-000000000904
+/bibliotheque/references_chantiers | bloc replié | code d'état interne | relue
+/bibliotheque/moyens_humains | visible | nom de table ou de colonne | Document, document
+/bibliotheque/moyens_humains | visible | code d'état interne | brouillon
+/bibliotheque/moyens_humains | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/moyens_humains | bloc replié | code d'état interne | relue
+/bibliotheque/moyens_materiels | visible | nom de table ou de colonne | Document, document
+/bibliotheque/moyens_materiels | visible | code d'état interne | brouillon
+/bibliotheque/moyens_materiels | visible | identifiant à underscores | materiel_mise_en_oeuvre
+/bibliotheque/moyens_materiels | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/bibliotheque/moyens_materiels | bloc replié | code d'état interne | relue
+/bibliotheque/fiches_produits | visible | nom de table ou de colonne | Document, document
+/bibliotheque/fiches_produits | visible | code d'état interne | brouillon, valide
+/bibliotheque/fiches_produits | bloc replié | UUID | d0000000-0000-4000-8000-000000000004, d0000000-0000-4000-8000-000000000103, d0000000-0000-4000-8000-0000000009a1, d0000000-0000-4000-8000-0000000009a2
+/bibliotheque/fiches_produits | bloc replié | code d'état interne | relue
+/bibliotheque/memoire_technique | visible | nom de table ou de colonne | Document, document
+/bibliotheque/memoire_technique | visible | code d'état interne | Brouillon, brouillon
+/bibliotheque/memoire_technique | bloc replié | UUID | d0000000-0000-4000-8000-000000000004, d0000000-0000-4000-8000-000000000901, d0000000-0000-4000-8000-000000000903, d0000000-0000-4000-8000-000000000a01, d0000000-0000-4000-8000-000000000a02
+/bibliotheque/memoire_technique | bloc replié | nom de table ou de colonne | memoire_technique
+/bibliotheque/memoire_technique | bloc replié | code d'état interne | relue
+/consultations | visible | nom de table ou de colonne | document
+/consultations | visible | code d'état interne | brouillon
+/consultations | bloc replié | nom de table ou de colonne | DOCUMENT
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | visible | nom de table ou de colonne | document
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | visible | code d'état interne | brouillon
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | visible | référence interne au projet | L8
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | bloc replié | UUID | d12e36e9-c447-4929-a0eb-8e16ef9215f0
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | bloc replié | empreinte SHA-256 | ca46cf7bbb0c602f5f8e7e4a84315210d2bd85ca6aaff35e900fa163ecc0f101
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | bloc replié | nom de table ou de colonne | Document
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | bloc replié | code d'état interne | analysee
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0 | bloc replié | jargon technique | SHA-256
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist | visible | code métier entre crochets | [attestation_assurance_decennale], [attestation_assurance_professionnelle], [attestation_bonne_execution], [certificat_qualification], [fiche_technique_produit], [references_chantiers]
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist | visible | code d'état interne | Manquante, brouillon, manquante, relue, valide
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist | visible | référence interne au projet | L8
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist | visible | identifiant à underscores | attestation_assurance_decennale, attestation_assurance_professionnelle, attestation_bonne_execution, fiche_technique_produit
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/checklist | bloc replié | UUID | d0000000-0000-4000-8000-000000000004
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | visible | nom de table ou de colonne | Document, document
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | visible | code d'état interne | Relue, brouillon, valide
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | visible | référence interne au projet | L8
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | visible | identifiant à underscores | materiel_mise_en_oeuvre
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | bloc replié | UUID | 33bf3b82-13f0-4187-ab49-ec3effadb140, 3a701d86-4e3d-43b9-97b3-b97c74cd8ee4, 67785c63-f829-4a7d-bfe3-54043eee2380, a95d893f-29b8-4a79-8078-b3bdc3c27e6d, bf6a8e89-28f1-43d3-b43a-b4df4da1eac7, d0d1aa1a-5614-49f0-ab99-0f8e26fbf0fb
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | bloc replié | code métier entre crochets | [expire], [valide]
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | bloc replié | nom de table ou de colonne | reference_chantier
+/consultations/d12e36e9-c447-4929-a0eb-8e16ef9215f0/memoire | bloc replié | code d'état interne | valide
+/entreprises/nouvelle | visible | nom de table ou de colonne | document
+/entreprises/nouvelle | visible | code d'état interne | brouillon, relue

@@ -1,129 +1,188 @@
 {% extends "base.html" %}
-{% block titre %}Analyse de la consultation{% endblock %}
+{% block titre %}{{ consultation.libelle }}{% endblock %}
 {% block contenu %}
-<h2>Analyse de la consultation — {{ consultation.libelle }}</h2>
-<p><a href="/consultations">Retour aux consultations</a></p>
-
-{% if erreur %}<div class="message message-erreur" role="alert">{{ erreur }}</div>{% endif %}
-{% if message_ok %}<div class="message message-ok" role="status">{{ message_ok }}</div>{% endif %}
-
-<div class="message message-brouillon">
-  brouillon — à relire et à signer
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>{{ consultation.libelle }}
+      {% if consultation.reference_consultation %}<span class="etat etat--info">{{ consultation.reference_consultation }}</span>{% endif %}
+    </h1>
+    <p class="sous-titre">Dossier analysé le {{ consultation.date_lisible }}.
+       Ce qui suit a été lu dans le document que vous avez déposé, et rien
+       d'autre.</p>
+  </div>
+  <div class="entete-ecran__action">
+    <a class="btn btn--principal btn--action" href="/consultations/{{ consultation.id }}/memoire">Demander le mémoire technique</a>
+  </div>
 </div>
+
+{% if erreur %}
+<div class="encart encart--erreur" role="alert">
+  <p class="encart__titre">L'action n'a pas abouti</p>
+  <p>{{ erreur }}</p>
+</div>
+{% endif %}
+{% if message_ok %}
+<div class="encart encart--ok" role="status"><p>{{ message_ok }}</p></div>
+{% endif %}
 
 <div class="carte">
-  <h3>Consultation déposée</h3>
-  <dl class="source">
-    <dt>Identifiant :</dt><dd><code>{{ consultation.id }}</code></dd>
-    <dt>Statut :</dt><dd>{{ consultation.statut }}</dd>
-    <dt>Référence :</dt><dd>{{ consultation.reference_consultation or 'non renseignée' }}</dd>
-    <dt>Maître d'ouvrage déclaré :</dt><dd>{{ consultation.maitre_ouvrage_declare or 'non renseigné' }}</dd>
-    <dt>Créée le :</dt><dd>{{ consultation.date_creation }}</dd>
-    {% if document %}
-    <dt>Document :</dt><dd>{{ document.libelle }} — {{ document.taille_octets }} octets — empreinte SHA-256 <code>{{ document.empreinte_sha256 }}</code></dd>
+  <h2 class="carte__titre">L'essentiel</h2>
+  <ul class="liste">
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">
+          {{ elements | selectattr('categorie', 'equalto', 'piece_exigee') | list | length }} pièces exigées lues dans le dossier
+        </span>
+        <span class="liste__complement">
+          Chacune doit être acceptée par vous avant de compter dans la
+          vérification du dossier.
+        </span>
+      </div>
+      <div class="liste__fin">
+        <a href="/consultations/{{ consultation.id }}/checklist">Vérifier le dossier</a>
+      </div>
+    </li>
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">
+          {{ elements | selectattr('categorie', 'equalto', 'critere') | list | length }} critères d'attribution
+        </span>
+        <span class="liste__complement">
+          {% set poids = elements | selectattr('categorie', 'equalto', 'critere') | selectattr('valeur') | list %}
+          {% if poids %}Le dossier donne leur poids pour au moins un critère.{% else %}Le dossier ne donne pas leur poids.{% endif %}
+        </span>
+      </div>
+    </li>
+    {% set dates = elements | selectattr('categorie', 'equalto', 'date_limite') | list %}
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Date limite de remise</span>
+        <span class="liste__complement">
+          {% if dates %}{{ dates[0].valeur_lisible }}{% else %}non trouvé dans le document{% endif %}
+        </span>
+      </div>
+    </li>
+    {% if consultation.maitre_ouvrage_declare %}
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Maître d'ouvrage</span>
+        <span class="liste__complement">{{ consultation.maitre_ouvrage_declare }} — saisi par vous, repris tel quel.</span>
+      </div>
+    </li>
     {% endif %}
-  </dl>
+  </ul>
 </div>
 
-<h3>Éléments proposés, avec leur source</h3>
-<p class="aide">
-  Chaque élément porte le fichier et l'emplacement où il a été lu. Un élément
-  <strong>proposé</strong> est marqué « non vérifié » : il n'est pas un fait tant
-  qu'un humain ne l'a pas validé. Seul un élément validé alimente la checklist.
-</p>
-
+<h2>Ce que le dossier contient</h2>
 {% if elements %}
 {% for categorie, libelle_categorie in categories.items() %}
 {% set du_groupe = elements | selectattr('categorie', 'equalto', categorie) | list %}
-<h4>{{ libelle_categorie }}</h4>
 {% if du_groupe %}
-<ul class="elements">
-  {% for e in du_groupe %}
-  <li>
-    <h5 style="margin:0 0 .3rem">{{ e.libelle }}</h5>
-    <dl class="source">
-      {% if e.valeur %}<dt>Valeur :</dt><dd class="fiche-valeur">{{ e.valeur }}</dd>{% endif %}
-      <dt>Source :</dt>
-      <dd>
-        {% if e.source_document_id %}
-          document <code>{{ e.source_document_id }}</code>, emplacement : {{ e.source_emplacement }}
-        {% else %}
-          aucune source — valeur <strong>non vérifiée</strong>
-        {% endif %}
-      </dd>
-      {% if e.source_extrait %}<dt>Extrait :</dt><dd>« {{ e.source_extrait }} »</dd>{% endif %}
-      <dt>Statut de vérification :</dt>
-      <dd>
-        {% if e.statut_verification == 'valide' %}validé
-        {% elif e.statut_verification == 'corrige' %}corrigé
-        {% elif e.statut_verification == 'supprime' %}supprimé
-        {% else %}proposé — <strong>non vérifié</strong>{% endif %}
-        {% if e.verificateur_nom %} par {{ e.verificateur_nom }}{% endif %}
-        {% if e.date_verification %} le {{ e.date_verification }}{% endif %}
-      </dd>
-    </dl>
+<h3>{{ libelle_categorie }}</h3>
+{% for e in du_groupe %}
+<div class="fiche-ligne">
+  <div class="fiche-ligne__tete">
+    <span class="fiche-ligne__titre">{{ e.libelle }}</span>
+    <span class="etat etat--{% if e.statut_verification == 'valide' %}ok{% elif e.statut_verification == 'corrige' %}info{% else %}attente{% endif %}">
+      {% if e.statut_verification == 'valide' %}Accepté
+      {% elif e.statut_verification == 'corrige' %}Corrigé puis accepté
+      {% else %}Proposé — non vérifié{% endif %}
+    </span>
+  </div>
+  {% if e.valeur %}<p><strong>{{ e.valeur_lisible }}</strong></p>{% endif %}
+  <ul class="sources">
+    <li>
+      <span class="source-etiquette">Source :</span>
+      {% if e.source_document_id %}
+        {{ document.libelle if document else 'le dossier que vous avez déposé' }}, emplacement : {{ e.source_emplacement }}
+      {% else %}
+        aucune source — valeur <strong>non vérifiée</strong>
+      {% endif %}
+    </li>
+    {% if e.source_extrait %}<li><span class="source-etiquette">Extrait :</span> « {{ e.source_extrait }} »</li>{% endif %}
+    {% if e.verificateur_nom %}<li><span class="source-etiquette">Relu par :</span> {{ e.verificateur_nom }}</li>{% endif %}
+  </ul>
 
-    <form method="post" action="/consultations/{{ consultation.id }}/elements/{{ e.id }}">
-      <div class="champ">
-        <label for="nom-{{ e.id }}">Nom de l'humain qui vérifie (obligatoire pour valider ou corriger)</label>
-        <input type="text" id="nom-{{ e.id }}" name="verificateur_nom">
+  <form method="post" action="/consultations/{{ consultation.id }}/elements/{{ e.id }}">
+    <div class="champ">
+      <label for="nom-{{ e.id }}">Votre nom</label>
+      <p class="aide" id="aide-nom-{{ e.id }}">Obligatoire pour accepter ou
+         corriger. Une acceptation sans nom n'est pas enregistrée.</p>
+      <input type="text" id="nom-{{ e.id }}" name="verificateur_nom"
+             aria-describedby="aide-nom-{{ e.id }}">
+    </div>
+    <details class="pourquoi">
+      <summary>Corriger ce qui a été lu avant d'accepter</summary>
+      <div class="reponse">
+        <div class="champ">
+          <label for="valeur-{{ e.id }}">Valeur lue dans le dossier</label>
+          <input type="text" id="valeur-{{ e.id }}" name="valeur" value="{{ e.valeur or '' }}">
+        </div>
+        <div class="champ">
+          <label for="libelle-{{ e.id }}">Libellé</label>
+          <input type="text" id="libelle-{{ e.id }}" name="libelle" value="{{ e.libelle }}">
+        </div>
       </div>
-      <div class="champ">
-        <label for="libelle-{{ e.id }}">Libellé (corriger si nécessaire)</label>
-        <input type="text" id="libelle-{{ e.id }}" name="libelle" value="{{ e.libelle }}">
-      </div>
-      <div class="champ">
-        <label for="valeur-{{ e.id }}">Valeur (corriger si nécessaire)</label>
-        <input type="text" id="valeur-{{ e.id }}" name="valeur" value="{{ e.valeur or '' }}">
-      </div>
-      <div class="actions">
-        <button type="submit" name="action" value="valider">Valider cet élément</button>
-        <button type="submit" name="action" value="corriger" class="secondaire">Enregistrer la correction</button>
-        <button type="submit" name="action" value="supprimer" class="danger">Marquer comme supprimé</button>
-      </div>
-    </form>
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>Non trouvé dans le document pour « {{ libelle_categorie }} ».</p>
+    </details>
+    <div class="actions">
+      <button type="submit" name="action" value="valider" class="btn btn--secondaire">Accepter</button>
+      <button type="submit" name="action" value="corriger" class="btn btn--discret">Corriger avant d'accepter</button>
+      <button type="submit" name="action" value="supprimer" class="btn btn--discret">Refuser</button>
+    </div>
+  </form>
+</div>
+{% endfor %}
 {% endif %}
 {% endfor %}
 {% else %}
-<p>Aucun élément n'a été extrait de ce document.</p>
+<p>Aucun élément n'a été lu dans ce document.</p>
 {% endif %}
 
 {% if elements_non_trouves %}
-<h4>Catégories restituées « non trouvé dans le document »</h4>
-<ul>
+<h3>Ce que le dossier ne dit pas</h3>
+<ul class="liste">
   {% for a in elements_non_trouves %}
   <li>
-    {{ a.libelle }} — <strong>{{ a.message }}</strong>
-    (source : document <code>{{ a.source_document_id }}</code>, emplacement : {{ a.source_emplacement }})
+    <div class="liste__principal">
+      <span class="liste__libelle">{{ a.libelle }}</span>
+      <span class="liste__complement">L'information n'est pas dans le dossier —
+        elle n'a pas été devinée. Vous décidez si c'est un oubli de l'acheteur
+        ou une absence de votre côté.</span>
+    </div>
+    <div class="liste__fin"><span class="etat etat--attente">non trouvé dans le document</span></div>
   </li>
   {% endfor %}
 </ul>
-<p class="aide">
-  Le vide n'est pas comblé : aucune ligne n'est créée pour un « non trouvé ».
-</p>
 {% endif %}
 
 <div class="carte">
-  <h3>Vérifier le dossier — checklist de conformité</h3>
-  <p>
-    La checklist croise les pièces exigées <strong>validées</strong> ci-dessus avec
-    la bibliothèque d'entreprise. C'est un outil d'aide à la relecture, pas un
-    certificat : aucune conformité n'est garantie.
-  </p>
+  <h2 class="carte__titre">Vérifier le dossier</h2>
+  <p>La vérification croise les pièces exigées que vous avez acceptées avec
+     votre bibliothèque d'entreprise. C'est une aide à la relecture, pas un
+     certificat&nbsp;: aucune conformité n'est garantie.</p>
   <form method="post" action="/consultations/{{ consultation.id }}/checklist">
     <div class="champ">
-      <label for="execute_par">Nom de l'humain qui lance la vérification (obligatoire)</label>
-      <input type="text" id="execute_par" name="execute_par" required>
+      <label for="execute_par">Votre nom</label>
+      <p class="aide" id="aide-exec">La personne qui lance la vérification.</p>
+      <input type="text" id="execute_par" name="execute_par" required
+             aria-describedby="aide-exec">
     </div>
     <div class="actions">
-      <button type="submit">Vérifier le dossier</button>
+      <button type="submit" class="btn btn--secondaire">Vérifier le dossier</button>
     </div>
   </form>
-  <p><a href="/consultations/{{ consultation.id }}/checklist">Voir la dernière checklist de cette consultation</a></p>
+  <p><a href="/consultations/{{ consultation.id }}/checklist">Voir la dernière vérification de ce dossier</a></p>
 </div>
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Dossier <code>{{ consultation.id }}</code> — statut
+       <code>{{ consultation.statut }}</code>.</p>
+    {% if document %}
+    <p>Document&nbsp;: {{ document.libelle }} — {{ document.taille_octets }} octets
+       — empreinte SHA-256 <code>{{ document.empreinte_sha256 }}</code>.</p>
+    {% endif %}
+  </div>
+</details>
 {% endblock %}

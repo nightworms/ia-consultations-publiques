@@ -181,3 +181,53 @@ retenue est :
 
 Cette décision reste **révisable** : elle est écrite ici pour être contestée, pas pour
 être subie.
+
+---
+
+# Décisions de phase 4
+
+*Arbitrage rendu le 30 septembre 2026, sur demande de `dev-web` (carte `t_18a19ff7`),
+suite au défaut critère 6 relevé par la vérification indépendante L8
+(`docs/RAPPORTS/P4-qa-criteres-acceptation.md`).*
+
+## D11 — Conflit critère 6 (PLAN-PHASE-4 § 1.6) vs bloc « Références techniques » (DESIGN.md § 5)
+
+**Option 2 retenue : le critère 6 est reformulé, le bloc replié n'est pas supprimé.**
+
+Le conflit était réel : `PLAN-PHASE-4.md` § 1.6 exigeait qu'aucun écran n'affiche
+« de valeur technique, de jargon d'architecture ni d'identifiant interne », vérifié
+en ouvrant chaque page ; `DESIGN.md` § 5 impose au contraire que le technique
+(identifiants, empreintes, noms de tables) soit **replié** dans un bloc
+« Références techniques », fermé par défaut, et qu'« aucune information utile ne
+soit supprimée ».
+
+Raisons du choix :
+
+- Le bloc replié n'apparaît sur **aucune capture de page ouverte** — c'est
+  exactement la méthode de contrôle que le critère 6 décrit lui-même (« contrôle
+  fait en ouvrant chaque page et en la regardant »). Le critère, mal formulé,
+  interdisait involontairement une fonctionnalité que `DESIGN.md` avait déjà actée.
+- La suppression pure (option 1) aurait fait perdre une information utile au
+  support : identifiant de fiche, empreinte SHA-256 du DCE déposé, statut de
+  vérification — sans bénéfice pour l'utilisateur final, qui ne voit ces valeurs
+  que s'il choisit de déplier le bloc.
+- C'est la seule option qui ne revient pas sur une décision de design déjà actée
+  (lot L4/L5a) sans raison métier nouvelle.
+
+**Formulation corrigée du critère 6** (remplace le texte de `PLAN-PHASE-4.md` § 1.6,
+point 6) :
+
+> Aucun écran n'affiche de valeur technique, de jargon d'architecture ni
+> d'identifiant interne **visible sans action de l'utilisateur** — contrôle fait en
+> ouvrant chaque page et en la regardant (capture d'écran), sans déplier les blocs
+> « Références techniques ».
+
+Conséquence pour `dev-web` : aucun changement de code sur le point 3 de la carte
+`t_ebbaac86` (les huit blocs restent en l'état, tels que livrés en L5a/L5b). Les
+points 1, 2 et 4 de cette même carte, déjà corrigés, ne sont pas remis en cause par
+cette décision.
+
+Cette décision reste **révisable** si un nouvel usage prouve que le bloc replié est
+consulté par un utilisateur non technique dans des conditions qui rendent
+l'information exploitable sans compétence métier (ex. capture d'écran partagée par
+erreur) — à réévaluer si le signal se présente, pas par principe.

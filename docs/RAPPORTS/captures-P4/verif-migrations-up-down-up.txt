@@ -1,0 +1,48 @@
+== copie de la base de demonstration ==
+NOTICE:  database "ia_consultations_qa_l8_mig" does not exist, skipping
+copie faite : postgresql://pause@127.0.0.1:5432/ia_consultations_qa_l8_mig
+
+=== ETAT INITIAL ===
+0001  appliquée
+0002  appliquée
+0003  appliquée
+0004  appliquée
+0005  appliquée
+0006  appliquée
+tables memoire_/import_ : 7
+donnees : client=2 entreprise=2 reference=5 document=13 assurance=3 consultation=2 memoire_section=6 import_document=6
+
+=== DOWN 2 (0006 puis 0005) ===
+Migrations annulées : 0006, 0005
+0001  appliquée
+0002  appliquée
+0003  appliquée
+0004  appliquée
+0005  en attente
+0006  en attente
+tables memoire_/import_ restantes (attendu 0) : 0
+ERROR:  relation "memoire_section" does not exist
+LINE 8: ...     ||' memoire_section='||(SELECT count(*) FROM memoire_se...
+                                                             ^
+donnees apres down : 
+
+=== UP (les deux remontent) ===
+Migrations appliquées : 0005, 0006
+0001  appliquée
+0002  appliquée
+0003  appliquée
+0004  appliquée
+0005  appliquée
+0006  appliquée
+tables memoire_/import_ : 7
+donnees apres up : client=2 entreprise=2 reference=5 document=13 assurance=3 consultation=2 memoire_section=0 import_document=0
+
+=== DOWN puis UP a nouveau (idempotence du cycle) ===
+0001  appliquée
+0002  appliquée
+0003  appliquée
+0004  appliquée
+0005  appliquée
+0006  appliquée
+donnees apres up/down/up : client=2 entreprise=2 reference=5 document=13 assurance=3 consultation=2 memoire_section=0 import_document=0
+copie supprimee

@@ -1,0 +1,305 @@
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Importer vos documents — Consultations publiques</title>
+  <link rel="stylesheet" href="http://127.0.0.1:8098/static/style.css">
+</head>
+<body>
+<a class="lien-evitement" href="#contenu">Aller au contenu principal</a>
+<header class="bandeau">
+  <div class="bandeau__int">
+    <a class="bandeau__marque" href="/accueil">Consultations publiques</a>
+    <nav aria-label="Navigation principale">
+      
+      <a href="/accueil">Accueil</a>
+      <a href="/bibliotheque" aria-current="page">Bibliothèque</a>
+      <a href="/consultations">Consultations</a>
+      <span class="bandeau__qui">Compte de démonstration (FICTIF)</span>
+      <form method="post" action="/deconnexion">
+        <button type="submit">Se déconnecter</button>
+      </form>
+      
+    </nav>
+  </div>
+</header>
+
+<main id="contenu" class="page">
+  
+<div class="entete-ecran">
+  <div class="entete-ecran__texte">
+    <h1>Importer vos documents existants</h1>
+    <p class="sous-titre">Votre ancien mémoire, une plaquette, une attestation, un
+       CV&nbsp;: déposez-les, l'outil en tire des propositions. Vous validez, ou vous
+       refusez — rien n'entre dans votre bibliothèque sans votre décision.</p>
+  </div>
+</div>
+
+
+
+
+
+
+
+<div class="carte">
+  <h2 class="carte__titre">Où vous en êtes</h2>
+  <ol class="progression">
+    <li class="encours">
+      <span class="puce" aria-hidden="true">1</span>
+      <div>
+        <p class="titre">Lire un document
+          
+          <span class="etat etat--info">Étape en cours</span>
+          
+        </p>
+        <p class="detail">PDF, y compris un document scanné, ou texte brut. Les autres
+           formats sont refusés, et vous êtes prévenu.</p>
+      </div>
+    </li>
+    <li class="none">
+      <span class="puce" aria-hidden="true">2</span>
+      <div>
+        <p class="titre">Valider les propositions, une par une
+          
+          <span class="etat etat--info">À faire</span>
+          
+        </p>
+        <p class="detail">Chaque proposition montre le passage exact du document dont
+           elle vient. La décision porte votre nom et la date.</p>
+      </div>
+    </li>
+    <li class="none">
+      <span class="puce" aria-hidden="true">3</span>
+      <div>
+        <p class="titre">C'est dans votre bibliothèque
+          
+          <span class="etat etat--info">À faire</span>
+          
+        </p>
+        <p class="detail">Ce que vous acceptez entre dans la famille choisie, marqué
+           « extrait d'un document — à vérifier ». C'est à vous de confirmer qu'il est
+           exact et à jour.</p>
+      </div>
+    </li>
+  </ol>
+</div>
+
+<h2 id="analyser">Lire un document</h2>
+<div class="carte">
+  <form method="post" action="/bibliotheque/import" enctype="multipart/form-data">
+    <div class="grille">
+      <div class="champ pleine">
+        <label for="fichier">Document à lire</label>
+        <p class="aide" id="aide-fichier">PDF, y compris un document scanné, ou texte
+           brut. Le document est rangé sous le nom de son fichier.</p>
+        <input type="file" id="fichier" name="fichier"
+               accept=".pdf,.txt,application/pdf,text/plain" required
+               aria-describedby="aide-fichier">
+      </div>
+      <div class="champ">
+        <label for="famille_cible">Dans quelle famille&nbsp;?</label>
+        <p class="aide" id="aide-famille">La famille oriente la lecture et reçoit ce que
+           vous accepterez. Vous pouvez changer d'avis avant d'accepter.</p>
+        <select id="famille_cible" name="famille_cible" aria-describedby="aide-famille">
+          <option value="references_chantiers">Références de chantiers</option><option value="certifications">Certifications et qualifications</option><option value="assurances">Assurances</option><option value="moyens_humains">Moyens humains</option><option value="moyens_materiels">Moyens matériels</option><option value="fiches_produits">Fiches techniques produits</option><option value="capacites_financieres">Capacités financières</option><option value="memoire_technique">Mémoire technique type</option>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      
+      <button type="submit" name="action" value="analyser" class="btn btn--principal btn--action">Lire ce document</button>
+      
+    </div>
+  </form>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Ce que l'outil lit, et ce qu'il ne devine pas</summary>
+    <div class="reponse">
+      <p>Il ne lit que le texte du document, jamais votre fichier d'origine. Une page
+         illisible est signalée. Chaque proposition qu'il en tire porte l'endroit exact
+         et l'extrait dont elle vient&nbsp;: une proposition sans source vérifiable est
+         refusée, jamais enregistrée « au cas où ».</p>
+    </div>
+  </details>
+</div>
+
+
+
+
+
+
+<h2 id="avancement">Ce qui vous manque pour être prêt à concourir</h2>
+<div class="carte carte--conseil">
+  
+  <p>Voici, famille par famille, ce qui manque encore — et ce qu'il faut ajouter. Ce
+     ne sont pas des erreurs&nbsp;: ce sont les points que le jury cherchera et que
+     votre bibliothèque ne documente pas encore.</p>
+  
+  <ul class="liste">
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Identité</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/identite">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Capacités financières</span>
+        <span class="liste__complement">
+          Aucune attestation justificative (vigilance sociale, etc.).
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">À compléter</span>
+        <a href="/bibliotheque/capacites_financieres">Ajouter une information</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Assurances</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/assurances">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Certifications et qualifications</span>
+        <span class="liste__complement">
+          Certification ou qualification « Qualification étanchéité de toitures-terrasses » : échéance dépassée le 15/09/2026.
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--attente">À compléter</span>
+        <a href="/bibliotheque/certifications">Ajouter une information</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Références de chantiers</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/references_chantiers">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Moyens humains</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/moyens_humains">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Moyens matériels</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/moyens_materiels">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Fiches techniques produits</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/fiches_produits">Ouvrir</a>
+      </div>
+    </li>
+    
+    <li>
+      <div class="liste__principal">
+        <span class="liste__libelle">Mémoire technique type</span>
+        <span class="liste__complement">
+          Rien ne manque pour cette famille.
+          
+        </span>
+      </div>
+      <div class="liste__fin">
+        <span class="etat etat--ok">Prête</span>
+        <a href="/bibliotheque/memoire_technique">Ouvrir</a>
+      </div>
+    </li>
+    
+  </ul>
+  <details class="pourquoi">
+    <summary>Pourquoi&nbsp;? Aucun pourcentage de complétion</summary>
+    <div class="reponse">
+      <p>Un pourcentage ne dit pas quoi faire. Chaque ligne ci-dessus nomme un manque
+         concret et l'information qui le lèvera&nbsp;: une référence de chantier
+         comparable, une attestation d'assurance en cours de validité, une fiche
+         technique de produit.</p>
+    </div>
+  </details>
+</div>
+
+
+<details class="references">
+  <summary>Références techniques</summary>
+  <div class="reponse">
+    <p>Famille de destination&nbsp;: <code>references_chantiers, certifications, assurances, moyens_humains, moyens_materiels, fiches_produits, capacites_financieres, memoire_technique</code>.</p>
+    
+    <p>2 constats
+       de manque sur l'ensemble des familles.</p>
+    
+    
+    <p>Cette zone sert au support technique. Vous n'avez pas besoin de la lire.</p>
+  </div>
+</details>
+
+
+
+</main>
+
+<footer class="pied">
+  <div class="pied__int">
+    <p><strong>Ce que fait l'outil :</strong> il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références.</p>
+    <p>Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un <strong>brouillon — à relire et à signer</strong>.</p>
+  </div>
+</footer>
+</body>
+</html>

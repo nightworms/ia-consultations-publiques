@@ -1,0 +1,287 @@
+
+ 
+ 
+ 
+   
+   
+   Bibliothèque d'entreprise — Consultations publiques 
+   
+ 
+ 
+ Aller au contenu principal 
+ 
+   
+     Consultations publiques 
+     
+      
+       Accueil 
+       Bibliothèque 
+       Consultations 
+       Compte de démonstration (FICTIF) 
+       
+         Se déconnecter 
+       
+      
+     
+   
+ 
+
+ 
+  
+ 
+   
+     Votre bibliothèque d'entreprise 
+     Tout ce qui sert à écrire vos mémoires&nbsp;: chantiers,
+       certifications, moyens, assurances, produits. 
+   
+   
+     Importer vos documents existants 
+   
+ 
+
+
+
+
+
+ 
+   Relecture de votre bibliothèque&nbsp;: Socle complet (non relue) 
+   La relecture porte toujours le nom de la personne qui l'a faite et la date.
+     Toute information ajoutée ensuite fait repasser la bibliothèque en relecture. 
+ 
+
+
+ 
+   Ce qui vous manque pour être prêt à concourir 
+  
+    Chaque famille contient au moins une information.  
+   Cela ne veut pas dire qu'elles sont complètes au sens réglementaire&nbsp;:
+     l'outil constate ce qui est renseigné, il ne certifie rien. 
+  
+ 
+
+ Avancement par famille 
+ 
+   
+      
+   
+   9 familles
+     renseignées sur 9.
+     Aucune ne reste à compléter.
+      
+   
+    
+     
+       
+         Identité 
+         
+          2 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Capacités financières 
+         
+          4 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Assurances 
+         
+          2 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Certifications et qualifications 
+         
+          2 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Références de chantiers 
+         
+          4 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Moyens humains 
+         
+          5 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Moyens matériels 
+         
+          4 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Fiches techniques produits 
+         
+          2 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+     
+       
+         Mémoire technique type 
+         
+          2 informations
+          
+         
+       
+       
+         En cours 
+         Ouvrir 
+       
+     
+    
+   
+   
+ 
+
+
+
+ Relectures enregistrées 
+
+ Aucune relecture enregistrée pour cette version. 
+
+
+ 
+   Valider votre bibliothèque 
+   Relire et valider vos informations, c'est ce qui autorise le mémoire à
+     s'appuyer dessus. La relecture porte toujours le nom de la personne qui l'a
+     faite et la date. 
+  
+   
+     
+     
+       
+         Votre nom 
+         La personne qui a relu. Une
+           validation sans nom n'est pas enregistrée. 
+         
+       
+       
+         Ce que vous validez 
+         
+           Toute la bibliothèque 
+           Une seule famille 
+         
+       
+       
+         Famille concernée (si vous validez une seule famille) 
+         
+           — 
+          
+           Identité 
+          
+           Capacités financières 
+          
+           Assurances 
+          
+           Certifications et qualifications 
+          
+           Références de chantiers 
+          
+           Moyens humains 
+          
+           Moyens matériels 
+          
+           Fiches techniques produits 
+          
+           Mémoire technique type 
+          
+         
+       
+       
+         Commentaire  facultatif  
+          
+       
+     
+     
+       
+       J'ai relu et corrigé ces informations. 
+     
+     
+       Enregistrer la relecture 
+     
+   
+   
+ 
+
+ 
+
+
+ 
+
+ 
+   
+      Ce que fait l'outil :  il lit les dossiers que vous
+       déposez et rédige votre mémoire technique à partir de vos propres
+       références. 
+     Il ne dépose aucun pli, ne signe rien, ne fixe aucun prix et ne garantit aucune conformité. Ce que vous produisez reste un  brouillon — à relire et à signer . 
+   
+ 
+ 
+ 

@@ -1,0 +1,19 @@
+connexion : 200 http://127.0.0.1:8098/accueil
+OK        /accueil                                                               200   2470 car.
+OK        /consultations                                                         200   2107 car.
+OK        /consultations/b3d0ff50-b7b9-457e-89f0-68415ca3cdf7                    200  12510 car.
+OK        /consultations/b3d0ff50-b7b9-457e-89f0-68415ca3cdf7/checklist          200   6614 car.
+OK        /consultations/b3d0ff50-b7b9-457e-89f0-68415ca3cdf7/memoire            200  30664 car.
+OK        /bibliotheque                                                          200   4344 car.
+OK        /bibliotheque/assurances                                               200   5820 car.
+OK        /bibliotheque/certifications                                           200   5112 car.
+OK        /bibliotheque/moyens-materiels                                         404   1268 car.
+OK        /bibliotheque/moyens-humains                                           404   1268 car.
+OK        /bibliotheque/references-chantiers                                     404   1268 car.
+OK        /bibliotheque/fiches-produits                                          404   1268 car.
+OK        /bibliotheque/capacites-financieres                                    404   1268 car.
+OK        /bibliotheque/import                                                   200   4596 car.
+OK        /connexion                                                             200   2470 car.
+OK        /cette-page-nexiste-pas                                                404   1268 car.
+
+Aucune anomalie : aucun crochet ni valeur de code dans le texte visible.

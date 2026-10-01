@@ -699,3 +699,231 @@ def test_les_gabarits_ne_portent_aucun_bouton_engageant():
     for gabarit in gabarits:
         fautifs = _aucun_verbe_interdit(gabarit.read_text(encoding="utf-8"))
         assert not fautifs, f"{gabarit.name} : boutons interdits {fautifs}"
+
+
+# --------------------------------------------------------------------------- #
+# 8. Lot L5b — écrans de l'import guidé et du mémoire technique
+# --------------------------------------------------------------------------- #
+DOCUMENT_IMPORT_FICTIF = (
+    f"{MENTION} — document fictif écrit pour l'import guidé\n"
+    "Entité : reference_chantier\n"
+    "- intitule_operation : Réfection étanchéité fictive d'un groupe scolaire\n"
+    "- maitre_ouvrage : Commune fictive de Démonstration\n"
+    "- date_debut : 2023-07-01\n"
+    "- date_fin : 2023-11-30\n"
+    "- montant_montant : 412000\n"
+    "- montant_devise : EUR\n"
+)
+
+
+def test_ecran_import_repond_200_et_ne_se_confond_pas_avec_une_famille(
+    connexion, contexte_a, config
+):
+    """`/bibliotheque/import` est un écran : la route générique `{famille}` ne l'avale pas."""
+    client = _client_web(connexion, contexte_a, config, "web-import")
+    reponse = client.get("/bibliotheque/import")
+    assert reponse.status_code == 200
+    assert "Importer vos documents existants" in reponse.text
+    # Sans entreprise : l'écran dit quoi faire d'abord, et ne casse pas.
+    assert "Créer mon entreprise" in reponse.text
+
+
+def test_import_guide_depot_propositions_et_decision_nommee(
+    connexion, connexion_admin, contexte_a, config
+):
+    """Dépôt → propositions sourcées → décision humaine nommée, verrou compris."""
+    client = _client_web(connexion, contexte_a, config, "web-import-parcours")
+    client.post("/entreprises", data={"libelle_court": f"Fictive import — {MENTION}"})
+
+    reponse = client.post(
+        "/bibliotheque/import",
+        data={"action": "analyser", "famille_cible": "references_chantiers"},
+        files={"fichier": ("references_fictives.txt", DOCUMENT_IMPORT_FICTIF, "text/plain")},
+        **SANS_REDIRECTION,
+    )
+    assert reponse.status_code == 303, reponse.text
+    assert reponse.headers["location"].endswith("ok=import_depose")
+
+    page = client.get("/bibliotheque/import")
+    assert page.status_code == 200
+    assert "Proposition à valider" in page.text
+    # La proposition porte sa source : le passage exact du document.
+    assert "Passage" in page.text
+    assert "intitule_operation : Réfection étanchéité fictive" in page.text
+    # L'écran affiche l'état d'avancement « ce qui manque pour concourir ».
+    assert "Ce qui vous manque pour être prêt à concourir" in page.text
+
+    proposition_id = str(
+        connexion_admin.lire(
+            "SELECT id FROM import_proposition WHERE client_id = %s;",
+            (contexte_a.client_id,),
+        )[0][0]
+    )
+
+    # (a) Décision sans nom : refus explicite, aucune écriture.
+    reponse = client.post(
+        "/bibliotheque/import",
+        data={"action": "accepter", "proposition_id": proposition_id},
+        **SANS_REDIRECTION,
+    )
+    assert reponse.status_code == 200
+    assert "sans un humain nommé" in reponse.text
+    assert (
+        _compter(
+            connexion_admin,
+            "SELECT count(*) FROM import_proposition WHERE id = %s AND statut = 'propose';",
+            (proposition_id,),
+        )
+        == 1
+    )
+
+    # (b) Décision nommée : l'élément entre dans la bibliothèque du client de la session.
+    reponse = client.post(
+        "/bibliotheque/import",
+        data={
+            "action": "accepter",
+            "proposition_id": proposition_id,
+            "decide_par": f"Sonde Import — {MENTION}",
+        },
+        **SANS_REDIRECTION,
+    )
+    assert reponse.status_code == 303
+    assert reponse.headers["location"].endswith("ok=proposition_acceptee")
+    lignes = connexion_admin.lire(
+        "SELECT statut, decide_par, element_cree_id FROM import_proposition WHERE id = %s;",
+        (proposition_id,),
+    )
+    assert lignes[0][0] == "acceptee"
+    assert lignes[0][1] == f"Sonde Import — {MENTION}"
+    assert lignes[0][2] is not None
+    assert (
+        _compter(
+            connexion_admin,
+            "SELECT count(*) FROM reference_chantier WHERE client_id = %s;",
+            (contexte_a.client_id,),
+        )
+        == 1
+    )
+    # La file est vidée : plus de proposition en attente à l'écran.
+    assert "Proposition à valider" not in client.get("/bibliotheque/import").text
+
+
+def test_memoire_ecran_puis_isolation_par_client(
+    connexion, connexion_admin, contexte_a, contexte_b, config
+):
+    """Écran du mémoire : génération possible, et 404 net pour un autre client."""
+    client_a = _client_web(connexion, contexte_a, config, "web-memoire-a")
+    client_b = _client_web(connexion, contexte_b, config, "web-memoire-b")
+    client_a.post("/entreprises", data={"libelle_court": f"Fictive mémoire — {MENTION}"})
+    entreprise_id = str(
+        connexion_admin.lire(
+            "SELECT id FROM entreprise WHERE client_id = %s;", (contexte_a.client_id,)
+        )[0][0]
+    )
+    with (FIXTURES / "dce_fictif.pdf").open("rb") as fichier:
+        reponse = client_a.post(
+            "/consultations",
+            data={"libelle": f"DCE mémoire — {MENTION}", "entreprise_id": entreprise_id},
+            files={"fichier": ("dce_fictif.pdf", fichier, "application/pdf")},
+            **SANS_REDIRECTION,
+        )
+    consultation_id = reponse.headers["location"].split("/consultations/")[1].split("?")[0]
+
+    # Aucun mémoire : l'écran propose de le monter, sans casser.
+    page = client_a.get(f"/consultations/{consultation_id}/memoire")
+    assert page.status_code == 200
+    assert "Monter le mémoire technique" in page.text
+    # Aucun critère accepté : l'écran dit quoi faire d'abord.
+    assert "critère d'attribution n'est encore accepté" in page.text
+
+    # Accepte les critères lus, puis demande le mémoire.
+    page_consultation = client_a.get(f"/consultations/{consultation_id}")
+    identifiants = re.findall(
+        rf"/consultations/{consultation_id}/elements/([0-9a-f-]+)",
+        page_consultation.text,
+    )
+    assert identifiants, "aucun critère lu : le test ne prouverait rien"
+    for element_id in identifiants:
+        client_a.post(
+            f"/consultations/{consultation_id}/elements/{element_id}",
+            data={"action": "valider", "verificateur_nom": f"Sonde Mémoire — {MENTION}"},
+        )
+    reponse = client_a.post(
+        f"/consultations/{consultation_id}/memoire", data={}, **SANS_REDIRECTION
+    )
+    assert reponse.status_code == 303, reponse.text
+    assert reponse.headers["location"].endswith("ok=memoire_genere")
+
+    page = client_a.get(f"/consultations/{consultation_id}/memoire")
+    assert page.status_code == 200
+    assert "Relire et valider" in page.text
+    # Les critères sans référence sont des conseils, pas des erreurs.
+    assert "Ce qui manque, et ce que vous pouvez faire" in page.text
+    assert "Aucune référence correspondante dans votre bibliothèque" in page.text
+    assert "Pour renforcer ce critère" in page.text
+    # Aucun identifiant technique dans le texte visible : ni « brouillon » cru,
+    # ni nom de table (le rendu traduit tout en métier).
+    for interdit in ("reference_chantier", "memoire_section", "en_relecture", "a_verifier"):
+        assert interdit not in page.text, f"vocabulaire de code visible : {interdit}"
+
+    # Isolation : B n'atteint ni l'écran, ni la génération, ni la validation.
+    assert client_b.get(f"/consultations/{consultation_id}/memoire").status_code == 404
+    assert (
+        client_b.post(
+            f"/consultations/{consultation_id}/memoire", data={}, **SANS_REDIRECTION
+        ).status_code
+        == 404
+    )
+    assert (
+        client_b.post(
+            f"/consultations/{consultation_id}/memoire/validation",
+            data={"nom_validateur": "Sonde B", "fonction_validateur": "Test"},
+            **SANS_REDIRECTION,
+        ).status_code
+        == 404
+    )
+    # B n'atteint pas non plus l'écran d'import de A (aucune donnée croisée).
+    assert "Fictive mémoire" not in client_b.get("/bibliotheque/import").text
+
+
+def test_ecrans_memoire_et_import_sans_bouton_engageant(
+    connexion, connexion_admin, contexte_a, config
+):
+    """Les deux nouveaux écrans ne portent aucun bouton engageant, et un seul principal."""
+    client = _client_web(connexion, contexte_a, config, "web-l5b-boutons")
+    client.post("/entreprises", data={"libelle_court": f"Fictive L5b — {MENTION}"})
+    client.post(
+        "/bibliotheque/import",
+        data={"action": "analyser", "famille_cible": "references_chantiers"},
+        files={"fichier": ("references_fictives.txt", DOCUMENT_IMPORT_FICTIF, "text/plain")},
+    )
+    entreprise_id = str(
+        connexion_admin.lire(
+            "SELECT id FROM entreprise WHERE client_id = %s;", (contexte_a.client_id,)
+        )[0][0]
+    )
+    with (FIXTURES / "dce_fictif.pdf").open("rb") as fichier:
+        reponse = client.post(
+            "/consultations",
+            data={"libelle": f"DCE L5b — {MENTION}", "entreprise_id": entreprise_id},
+            files={"fichier": ("dce_fictif.pdf", fichier, "application/pdf")},
+            **SANS_REDIRECTION,
+        )
+    consultation_id = reponse.headers["location"].split("/consultations/")[1].split("?")[0]
+
+    pages = {
+        "/bibliotheque/import": client.get("/bibliotheque/import").text,
+        f"/consultations/{consultation_id}/memoire": client.get(
+            f"/consultations/{consultation_id}/memoire"
+        ).text,
+    }
+    for chemin, html in pages.items():
+        fautifs = _aucun_verbe_interdit(html)
+        assert not fautifs, f"{chemin} : boutons interdits {fautifs}"
+        assert _boutons(html), f"{chemin} : aucun bouton trouvé (test aveugle)"
+        assert MENTION_BROUILLON in html or "brouillon" in html.casefold()
+        # Une seule action principale par écran (classe .btn--action).
+        assert html.count("btn--action") <= 2, chemin  # balise + éventuelle classe CSS citée
+        # Aucun prix, aucun bouton de signature.
+        assert "signature électronique" not in html.casefold()
+

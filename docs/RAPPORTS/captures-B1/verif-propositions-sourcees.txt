@@ -1,0 +1,11 @@
+[OK] attestation-assurance-RCD-FICTIF.txt | assurance | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] memoire-technique-anterieur-FICTIF.txt | chapitre_memoire | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] memoire-technique-anterieur-FICTIF.txt | chapitre_memoire | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] memoire-technique-anterieur-FICTIF.txt | chapitre_memoire | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] memoire-technique-anterieur-FICTIF.txt | chapitre_memoire | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] memoire-technique-anterieur-FICTIF.txt | chapitre_memoire | acceptee | emplacement=oui | extrait_litteral=oui
+[OK] plaquette-presentation-FICTIF.txt | reference_chantier | propose | emplacement=oui | extrait_litteral=oui
+[OK] plaquette-presentation-FICTIF.txt | reference_chantier | propose | emplacement=oui | extrait_litteral=oui
+[OK] plaquette-presentation-FICTIF.txt | reference_chantier | propose | emplacement=oui | extrait_litteral=oui
+
+Total propositions : 9 | adossées au document : 9 | non adossées : 0
