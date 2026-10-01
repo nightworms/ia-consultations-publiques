@@ -1,163 +1,353 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="utf-8">
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IA Consultations Publiques — aide à la réponse aux appels d'offres</title>
-<meta name="description" content="Renseignez votre entreprise une fois. L'outil lit le dossier de consultation et produit un mémoire technique pré-rempli, en signalant ce qui vous manque.">
+<title>IA Consultations Publiques — le mémoire technique qui dit ce qui vous manque</title>
+<meta name="description" content="Renseignez votre entreprise une fois. L'outil lit le dossier de consultation et propose un mémoire technique argumenté, en signalant ce qui vous manque.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap">
 <style>
 :root{
-  --encre:#16202b; --encre-2:#4a5768; --fond:#f2f4f7; --carte:#ffffff;
-  --bord:#c9d2dc; --bandeau:#0d3554; --accent:#14507a;
+  --ink:#111111; --muted:#5c5c5c; --card:rgba(248,248,246,0.97);
+  --shell:1120px; --ease:cubic-bezier(0.16,1,0.3,1);
+  /* Chartes reprises de docs/DESIGN.md pour les blocs sous le bandeau */
+  --encre:#16202b; --encre-2:#4a5768; --fond:#f2f4f7; --carte:#ffffff; --bord:#c9d2dc;
+  --accent:#14507a;
   --ok-f:#125c37; --ok-bg:#e6f4ec;
   --att-f:#7a4f00; --att-bg:#fdf3e0;
-  --non-f:#9b2c12; --non-bg:#fdeee9;
 }
-*{box-sizing:border-box}
-html{-webkit-text-size-adjust:100%}
-body{
-  margin:0; background:var(--fond); color:var(--encre);
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  font-size:17px; line-height:1.65;
+*,*::before,*::after{box-sizing:border-box}
+html,body{background:#eef2ee; overflow-x:hidden; margin:0}
+body{font-family:"Poppins",-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+     -webkit-font-smoothing:antialiased; color:var(--ink)}
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+
+/* BANDEAU */
+.hero{position:relative; height:100vh; height:100svh; min-height:620px; width:100%;
+      overflow:hidden; display:flex; flex-direction:column}
+.hero__bg{position:absolute; inset:0; z-index:0; animation:fade-in 1.15s var(--ease) both}
+.hero__bg img{position:absolute; inset:0; width:100%; height:100%; object-fit:cover; object-position:center 42%;
+              filter:blur(7px) brightness(1.2) saturate(0.94); transform:scale(1.06)}
+.hero__inner{position:relative; z-index:2; display:flex; flex-direction:column; flex:1 1 auto; min-height:0}
+
+/* NAVIGATION */
+.nav{position:relative; z-index:70; width:100%; max-width:var(--shell); margin:0 auto;
+     padding:26px 24px 0; display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:16px}
+.brand{display:inline-flex; align-items:center; gap:10px; font-size:25px; font-weight:600;
+       letter-spacing:-0.02em; color:var(--ink); text-decoration:none}
+.brand svg{width:30px; height:30px; display:block}
+.nav__links{display:flex; align-items:center; gap:42px; list-style:none; margin:0; padding:0}
+.nav__links a{font-size:15px; font-weight:400; color:#1a1a1a; text-decoration:none; opacity:0.9;
+              transition:opacity 0.18s ease}
+.nav__links a:hover{opacity:0.55}
+.nav__cta{justify-self:end}
+.btn-dark{display:inline-flex; align-items:center; justify-content:center; background:#141414; color:#fff;
+          font-family:inherit; font-size:14.5px; font-weight:500; padding:13px 22px; border:0;
+          border-radius:9px; white-space:nowrap; cursor:pointer; text-decoration:none;
+          transition:background 0.18s ease, transform 0.18s ease}
+.btn-dark:hover{background:#000; transform:translateY(-1px)}
+.nav__toggle{display:none; align-items:center; justify-content:center; width:44px; height:44px;
+             margin-right:-10px; padding:0; border:0; background:transparent; cursor:pointer;
+             -webkit-tap-highlight-color:transparent}
+.nav__toggle-box{position:relative; display:block; width:22px; height:14px}
+.nav__toggle .bar{position:absolute; left:0; width:100%; height:1.8px; border-radius:2px;
+                  background:#141414; transition:transform 0.55s var(--ease), width 0.45s var(--ease)}
+.bar--top{top:0}
+.bar--bot{bottom:0; width:70%}
+.nav__toggle:hover .bar--bot{width:100%}
+.nav__toggle[aria-expanded="true"] .bar--top{transform:translateY(6.1px) rotate(45deg)}
+.nav__toggle[aria-expanded="true"] .bar--bot{width:100%; transform:translateY(-6.1px) rotate(-45deg)}
+.nav .menu__cta{display:none}
+
+/* PILE CENTRALE */
+.stage{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; align-items:center;
+       justify-content:center; text-align:center; padding:24px; gap:clamp(18px,2.4vh,26px);
+       background:radial-gradient(118% 88% at 50% 48%, rgba(255,255,255,0.70),
+                  rgba(255,255,255,0.42) 58%, rgba(255,255,255,0.04) 100%)}
+.badge{display:inline-flex; align-items:center; gap:14px; background:rgba(255,255,255,0.94);
+       border:1px solid rgba(0,0,0,0.07); border-radius:999px; padding:7px 16px 7px 8px;
+       font-size:13.5px; color:#4a4a4a}
+.badge__tag{background:rgba(255,255,255,0.95); border:1px solid rgba(0,0,0,0.07);
+            border-radius:999px; padding:3px 12px; font-size:13.5px; font-weight:500; color:#111}
+.headline{margin:0; font-size:clamp(32px,5.7vw,72px); line-height:1.03; font-weight:500;
+          letter-spacing:-0.035em; max-width:20ch}
+.sub{margin:0; font-size:clamp(14px,1.35vw,17.5px); line-height:1.65; font-weight:400;
+     color:#434343; max-width:66ch}
+.brk{display:none}
+
+/* CARTE DE SAISIE */
+.prompt{width:min(790px,100%); background:rgba(255,255,255,0.42);
+        -webkit-backdrop-filter:blur(18px) saturate(1.15);
+        backdrop-filter:blur(18px) saturate(1.15);
+        border:1px solid rgba(0,0,0,0.06); border-radius:20px; padding:22px 20px 16px;
+        text-align:left; box-shadow:0 18px 44px -26px rgba(0,0,0,0.28);
+        margin-top:clamp(6px,1.6vh,16px)}
+.prompt__input{width:100%; border:0; outline:0; resize:none; background:transparent;
+               font-family:inherit; font-size:16.5px; line-height:1.5; color:var(--ink);
+               min-height:clamp(56px,11vh,108px); padding:2px 4px}
+.prompt__input::placeholder{color:#3d3d3d; opacity:0.72}
+.prompt__bar{display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:10px}
+.prompt__right{display:flex; align-items:center; gap:12px}
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px;
+          border-radius:50%; border:1px solid rgba(0,0,0,0.1); background:#fff; color:#1a1a1a;
+          cursor:pointer; padding:0; transition:background 0.18s ease}
+.icon-btn:hover{background:#f1f1ef}
+.icon-btn--bare{border:0; background:transparent; width:34px}
+.icon-btn--bare:hover{background:rgba(0,0,0,0.05)}
+.icon-btn--send{background:#141414; border-color:#141414; color:#fff; width:46px; height:46px; border-radius:12px}
+.icon-btn--send:hover{background:#000}
+.icon-btn svg{width:19px; height:19px}
+.icon-btn--send svg{width:21px; height:21px}
+.prompt__note{margin:10px 2px 0; font-size:12.5px; color:#4a4a4a}
+
+/* ANIMATION D'ENTREE */
+@keyframes rise{from{opacity:0; transform:translate3d(0,18px,0)} to{opacity:1; transform:translate3d(0,0,0)}}
+@keyframes fade-in{from{opacity:0} to{opacity:1}}
+.rise{animation:rise 0.9s var(--ease) both; animation-delay:calc(var(--i,0) * 70ms)}
+
+/* MENU MOBILE */
+@media (max-width:900px){
+  .nav{display:flex; align-items:center; gap:12px; padding:18px 20px 0}
+  .brand,.nav__toggle{position:relative; z-index:80}
+  .brand{font-size:21px; margin-right:auto}
+  .brand svg{width:25px; height:25px}
+  .btn-dark{padding:11px 17px; font-size:13.5px}
+  .nav__toggle{display:inline-flex}
+  .nav__nav{position:fixed; inset:0; z-index:60; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; gap:30px; padding:92px 28px 46px;
+            background:#fafbf9; transform:translateY(-100%);
+            transition:transform 0.6s var(--ease); margin:0}
+  .nav__nav[data-open="true"]{transform:translateY(0)}
+  .nav__links{flex-direction:column; gap:26px}
+  .nav__links a{font-size:20px; font-weight:500}
+  .nav .menu__cta{display:inline-flex}
+  body.menu-open{overflow:hidden}
 }
+@media (min-width:900px){
+  .brk{display:inline}
+  .stage .headline{max-width:none}
+  .stage .sub{max-width:none}
+}
+
+/* CONTENU SOUS LE BANDEAU */
+.corps{background:var(--fond); color:var(--encre)}
 .enveloppe{max-width:780px; margin:0 auto; padding:0 22px}
-header{background:var(--bandeau); color:#fff; padding:46px 0 40px}
-header h1{margin:0 0 12px; font-size:1.85rem; line-height:1.25; letter-spacing:-.01em}
-header p{margin:0; color:#dbe6f1; font-size:1.06rem; max-width:60ch}
-main{padding:44px 0 20px}
-section{margin:0 0 34px}
-h2{font-size:1.16rem; margin:0 0 12px; letter-spacing:-.005em}
-p{margin:0 0 14px}
-a{color:var(--accent)}
-a:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
+section.bloc{padding:44px 0 0}
+section.bloc:first-child{padding-top:52px}
+h2{font-size:1.16rem; margin:0 0 12px; letter-spacing:-0.005em}
+.corps p{margin:0 0 14px; line-height:1.65}
+.corps a{color:var(--accent)}
+.corps a:focus-visible,.btn-dark:focus-visible{outline:3px solid var(--accent); outline-offset:2px}
 .carte{background:var(--carte); border:1px solid var(--bord); border-radius:10px; padding:20px 22px}
-.carte + .carte{margin-top:14px}
 .briques{margin:0; padding:0; list-style:none}
 .briques li{border-left:3px solid var(--bord); padding:2px 0 2px 16px; margin:0 0 16px}
 .briques li:last-child{margin-bottom:0}
 .briques strong{display:block; margin-bottom:2px}
 .briques span{color:var(--encre-2)}
-.etat{display:inline-block; font-size:.82rem; font-weight:600; padding:3px 9px;
-      border-radius:999px; border:1px solid transparent; white-space:nowrap}
+.cle{margin-top:6px; padding:14px 18px; background:var(--carte); border:1px solid var(--bord);
+     border-left:4px solid var(--accent); border-radius:8px}
+.cle p{margin:0}
+.etat{display:inline-block; font-size:.82rem; font-weight:600; padding:3px 9px; border-radius:999px;
+      border:1px solid transparent; white-space:nowrap}
 .etat-ok{color:var(--ok-f); background:var(--ok-bg); border-color:var(--ok-f)}
 .etat-att{color:var(--att-f); background:var(--att-bg); border-color:var(--att-f)}
-.etat-non{color:var(--non-f); background:var(--non-bg); border-color:var(--non-f)}
 table{border-collapse:collapse; width:100%; font-size:.96rem}
 th,td{text-align:left; padding:9px 10px; border-bottom:1px solid var(--bord); vertical-align:top}
 th{font-size:.84rem; text-transform:uppercase; letter-spacing:.04em; color:var(--encre-2)}
 td:last-child{text-align:right}
-.cle{margin-top:6px; padding:14px 18px; background:var(--carte);
-     border:1px solid var(--bord); border-left:4px solid var(--accent); border-radius:8px}
-.cle p{margin:0}
-footer{color:var(--encre-2); font-size:.9rem; padding:26px 0 46px; border-top:1px solid var(--bord); margin-top:14px}
-footer p{margin:0 0 6px}
-@media (max-width:520px){
-  header h1{font-size:1.5rem}
-  td:last-child{text-align:left}
-}
+.pied{color:var(--encre-2); font-size:.9rem; padding:34px 0 46px; border-top:1px solid var(--bord); margin-top:40px}
+.pied p{margin:0 0 6px}
+@media (max-width:520px){ td:last-child{text-align:left} }
 </style>
 </head>
 <body>
 
-<header>
-  <div class="enveloppe">
-    <h1>IA Consultations Publiques</h1>
-    <p>Renseignez votre entreprise une fois. L'outil lit le dossier de consultation
-       et produit un mémoire technique pré-rempli — en signalant ce qui vous manque.</p>
+<section class="hero">
+  <div class="hero__bg">
+    <img src="assets/fond-serre.jpg" alt="" width="1920" height="1080">
   </div>
-</header>
 
-<main class="enveloppe">
+  <div class="hero__inner">
+    <header class="nav">
+      <a class="brand" href="#">
+        <svg class="rise" style="--i:0" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 2.5 29.5 16 16 29.5 2.5 16 16 2.5Z" stroke="#141414" stroke-width="1.7" stroke-linejoin="round"/>
+          <path d="m10.8 16.4 3.6 3.6 6.9-7.4" stroke="#141414" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="rise" style="--i:1">IA Consultations</span>
+      </a>
 
-  <section>
-    <h2>Le problème</h2>
-    <p>Répondre à une consultation publique coûte un temps considérable à une entreprise,
-       pour un taux de réussite faible. Chaque dossier demande de lire un DCE de plusieurs
-       dizaines de pages, de comprendre les critères d'attribution, de réunir les pièces
-       administratives, de rédiger un mémoire technique réécrit à chaque fois, et de
-       vérifier la conformité avant remise.</p>
-  </section>
+      <nav class="nav__nav" id="site-menu">
+        <ul class="nav__links">
+          <li class="rise" style="--i:2"><a href="#fonctions">Fonctions</a></li>
+          <li class="rise" style="--i:3"><a href="#etat">État</a></li>
+          <li class="rise" style="--i:4"><a href="#perimetre">Périmètre</a></li>
+          <li class="rise" style="--i:5"><a href="#depot">Le projet</a></li>
+        </ul>
+        <a class="btn-dark menu__cta" href="https://github.com/nightworms/ia-consultations-publiques">Suivre le projet</a>
+      </nav>
 
-  <section>
-    <h2>Ce que fait l'outil</h2>
-    <ul class="briques">
-      <li>
-        <strong>1. Bibliothèque d'entreprise</strong>
-        <span>Vos références, moyens humains, certifications et attestations, saisies une
-              fois et structurées. Elles resservent à chaque réponse.</span>
-      </li>
-      <li>
-        <strong>2. Lecture du dossier de consultation</strong>
-        <span>Pièces exigées, critères pondérés, date limite — chaque élément extrait
-              porte l'extrait du document qui le justifie.</span>
-      </li>
-      <li>
-        <strong>3. Mémoire technique argumenté</strong>
-        <span>Une section par critère, chaque affirmation rattachée à un élément de votre
-              bibliothèque. Relu, corrigé et signé par vous.</span>
-      </li>
-    </ul>
-  </section>
+      <div class="nav__cta rise" style="--i:6">
+        <a class="btn-dark" href="https://github.com/nightworms/ia-consultations-publiques">Suivre le projet</a>
+      </div>
 
-  <section>
-    <h2>Ce qui distingue l'outil</h2>
-    <div class="cle">
-      <p>Un mémoire qui se contente de valoriser ce que vous avez ne fait pas gagner un marché.
-         L'outil dit aussi <strong>ce qui manque</strong> : pour chaque critère non couvert par
-         votre bibliothèque, il indique la pièce ou l'information à fournir pour y répondre.</p>
-    </div>
-    <p style="margin-top:14px">Aucun contenu n'est inventé. Le modèle propose, vous validez :
-       chaque élément extrait est présenté comme une proposition à vérifier, et une citation
-       introuvable dans le document source est refusée par l'outil plutôt qu'acceptée.</p>
-  </section>
+      <button class="nav__toggle rise" style="--i:6" id="menu-toggle" type="button"
+              aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="site-menu">
+        <span class="nav__toggle-box" aria-hidden="true">
+          <span class="bar bar--top"></span><span class="bar bar--bot"></span>
+        </span>
+      </button>
+    </header>
 
-  <section>
-    <h2>État du projet</h2>
-    <div class="carte">
-      <table>
-        <caption class="etat etat-att" style="caption-side:top; margin-bottom:14px">
-          Projet en développement — pas encore ouvert
-        </caption>
-        <thead>
-          <tr><th scope="col">Fonction</th><th scope="col">État</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Bibliothèque d'entreprise</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
-          <tr><td>Lecture du dossier de consultation</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
-          <tr><td>Mémoire technique</td><td><span class="etat etat-att">en correction</span></td></tr>
-          <tr><td>Import guidé des documents</td><td><span class="etat etat-att">en correction</span></td></tr>
-          <tr><td>Lisibilité des écrans</td><td><span class="etat etat-att">en correction</span></td></tr>
-        </tbody>
-      </table>
-      <p style="margin:16px 0 0; color:var(--encre-2); font-size:.94rem">
-        Le socle fonctionne de bout en bout sur un dossier de consultation réel. Les trois
-        points marqués « en correction » ont été recalés par une vérification indépendante et
-        sont en cours de reprise — ils ne sont pas annoncés comme tenus avant d'être re-testés.
+    <div class="stage">
+      <div class="badge rise" style="--i:8">
+        <span class="badge__tag">Bientôt</span><span>Version 0.1 — en développement</span>
+      </div>
+
+      <h1 class="headline rise" style="--i:10">
+        Le mémoire technique<br class="brk"> qui dit ce qui vous manque.
+      </h1>
+
+      <p class="sub rise" style="--i:12">
+        L'outil lit le dossier de consultation et propose un mémoire argumenté, critère par critère.<br class="brk">
+        Chaque affirmation est rattachée à un élément de votre entreprise — et chaque manque est signalé.
       </p>
+
+      <form class="prompt rise" style="--i:14" onsubmit="return false;">
+        <label class="sr-only" for="prompt-input">Décrivez la consultation que vous voulez traiter</label>
+        <textarea id="prompt-input" class="prompt__input" rows="3"
+          placeholder="Décrivez la consultation que vous voulez traiter…"></textarea>
+        <div class="prompt__bar">
+          <button class="icon-btn rise" style="--i:16" type="button" aria-label="Ajouter une pièce">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div class="prompt__right">
+            <button class="icon-btn icon-btn--bare rise" style="--i:17" type="button" aria-label="Dicter">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="2.5" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21"/>
+              </svg>
+            </button>
+            <button class="icon-btn icon-btn--send rise" style="--i:18" type="submit" aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+        <p class="prompt__note">Aperçu : ce champ n'est pas encore connecté.</p>
+      </form>
     </div>
-  </section>
+  </div>
+</section>
 
-  <section>
-    <h2>Périmètre</h2>
-    <p>L'outil s'adresse aux <strong>entreprises</strong> qui répondent à des marchés publics,
-       tous corps de métier. L'acheteur public est hors périmètre. Les données de l'entreprise
-       et les dossiers déposés lui appartiennent ; l'hébergement visé est en France.</p>
-  </section>
+<main class="corps">
+  <div class="enveloppe">
 
-  <section>
-    <h2>Aller plus loin</h2>
-    <p>Le cadrage, les décisions de conception et les documents techniques sont publics :
-       <a href="https://github.com/nightworms/ia-consultations-publiques">dépôt GitHub du projet</a>.</p>
-  </section>
+    <section class="bloc">
+      <h2>Le problème</h2>
+      <p>Répondre à une consultation publique coûte un temps considérable à une entreprise,
+         pour un taux de réussite faible. Chaque dossier demande de lire un DCE de plusieurs
+         dizaines de pages, de comprendre les critères d'attribution, de réunir les pièces
+         administratives, de rédiger un mémoire technique réécrit à chaque fois, et de
+         vérifier la conformité avant remise.</p>
+    </section>
 
+    <section class="bloc" id="fonctions">
+      <h2>Ce que fait l'outil</h2>
+      <ul class="briques">
+        <li>
+          <strong>1. Bibliothèque d'entreprise</strong>
+          <span>Vos références, moyens humains, certifications et attestations, saisies une
+                fois et structurées. Elles resservent à chaque réponse.</span>
+        </li>
+        <li>
+          <strong>2. Lecture du dossier de consultation</strong>
+          <span>Pièces exigées, critères pondérés, date limite — chaque élément extrait
+                porte l'extrait du document qui le justifie.</span>
+        </li>
+        <li>
+          <strong>3. Mémoire technique argumenté</strong>
+          <span>Une section par critère, chaque affirmation rattachée à un élément de votre
+                bibliothèque. Relu, corrigé et signé par vous.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="bloc">
+      <h2>Ce qui distingue l'outil</h2>
+      <div class="cle">
+        <p>Un mémoire qui se contente de valoriser ce que vous avez ne fait pas gagner un marché.
+           L'outil dit aussi <strong>ce qui manque</strong> : pour chaque critère non couvert par
+           votre bibliothèque, il indique la pièce ou l'information à fournir pour y répondre.</p>
+      </div>
+      <p style="margin-top:14px">Aucun contenu n'est inventé. Le modèle propose, vous validez :
+         chaque élément extrait est présenté comme une proposition à vérifier, et une citation
+         introuvable dans le document source est refusée par l'outil plutôt qu'acceptée.</p>
+    </section>
+
+    <section class="bloc" id="etat">
+      <h2>État du projet</h2>
+      <div class="carte">
+        <table>
+          <caption class="etat etat-att" style="caption-side:top; margin-bottom:14px">
+            Projet en développement — pas encore ouvert
+          </caption>
+          <thead>
+            <tr><th scope="col">Fonction</th><th scope="col">État</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Bibliothèque d'entreprise</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
+            <tr><td>Lecture du dossier de consultation</td><td><span class="etat etat-ok">opérationnel</span></td></tr>
+            <tr><td>Mémoire technique</td><td><span class="etat etat-att">en correction</span></td></tr>
+            <tr><td>Import guidé des documents</td><td><span class="etat etat-att">en correction</span></td></tr>
+            <tr><td>Lisibilité des écrans</td><td><span class="etat etat-att">en correction</span></td></tr>
+          </tbody>
+        </table>
+        <p style="margin:16px 0 0; color:var(--encre-2); font-size:.94rem">
+          Le socle fonctionne de bout en bout sur un dossier de consultation réel. Les trois
+          points marqués « en correction » ont été recalés par une vérification indépendante et
+          sont en cours de reprise — ils ne sont pas annoncés comme tenus avant d'être re-testés.
+        </p>
+      </div>
+    </section>
+
+    <section class="bloc" id="perimetre">
+      <h2>Périmètre</h2>
+      <p>L'outil s'adresse aux <strong>entreprises</strong> qui répondent à des marchés publics,
+         tous corps de métier. L'acheteur public est hors périmètre. Les données de l'entreprise
+         et les dossiers déposés lui appartiennent ; l'hébergement visé est en France.</p>
+    </section>
+
+    <section class="bloc" id="depot">
+      <h2>Aller plus loin</h2>
+      <p>Le cadrage, les décisions de conception et les documents techniques sont publics :
+         <a href="https://github.com/nightworms/ia-consultations-publiques">dépôt GitHub du projet</a>.</p>
+    </section>
+
+    <footer class="pied">
+      <p>IA Consultations Publiques — projet en développement.</p>
+      <p>Fond photographique : serre tropicale, Yoksel Zok — licence Unsplash (usage libre, y compris commercial).</p>
+    </footer>
+
+  </div>
 </main>
 
-<footer>
-  <div class="enveloppe">
-    <p>IA Consultations Publiques — projet en développement.</p>
-    <p>Page sans script, sans police distante et sans ressource externe.</p>
-  </div>
-</footer>
-
+<script>
+(function(){
+  var t=document.getElementById('menu-toggle'), m=document.getElementById('site-menu');
+  if(!t||!m) return;
+  m.setAttribute('data-open','false');
+  t.addEventListener('click',function(){
+    var ouvert = t.getAttribute('aria-expanded')==='true';
+    t.setAttribute('aria-expanded', String(!ouvert));
+    t.setAttribute('aria-label', ouvert ? 'Ouvrir le menu' : 'Fermer le menu');
+    m.setAttribute('data-open', String(!ouvert));
+    document.body.classList.toggle('menu-open', !ouvert);
+  });
+  m.addEventListener('click',function(e){
+    if(e.target.tagName==='A' && t.getAttribute('aria-expanded')==='true'){ t.click(); }
+  });
+})();
+</script>
 </body>
 </html>
