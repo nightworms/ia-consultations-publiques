@@ -1,33 +1,60 @@
 /* ==========================================================================
    Feuille de style unique — interface de réponse aux consultations publiques.
-   Reprise de la direction de design du lot L4 (`docs/DESIGN.md` § 6), posée
-   ici par le lot L5a (dev-web).
 
-   Principes tenus ici :
-   - HTML servi côté serveur, aucun JavaScript, aucune ressource externe ;
+   Thème généralisé (lot design) : direction visuelle de la page de présentation
+   appliquée à tous les écrans. Ce qui change par rapport à la version L5a :
+   typographie Poppins, encre et surfaces du bandeau, boutons et rayons.
+
+   Ce qui NE change PAS, et ne doit pas changer :
+   - HTML servi côté serveur, aucune ressource externe : la police Poppins est
+     hébergée dans `static/polices/` (licence OFL), l'image de fond dans
+     `static/fond-serre.jpg` (licence Unsplash). Aucune requête vers Google.
    - une action principale par écran (classe .btn--action), une seule ;
    - aucun état porté par la couleur seule : chaque couleur accompagne un mot ;
    - contrastes vérifiés (WCAG AA / RGAA), focus visible partout ;
    - mobile d'abord : la mise en page tient à 320 px sans défilement horizontal.
    ========================================================================== */
 
+/* --- Police hébergée localement -------------------------------------------
+   Poppins, licence SIL Open Font License 1.1 — auto-hébergée pour ne pas
+   dépendre de fonts.googleapis.com (vie privée, réseau coupé, latence). */
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 400;
+  font-display: swap; src: url("polices/poppins-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 500;
+  font-display: swap; src: url("polices/poppins-500.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Poppins"; font-style: normal; font-weight: 600;
+  font-display: swap; src: url("polices/poppins-600.woff2") format("woff2");
+}
+
 :root {
-  --encre:        #16202b;   /* texte principal          — 16,5:1 sur blanc */
-  --encre-2:      #4a5768;   /* texte secondaire         —  7,4:1 sur blanc */
-  --fond:         #f2f4f7;
+  /* Encre et surfaces — reprises de la page de présentation */
+  --encre:        #111111;   /* texte principal          — 18,9:1 sur blanc */
+  --encre-2:      #5c5c5c;   /* texte secondaire         —  7,0:1 sur blanc */
+  --encre-3:      #6b6b6b;   /* texte tertiaire          —  5,4:1 sur blanc */
+  --fond:         #eef2ee;
   --carte:        #ffffff;
-  --bord:         #c9d2dc;
+  --bord:         #dfe4e0;
   --bord-fort:    #788799;   /* bordures de champs        —  3,7:1 sur blanc */
-  --accent:       #14507a;   /* bouton principal         —  8,5:1 sur blanc */
-  --accent-fonce: #0d3554;   /* bandeau, survols         — 12,7:1 sur blanc */
+  --accent:       #14507a;   /* liens, accents           —  8,5:1 sur blanc */
+  --accent-fonce: #0d3554;   /* survols                  — 12,7:1 sur blanc */
   --accent-clair: #e8f0f7;
+  --noir:         #141414;   /* bouton principal, bandeau du site */
+  --noir-survol:  #000000;
+
+  /* États — valeurs mesurées, inchangées */
   --ok-t:         #125c37;   --ok-f:  #e6f4ec;   --ok-b:  #9fd0b4;
   --att-t:        #7a4f00;   --att-f: #fdf3e0;   --att-b: #e6c489;
   --err-t:        #9b2c12;   --err-f: #fdeee9;   --err-b: #e9b3a3;
   --info-f:       #eef3f8;
-  --rayon:        8px;
-  --rayon-s:      6px;
-  --ombre: 0 1px 2px rgba(16,32,48,.06), 0 2px 10px rgba(16,32,48,.05);
+
+  --rayon:        14px;
+  --rayon-s:      9px;
+  --ombre: 0 1px 2px rgba(16,32,24,.05), 0 10px 28px -18px rgba(16,32,24,.28);
 }
 
 * { box-sizing: border-box; }
@@ -36,62 +63,84 @@ body {
   margin: 0;
   background: var(--fond);
   color: var(--encre);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-               "Helvetica Neue", Arial, sans-serif;
+  font-family: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 1rem;
-  line-height: 1.55;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* --- Accessibilité : lien d'évitement, focus visible, contenu réservé ------ */
 .lien-evitement {
   position: absolute; left: -9999px; top: 0; z-index: 20;
-  background: var(--accent-fonce); color: #fff; padding: .6rem 1rem;
+  background: var(--noir); color: #fff; padding: .6rem 1rem;
+  border-radius: 0 0 var(--rayon-s) 0; text-decoration: none;
 }
 .lien-evitement:focus { left: 0; }
 a:focus-visible, button:focus-visible, input:focus-visible,
 select:focus-visible, textarea:focus-visible, summary:focus-visible,
 [tabindex]:focus-visible {
-  outline: 3px solid var(--accent-fonce); outline-offset: 2px;
+  outline: 3px solid var(--encre); outline-offset: 2px;
 }
 .visuellement-cache {
   position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
 }
 
-/* --- Bandeau -------------------------------------------------------------- */
-.bandeau { background: var(--accent-fonce); color: #fff; }
+/* --- Bandeau -------------------------------------------------------------
+   Bande photographique : la même image que la page publique, adoucie par un
+   flou et un voile clair. Le voile n'est pas décoratif — sans lui, les liens
+   de navigation se perdent dans le feuillage (constaté à l'écran). */
+.bandeau {
+  position: relative; overflow: hidden; isolation: isolate;
+  background: var(--carte);
+}
+.bandeau::before {
+  content: ""; position: absolute; inset: -10px; z-index: -2;
+  background: url("fond-serre.jpg") center 42% / cover no-repeat;
+  filter: blur(7px) brightness(1.22) saturate(0.94);
+}
+.bandeau::after {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(90deg,
+              rgba(255,255,255,.90), rgba(255,255,255,.74) 48%, rgba(255,255,255,.58));
+}
 .bandeau__int {
-  max-width: 68rem; margin: 0 auto; padding: .6rem 1rem;
+  position: relative; z-index: 1;
+  max-width: 68rem; margin: 0 auto; padding: 1.05rem 1rem;
   display: flex; flex-wrap: wrap; gap: .5rem 1rem;
   align-items: center; justify-content: space-between;
 }
 .bandeau__marque {
-  color: #fff; text-decoration: none; font-weight: 700; font-size: 1.05rem;
-  padding: .3rem 0;
+  display: inline-flex; align-items: center; gap: .5rem;
+  color: var(--encre); text-decoration: none; font-weight: 600; font-size: 1.08rem;
+  letter-spacing: -.015em; padding: .3rem 0;
 }
 .bandeau nav { display: flex; flex-wrap: wrap; gap: .35rem; align-items: center; }
 .bandeau nav a {
-  color: #fff; text-decoration: none; padding: .45rem .6rem;
-  border-radius: var(--rayon-s); font-size: .95rem;
+  color: var(--encre); text-decoration: none; padding: .45rem .65rem;
+  border-radius: var(--rayon-s); font-size: .95rem; font-weight: 500;
 }
-.bandeau nav a:hover { background: rgba(255,255,255,.14); }
+.bandeau nav a:hover { background: rgba(255,255,255,.75); }
 .bandeau nav a[aria-current="page"] {
-  background: rgba(255,255,255,.2); text-decoration: underline;
+  background: rgba(255,255,255,.9); box-shadow: inset 0 -2px 0 var(--noir);
 }
-.bandeau nav .lien-quitter { border: 1px solid rgba(255,255,255,.55); }
+.bandeau nav .lien-quitter { border: 1px solid rgba(20,20,20,.45); }
 .bandeau nav form { margin: 0; display: inline; }
 .bandeau nav button {
-  font: inherit; font-size: .95rem; cursor: pointer;
-  background: none; color: #fff; border: 1px solid rgba(255,255,255,.55);
-  border-radius: var(--rayon-s); padding: .45rem .6rem;
+  font: inherit; font-size: .95rem; font-weight: 500; cursor: pointer;
+  background: rgba(255,255,255,.75); color: var(--encre);
+  border: 1px solid rgba(20,20,20,.35);
+  border-radius: var(--rayon-s); padding: .45rem .7rem;
+  transition: background .18s ease;
 }
-.bandeau nav button:hover { background: rgba(255,255,255,.14); }
-.bandeau__qui { font-size: .95rem; opacity: .95; }
+.bandeau nav button:hover { background: #fff; }
+.bandeau__qui { font-size: .95rem; color: var(--encre-2); font-weight: 500; }
 
 /* --- Mise en page --------------------------------------------------------- */
-.page { max-width: 68rem; margin: 0 auto; padding: 1.25rem 1rem 3rem; }
+.page { max-width: 68rem; margin: 0 auto; padding: 1.6rem 1rem 3.5rem; }
 .bandeau-mention {
-  background: #e8ecf1; color: var(--encre-2); font-size: .85rem;
+  background: #e3e8e4; color: var(--encre-2); font-size: .85rem;
   text-align: center; padding: .35rem 1rem;
 }
 
@@ -99,19 +148,22 @@ select:focus-visible, textarea:focus-visible, summary:focus-visible,
 .entete-ecran {
   display: flex; flex-wrap: wrap; gap: 1rem;
   align-items: flex-start; justify-content: space-between;
-  margin: 0 0 1.25rem;
+  margin: 0 0 1.5rem;
 }
 .entete-ecran__texte { flex: 1 1 22rem; }
-.entete-ecran h1 { margin: 0; font-size: 1.5rem; line-height: 1.25; }
+.entete-ecran h1 {
+  margin: 0; font-size: 1.65rem; line-height: 1.2;
+  font-weight: 600; letter-spacing: -.025em;
+}
 .entete-ecran .sous-titre {
-  margin: .4rem 0 0; color: var(--encre-2); max-width: 44rem;
+  margin: .45rem 0 0; color: var(--encre-2); max-width: 44rem;
 }
 .entete-ecran__action { flex: 0 0 auto; }
 
-h2 { font-size: 1.18rem; margin: 1.75rem 0 .6rem; }
-h3 { font-size: 1rem; margin: 1.15rem 0 .4rem; }
-h4 { font-size: .95rem; margin: 1rem 0 .3rem; text-transform: uppercase;
-     letter-spacing: .04em; color: var(--encre-2); }
+h2 { font-size: 1.2rem; margin: 1.9rem 0 .6rem; font-weight: 600; letter-spacing: -.015em; }
+h3 { font-size: 1.03rem; margin: 1.2rem 0 .4rem; font-weight: 600; }
+h4 { font-size: .95rem; margin: 1rem 0 .3rem; font-weight: 600;
+     text-transform: uppercase; letter-spacing: .04em; color: var(--encre-2); }
 p { margin: .5rem 0; }
 ul, ol { margin: .5rem 0; padding-left: 1.15rem; }
 li { margin: .2rem 0; }
@@ -119,29 +171,37 @@ li { margin: .2rem 0; }
 /* --- Cartes --------------------------------------------------------------- */
 .carte {
   background: var(--carte); border: 1px solid var(--bord);
-  border-radius: var(--rayon); padding: 1.1rem; margin: 0 0 1.25rem;
+  border-radius: var(--rayon); padding: 1.2rem; margin: 0 0 1.25rem;
   box-shadow: var(--ombre);
 }
 .carte > :first-child { margin-top: 0; }
 .carte > :last-child { margin-bottom: 0; }
 .carte--plate { box-shadow: none; }
-.carte__titre { font-size: 1.05rem; margin: 0 0 .5rem; }
+.carte__titre { font-size: 1.08rem; margin: 0 0 .5rem; font-weight: 600; }
 
 /* --- Boutons -------------------------------------------------------------- */
 .btn {
-  display: inline-block; font: inherit; font-weight: 600; cursor: pointer;
-  padding: .6rem 1.1rem; border: 2px solid transparent; border-radius: var(--rayon-s);
-  text-decoration: none; text-align: center; line-height: 1.3;
+  display: inline-block; font: inherit; font-weight: 500; cursor: pointer;
+  padding: .62rem 1.15rem; border: 2px solid transparent;
+  border-radius: var(--rayon-s); text-decoration: none; text-align: center;
+  line-height: 1.3; transition: background .18s ease, transform .18s ease;
 }
-.btn--principal { background: var(--accent); color: #fff; border-color: var(--accent); }
-.btn--principal:hover { background: var(--accent-fonce); border-color: var(--accent-fonce); }
-.btn--secondaire { background: #fff; color: var(--accent-fonce); border-color: var(--accent); }
-.btn--secondaire:hover { background: var(--accent-clair); }
+.btn--principal {
+  background: var(--noir); color: #fff; border-color: var(--noir);
+}
+.btn--principal:hover {
+  background: var(--noir-survol); border-color: var(--noir-survol);
+  transform: translateY(-1px);
+}
+.btn--secondaire {
+  background: #fff; color: var(--encre); border-color: rgba(20,20,20,.28);
+}
+.btn--secondaire:hover { background: #f4f6f3; }
 .btn--discret {
-  background: transparent; color: var(--accent-fonce); border-color: transparent;
+  background: transparent; color: var(--accent); border-color: transparent;
   text-decoration: underline; padding: .4rem .3rem;
 }
-.btn--action { font-size: 1.05rem; padding: .8rem 1.3rem; }
+.btn--action { font-size: 1.05rem; padding: .85rem 1.4rem; font-weight: 600; }
 .actions { display: flex; flex-wrap: wrap; gap: .6rem 1rem; align-items: center; margin-top: 1rem; }
 @media (max-width: 30rem) {
   .btn--action { display: block; width: 100%; }
@@ -151,10 +211,10 @@ li { margin: .2rem 0; }
 /* --- Encarts (information, attention, réussite, erreur) ------------------- */
 .encart {
   border-left: 5px solid var(--bord-fort); background: var(--info-f);
-  padding: .85rem 1rem; margin: 0 0 1.25rem;
+  padding: .9rem 1.1rem; margin: 0 0 1.25rem;
   border-radius: 0 var(--rayon-s) var(--rayon-s) 0;
 }
-.encart__titre { font-weight: 700; margin: 0 0 .25rem; }
+.encart__titre { font-weight: 600; margin: 0 0 .25rem; }
 .encart p:last-child, .encart ul:last-child { margin-bottom: 0; }
 .encart--ok       { border-left-color: var(--ok-t);  background: var(--ok-f);  color: #0d3d26; }
 .encart--attention{ border-left-color: var(--att-t); background: var(--att-f); color: #5a3a00; }
@@ -163,7 +223,7 @@ li { margin: .2rem 0; }
 /* --- États textuels ------------------------------------------------------- */
 .etat {
   display: inline-block; font-size: .85rem; font-weight: 600;
-  padding: .1rem .55rem; border-radius: 999px; border: 1px solid;
+  padding: .12rem .6rem; border-radius: 999px; border: 1px solid;
   white-space: nowrap;
 }
 .etat--ok       { color: var(--ok-t);  background: var(--ok-f);  border-color: var(--ok-b); }
@@ -176,17 +236,17 @@ li { margin: .2rem 0; }
 .progression > li { display: grid; grid-template-columns: 2rem 1fr; gap: .8rem; align-items: start; margin: 0; }
 .progression .puce {
   width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center;
-  font-weight: 700; font-size: .9rem;
+  font-weight: 600; font-size: .9rem;
   border: 2px solid var(--bord-fort); background: #fff; color: var(--encre-2);
 }
 .progression .fait .puce    { background: var(--ok-t);  border-color: var(--ok-t);  color: #fff; }
-.progression .encours .puce { background: var(--accent); border-color: var(--accent); color: #fff; }
+.progression .encours .puce { background: var(--noir); border-color: var(--noir); color: #fff; }
 .progression .titre { font-weight: 600; }
 .progression .detail { margin: .1rem 0 0; color: var(--encre-2); font-size: .95rem; }
 
-.jauge { height: .8rem; background: #e3e8ee; border: 1px solid var(--bord);
+.jauge { height: .8rem; background: #dee4df; border: 1px solid var(--bord);
          border-radius: 999px; overflow: hidden; margin: .5rem 0 .3rem; }
-.jauge__part { height: 100%; background: var(--accent); }
+.jauge__part { height: 100%; background: var(--noir); }
 .jauge-legende { margin: 0; color: var(--encre-2); font-size: .95rem; }
 
 /* --- Listes --------------------------------------------------------------- */
@@ -194,7 +254,7 @@ li { margin: .2rem 0; }
 .liste > li {
   display: flex; flex-wrap: wrap; gap: .3rem 1rem;
   align-items: baseline; justify-content: space-between;
-  padding: .8rem 0; border-bottom: 1px solid #e4e9ef; margin: 0;
+  padding: .8rem 0; border-bottom: 1px solid #e6eae7; margin: 0;
 }
 .liste > li:last-child { border-bottom: 0; }
 .liste__principal { flex: 1 1 16rem; }
@@ -205,7 +265,7 @@ li { margin: .2rem 0; }
 /* Ligne « fiche » : un titre, un état, des sources */
 .fiche-ligne {
   border: 1px solid var(--bord); border-radius: var(--rayon-s);
-  padding: .85rem .95rem; margin: 0 0 .7rem; background: var(--carte);
+  padding: .9rem 1rem; margin: 0 0 .7rem; background: var(--carte);
 }
 .fiche-ligne__tete {
   display: flex; flex-wrap: wrap; gap: .4rem .9rem;
@@ -221,12 +281,12 @@ li { margin: .2rem 0; }
 /* --- Plier / déplier ------------------------------------------------------ */
 details.pourquoi { margin: .6rem 0 0; }
 details.pourquoi > summary {
-  cursor: pointer; color: var(--accent-fonce); font-weight: 600;
+  cursor: pointer; color: var(--accent); font-weight: 500;
   font-size: .95rem; padding: .3rem 0; display: inline-block;
 }
-details.pourquoi > summary::marker { color: var(--accent-fonce); }
+details.pourquoi > summary::marker { color: var(--accent); }
 details.pourquoi .reponse {
-  margin: .4rem 0 0; padding: .8rem 1rem; background: var(--info-f);
+  margin: .4rem 0 0; padding: .85rem 1.1rem; background: var(--info-f);
   border-radius: var(--rayon-s); color: var(--encre-2);
   max-width: 46rem; font-size: .95rem;
 }
@@ -238,18 +298,23 @@ details.references code { font-size: .9rem; word-break: break-all; }
 /* --- Formulaires ---------------------------------------------------------- */
 fieldset {
   border: 1px solid var(--bord); border-radius: var(--rayon);
-  padding: .9rem 1rem 1.1rem; margin: 0 0 1.25rem; background: var(--carte);
+  padding: 1rem 1.1rem 1.2rem; margin: 0 0 1.25rem; background: var(--carte);
 }
-legend { font-weight: 700; padding: 0 .4rem; }
+legend { font-weight: 600; padding: 0 .45rem; }
 .champ { margin: 0 0 .95rem; }
 .champ:last-child { margin-bottom: 0; }
-.champ > label { display: block; font-weight: 600; margin-bottom: .25rem; }
+.champ > label { display: block; font-weight: 500; margin-bottom: .3rem; }
 .champ .aide { margin: 0 0 .35rem; color: var(--encre-2); font-size: .9rem; }
 input[type="text"], input[type="password"], input[type="email"],
 input[type="search"], input[type="file"], select, textarea {
-  width: 100%; max-width: 100%; font: inherit; padding: .55rem .6rem;
-  border: 1px solid var(--bord-fort); border-radius: var(--rayon-s);
+  width: 100%; max-width: 100%; font: inherit; padding: .6rem .7rem;
+  border: 1px solid #b8c1bb; border-radius: var(--rayon-s);
   background: #fff; color: var(--encre);
+  transition: border-color .18s ease, box-shadow .18s ease;
+}
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus,
+input[type="search"]:focus, input[type="file"]:focus, select:focus, textarea:focus {
+  border-color: var(--encre); box-shadow: 0 0 0 3px rgba(20,20,20,.12);
 }
 textarea { min-height: 6rem; }
 .grille { display: grid; gap: 0 1.25rem; grid-template-columns: 1fr; }
@@ -264,7 +329,7 @@ textarea { min-height: 6rem; }
 /* --- Pied de page --------------------------------------------------------- */
 .pied {
   border-top: 1px solid var(--bord); background: #fff;
-  margin-top: 2rem; padding: 1.25rem 1rem; color: var(--encre-2); font-size: .92rem;
+  margin-top: 2.5rem; padding: 1.4rem 1rem; color: var(--encre-2); font-size: .92rem;
 }
 .pied__int { max-width: 68rem; margin: 0 auto; }
 .pied p { margin: .3rem 0; }
@@ -283,10 +348,10 @@ textarea { min-height: 6rem; }
   border-left: 6px solid var(--accent);
   border-radius: var(--rayon-s);
   background: var(--carte);
-  padding: .85rem 1rem;
+  padding: .9rem 1rem;
   margin: 0 0 .8rem;
 }
-.manque__titre { font-weight: 700; margin: 0 0 .3rem; }
+.manque__titre { font-weight: 600; margin: 0 0 .3rem; }
 .manque__quoi, .manque__faire { margin: .25rem 0; }
 .manque__faire { font-weight: 600; }
 .manque .actions { margin-top: .6rem; }
